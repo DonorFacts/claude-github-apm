@@ -3,6 +3,7 @@
 const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const { createApmSymlink } = require('../lib/symlink-utils');
 
 const command = process.argv[2];
 const args = process.argv.slice(3);
@@ -16,7 +17,7 @@ Claude GitHub APM Framework CLI
 Usage: claude-github-apm <command> [args...]
 
 Commands:
-  add-issues <org> <project_num> <issue_nums_or_urls...>
+  add-issues <org> <project_num> <issue_numbers_or_urls...>
     Add specific issues to a GitHub project
     
   add-issues-simple
@@ -42,20 +43,24 @@ Examples:
 function initProject() {
   const templatesDir = path.join(__dirname, '..', 'templates');
   const targetDir = path.join(process.cwd(), '.claude');
+  const packageRoot = path.join(__dirname, '..');
   
-  if (fs.existsSync(targetDir)) {
+  // Create .claude directory if it doesn't exist
+  if (!fs.existsSync(targetDir)) {
+    try {
+      // Copy template directory
+      execSync(`cp -r "${templatesDir}/.claude" "${targetDir}"`, { stdio: 'inherit' });
+      console.log('✓ Initialized .claude directory structure');
+    } catch (error) {
+      console.error('❌ Failed to initialize .claude directory:', error.message);
+      process.exit(1);
+    }
+  } else {
     console.log('✓ .claude directory already exists');
-    return;
   }
   
-  try {
-    // Copy template directory
-    execSync(`cp -r "${templatesDir}/.claude" "${targetDir}"`, { stdio: 'inherit' });
-    console.log('✓ Initialized .claude directory structure');
-  } catch (error) {
-    console.error('❌ Failed to initialize .claude directory:', error.message);
-    process.exit(1);
-  }
+  // Create symlink for APM commands
+  createApmSymlink(process.cwd(), packageRoot);
 }
 
 function runScript(scriptName, scriptArgs = []) {
@@ -80,7 +85,7 @@ function runScript(scriptName, scriptArgs = []) {
 switch (command) {
   case 'add-issues':
     if (args.length < 3) {
-      console.error('Usage: claude-github-apm add-issues <org> <project_num> <issue_nums_or_urls...>');
+      console.error('Usage: claude-github-apm add-issues <org> <project_num> <issue_numbers_or_urls...>');
       process.exit(1);
     }
     runScript('add-issues-to-project.sh', args);

@@ -10,12 +10,14 @@
     "bin",
     "scripts",
     "lib",
-    "templates"
+    "templates",
+    "src"
   ],
   "scripts": {
     "dev": "echo 'Framework ready for linking'",
     "link": "pnpm link --global",
-    "unlink": "pnpm unlink --global"
+    "unlink": "pnpm unlink --global",
+    "postinstall": "node scripts/postinstall.js"
   },
   "keywords": [
     "claude",
