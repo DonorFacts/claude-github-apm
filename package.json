@@ -1,0 +1,36 @@
+{
+  "name": "@jakedetels/claude-github-apm",
+  "version": "0.1.0",
+  "description": "GitHub automation framework for Claude Code workflows",
+  "main": "./lib/index.js",
+  "bin": {
+    "claude-github-apm": "./bin/claude-framework.js"
+  },
+  "files": [
+    "bin",
+    "scripts",
+    "lib",
+    "templates"
+  ],
+  "scripts": {
+    "dev": "echo 'Framework ready for linking'",
+    "link": "pnpm link --global",
+    "unlink": "pnpm unlink --global"
+  },
+  "keywords": [
+    "claude",
+    "agentic",
+    "github",
+    "automation",
+    "cli"
+  ],
+  "author": "Jake Detels",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DonorFacts/claude-github-apm.git"
+  }
+}
