@@ -47,3 +47,6 @@ coverage/
 
 # Test files (if we add them later)
 **/__snapshots__/
+
+# Temporary test directories
+.tmp/

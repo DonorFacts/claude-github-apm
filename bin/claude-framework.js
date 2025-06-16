@@ -3,7 +3,7 @@
 const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const { createApmSymlink } = require('../lib/symlink-utils');
+const { createCommandFiles } = require('../lib/create-command-files');
 
 const command = process.argv[2];
 const args = process.argv.slice(3);
@@ -59,8 +59,8 @@ function initProject() {
     console.log('✓ .claude directory already exists');
   }
   
-  // Create symlink for APM commands
-  createApmSymlink(process.cwd(), packageRoot);
+  // Create command files for APM prompts
+  createCommandFiles(process.cwd(), packageRoot);
 }
 
 function runScript(scriptName, scriptArgs = []) {

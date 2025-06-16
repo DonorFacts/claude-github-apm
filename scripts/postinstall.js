@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 const path = require('path');
-const { createApmSymlink, getConsumingProjectRoot } = require('../lib/symlink-utils');
+const { createCommandFiles, getConsumingProjectRoot } = require('../lib/create-command-files');
 
 // This script runs after the package is installed in a consuming project
 // Note: It may not run for linked packages (e.g., link:../path or pnpm link)
@@ -14,8 +14,11 @@ function postinstall() {
   console.log('Package root:', packageRoot);
   console.log('Consuming project root:', consumingProjectRoot);
   
-  // Create the APM symlink
-  createApmSymlink(consumingProjectRoot, packageRoot);
+  // Create command files for all markdown files in src/prompts
+  createCommandFiles(consumingProjectRoot, packageRoot);
 }
 
-postinstall();
+// Run postinstall if this script is run directly
+if (require.main === module) {
+  postinstall();
+}

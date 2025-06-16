@@ -17,7 +17,8 @@
     "dev": "echo 'Framework ready for linking'",
     "link": "pnpm link --global",
     "unlink": "pnpm unlink --global",
-    "postinstall": "node scripts/postinstall.js"
+    "postinstall": "node scripts/postinstall.js",
+    "test": "jest"
   },
   "keywords": [
     "claude",
@@ -34,5 +35,8 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DonorFacts/claude-github-apm.git"
+  },
+  "devDependencies": {
+    "jest": "^30.0.0"
   }
 }
