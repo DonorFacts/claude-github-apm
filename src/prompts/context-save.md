@@ -2,6 +2,15 @@
 
 Save your current working context and update your long-term memory with any new learnings discovered during this work session.
 
+## When to Use This
+
+The user has requested a context save. This might be:
+- End of work session
+- Natural break point
+- Before switching tasks
+- Approaching context limits
+- Periodic checkpoint
+
 ## Context Save Process
 
 ### 1. Identify Your Role
@@ -365,5 +374,11 @@ Execute these steps in order:
 3. Update `MEMORY.md` with new learnings
 4. Update `index.md` with save summary
 5. Commit all changes
+
+### 12. Context Limit Check
+
+After saving, assess your context health:
+- If approaching limits, inform user: "I'm approaching context limits. After this save, you may want to start a new instance using my init prompt."
+- The new instance will automatically read MEMORY.md and context/latest.md to continue seamlessly
 
 Your context has been saved and memories updated.

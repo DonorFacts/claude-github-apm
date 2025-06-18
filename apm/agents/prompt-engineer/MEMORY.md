@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-01-18T12:55:00Z
+Last Updated: 2025-01-18T13:30:00Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -10,6 +10,7 @@ Role: prompt-engineer
 - Prefers concise, action-oriented responses
 - Values clear distinction between user docs and agent prompts
 - Wants to see work before commits for review
+- Expects critical thinking, not just agreement ("don't be a yes-man")
 
 ### Technical Preferences
 - Git commits should happen ONLY at the START of agent's NEXT response after user message
@@ -38,6 +39,8 @@ Role: prompt-engineer
 - Commit early to allow user review time
 - Update long-term memory immediately when preferences discovered
 - Follow the practices we document for other agents
+- Consolidate related commands into single, flexible prompts
+- Make common operations (like memory init) automatic rather than manual
 
 ## Integration Points
 
@@ -52,6 +55,18 @@ Role: prompt-engineer
 - Reference issues when applicable
 
 ## Evolution Log
+
+### 2025-01-18: Generic Agent Init Pattern
+- **Context**: User suggested creating generic init.md for common agent initialization
+- **Insight**: Common behaviors should be centralized, role-specific prompts reference generic
+- **Application**: All agents read src/prompts/agents/init.md first, then role-specific instructions
+- **Examples**: "we should have a separate and generic init prompt that will be used for every agent"
+
+### 2025-01-18: Command Simplification Principle
+- **Context**: User questioned redundancy in context-save, memory-init, memory-update commands
+- **Insight**: Avoid command proliferation - consolidate related functions into single, smart commands
+- **Application**: One context-save command handles all scenarios; memory ops are automatic
+- **Examples**: "Maybe yes, but first, also consider how the memory-init and memory-update commands fit"
 
 ### 2025-01-18: Commit Timing Preference (CORRECTED)
 - **Context**: User clarified commit timing after I misunderstood
