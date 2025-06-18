@@ -38,10 +38,14 @@ Claude GitHub APM transforms the original [Agentic Project Management (APM)](htt
 
 ### 🤖 Enhanced Agent Roles
 
-- **Manager Agent**: GitHub-aware project orchestration
-- **Scrum Master**: Automated issue and sprint management
-- **Prompt Engineer**: Optimized prompts for Claude Code
-- **Implementation Agents**: Git-integrated development workflows
+Each agent role has specialized capabilities and maintains its own memory:
+
+- **Manager Agent** (`manager`): Creates Implementation Plans, orchestrates work, reviews results
+- **Scrum Master** (`scrum-master`): Converts plans to GitHub issues, manages sprints
+- **Prompt Engineer** (`prompt-engineer`): Creates and optimizes agent prompts
+- **Developer Agents** (`developer`): Implement features with tests and docs
+- **QA Engineer** (`qa-engineer`): Comprehensive testing and validation
+- **Documentation Writer** (`documentation`): Technical docs and user guides
 
 ### 🛠️ Professional CLI
 
@@ -98,6 +102,48 @@ claude --apm manager init
 
 ## 📖 Core Concepts
 
+### Agent Memory System
+
+Claude GitHub APM uses a three-tier memory system that enables agents to learn and improve over time:
+
+#### 1. **Long-Term Memory** (`apm/agents/<role>/MEMORY.md`)
+- Captures enduring patterns, preferences, and principles
+- Persists across Claude Code sessions
+- Helps each agent role become more effective over time
+- Automatically loaded when agents initialize
+
+#### 2. **Short-Term Memory** (`apm/agents/<role>/context/`)
+- Saves current work state and active tasks
+- Enables seamless continuation after breaks
+- Includes `latest.md` and timestamped archives
+- Automatically loaded on agent initialization
+
+#### 3. **Git History** (Project commits)
+- Immutable record of all changes and decisions
+- Tracked through structured commit messages
+- Provides audit trail and project evolution
+
+### Agent Initialization
+
+When you start an agent in Claude Code:
+
+```bash
+# Example: Initialize Scrum Master
+# The agent will automatically:
+# 1. Read generic initialization instructions
+# 2. Load any existing long-term memory
+# 3. Check for saved context to continue work
+# 4. Confirm readiness with current state
+
+"Initialize as Scrum Master agent"
+```
+
+Agents handle their own memory - you don't need to manage it manually. They'll:
+- Create memory files on first use
+- Update learnings automatically during work
+- Save context when you request it
+- Alert you if approaching context limits
+
 ### Issue Hierarchy
 
 ```
@@ -106,6 +152,32 @@ Phase (Strategic Milestone - Quarters)
     └── Epic (Feature Set - Days)
         └── Feature/Task/Bug (Atomic Work - Hours)
 ```
+
+### Context Management
+
+Save your agent's work state at any time:
+
+```bash
+# Simple command to save current context
+"save context"
+
+# The agent will:
+# - Save current work to context/latest.md
+# - Create timestamped archive
+# - Update long-term memory with new learnings
+# - Confirm save completion
+```
+
+When Claude approaches context limits, agents will proactively alert you:
+```
+⚠️ I'm approaching context limits (noticing difficulty recalling earlier details)
+Recommend completing current task then starting fresh instance
+```
+
+To continue after context reset:
+1. Start a new Claude Code instance
+2. Initialize the same agent role
+3. Agent automatically loads memory and continues where left off
 
 ### Workflow Example
 
