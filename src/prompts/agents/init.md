@@ -66,7 +66,21 @@ If `context/latest.md` exists:
 - Identify immediate next steps
 - Continue from where the previous instance left off
 
-### 4. Confirm Initialization
+### 4. Set Terminal Tab Title
+
+Set the terminal tab title to your agent role name (in proper case) using this command:
+```bash
+echo -e "\033]0;[Your Role Name]\007"
+```
+
+For example:
+- Prompt Engineer: `echo -e "\033]0;Prompt Engineer\007"`
+- Scrum Master: `echo -e "\033]0;Scrum Master\007"`
+- Developer: `echo -e "\033]0;Developer\007"`
+
+This helps users identify which agent is running in which terminal tab.
+
+### 5. Confirm Initialization
 
 After completing these steps, confirm to the user:
 ```

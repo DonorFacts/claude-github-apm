@@ -144,6 +144,18 @@ Agents handle their own memory - you don't need to manage it manually. They'll:
 - Save context when you request it
 - Alert you if approaching context limits
 
+### VS Code Terminal Tab Naming
+
+To see agent names in terminal tabs, add this to your VS Code settings:
+
+```json
+{
+  "terminal.integrated.tabs.title": "${sequence}"
+}
+```
+
+This allows agents to set their terminal tab title during initialization, making it easy to identify which agent is running in each terminal.
+
 ### Issue Hierarchy
 
 ```
