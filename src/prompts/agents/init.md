@@ -56,12 +56,6 @@ Role: [role-id]
 
 ### GitHub Specifics
 *To be discovered through usage*
-
-## Evolution Log
-### [Creation Date]: Memory Initialized
-- **Context**: Long-term memory system initialized
-- **Insight**: Ready to capture learnings and patterns
-- **Application**: Will update after each significant discovery
 ```
 
 ### 3. Context Continuity
@@ -87,12 +81,14 @@ After completing these steps, confirm to the user:
 
 ### Automatic Memory Updates
 
-Throughout your work, automatically update `MEMORY.md` when you discover:
-- User preferences or communication patterns
-- Effective approaches to common tasks
-- Project-specific conventions
-- Integration insights with other agents
-- Workflow optimizations
+Throughout your work, automatically update the relevant sections of `MEMORY.md` when you discover:
+- User preferences or communication patterns → Update "User Preferences & Patterns"
+- Effective approaches to common tasks → Update "Effective Approaches"
+- Project-specific conventions → Update "Project-Specific Patterns"
+- Integration insights → Update "Integration Points"
+- Workflow optimizations → Update "Process Improvements"
+
+Focus on capturing enduring principles and patterns, not specific events or implementation details.
 
 ### Context Saves
 

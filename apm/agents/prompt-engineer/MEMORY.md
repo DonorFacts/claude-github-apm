@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-01-18T13:45:00Z
+Last Updated: 2025-01-18T14:00:00Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -37,10 +37,10 @@ Role: prompt-engineer
 
 ### Process Improvements
 - Commit early to allow user review time
-- Update long-term memory immediately when preferences discovered
 - Follow the practices we document for other agents
 - Consolidate related commands into single, flexible prompts
 - Make common operations (like memory init) automatic rather than manual
+- Long-term memory should capture enduring principles, not session events
 
 ## Integration Points
 
@@ -54,38 +54,8 @@ Role: prompt-engineer
 - Include bullet points for major changes
 - Reference issues when applicable
 
-## Evolution Log
-
-### 2025-01-18: Automatic Behaviors Over Manual Commands
-- **Context**: User questioned purpose of context-check.md command
-- **Insight**: Common behaviors should be automatic, not manual commands users must remember
-- **Application**: Build monitoring/checking into normal agent operation, alert proactively
-- **Examples**: "how would context-check.md command be used, and by whom?"
-
-### 2025-01-18: Generic Agent Init Pattern
-- **Context**: User suggested creating generic init.md for common agent initialization
-- **Insight**: Common behaviors should be centralized, role-specific prompts reference generic
-- **Application**: All agents read src/prompts/agents/init.md first, then role-specific instructions
-- **Examples**: "we should have a separate and generic init prompt that will be used for every agent"
-
-### 2025-01-18: Command Simplification Principle
-- **Context**: User questioned redundancy in context-save, memory-init, memory-update commands
-- **Insight**: Avoid command proliferation - consolidate related functions into single, smart commands
-- **Application**: One context-save command handles all scenarios; memory ops are automatic
-- **Examples**: "Maybe yes, but first, also consider how the memory-init and memory-update commands fit"
-
-### 2025-01-18: Commit Timing Preference (CORRECTED)
-- **Context**: User clarified commit timing after I misunderstood
-- **Insight**: Commits happen at START of agent's NEXT response, giving user time to review
-- **Application**: Make changes → Wait for user message → Commit FIRST in next response → Continue work
-- **Examples**: "once again, you committed your changes before I got a chance to review"
-
-### 2025-01-18: Memory System Implementation
-- **Context**: Completed three-tier memory system design
-- **Insight**: Agents need both short-term (context) and long-term (MEMORY.md) memory
-- **Application**: All agents should maintain MEMORY.md for continuous improvement
-
-### 2025-01-18: Agent vs User Content Separation  
-- **Context**: User pointed out some prompts mixed user and agent content
-- **Insight**: Prompts in src/prompts/ must be purely agent-directed
-- **Application**: User guides go in docs/, agent prompts stay focused on agent actions
+### Design Principles Discovered
+- Common behaviors should be automatic, not manual commands
+- Generic patterns should be centralized; only specialize what's unique
+- Avoid command proliferation - one flexible command beats many specific ones
+- Agent prompts must be purely agent-directed (user docs go in docs/)

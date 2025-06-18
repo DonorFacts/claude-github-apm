@@ -331,25 +331,22 @@ Last Updated: [ISO Timestamp]
 - [PR review preferences]
 - [Commit message styles]
 
-## Evolution Log
+## Recent Insights
 
-### [Today's Date]: [Key Learning]
-- **Context**: [What prompted this]
-- **Insight**: [What was learned]
-- **Application**: [How it changes behavior]
-
-[Previous entries...]
+[If you discovered new principles or patterns, update the appropriate categorical sections above rather than creating a chronological log]
 ```
 
 ### 9. Memory Update Guidelines
 
 #### What to Add to Long-Term Memory:
-- User preferences discovered through interaction
-- Successful problem-solving approaches
-- Project-specific conventions noticed
-- Workflow optimizations discovered
-- Common error patterns to avoid
-- Effective communication patterns
+- Enduring user preferences and patterns (not one-time requests)
+- Successful approaches that will apply to future work
+- Project conventions that persist across sessions
+- Design principles discovered (not specific implementations)
+- Patterns to avoid (not individual bugs)
+- Communication styles that work well
+
+Update the categorical sections in MEMORY.md. Don't create chronological logs.
 
 #### What NOT to Add:
 - Task-specific details (keep in context)
