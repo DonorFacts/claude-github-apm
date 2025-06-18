@@ -1,6 +1,30 @@
-# Save Current Context
+# Save Current Context & Update Memory
 
-Save your current working context to enable recovery or handover. This creates a snapshot of your current state, understanding, and work in progress.
+Perform a context save operation that captures your current work state and updates your long-term memory with new learnings. This maintains both short-term context for recovery and long-term memory for continuous improvement.
+
+## Memory System Overview
+
+Our three-tier memory system:
+- **Short-term memory** (`context/` files): Current work state, active tasks, immediate context
+- **Long-term memory** (`MEMORY.md`): Learned preferences, patterns, role-specific insights
+- **Git commits**: Immutable project history and decisions
+
+## Save Types
+
+### 1. Quick Save (Most Common)
+- **When**: Task completion, natural break points, before switching focus
+- **Updates**: `latest.md`, `MEMORY.md` (new learnings), `index.md`
+- **Time**: ~2-3 minutes
+
+### 2. Full Archive (Periodic)
+- **When**: Major milestones, end of session, before complex tasks
+- **Updates**: Everything from quick save + timestamped archive
+- **Time**: ~5-7 minutes with reflection
+
+### 3. Context Reset Prep (Rare)
+- **When**: Approaching context limit warnings
+- **Creates**: Formal handover artifacts + comprehensive memory update
+- **Time**: ~10-15 minutes
 
 ## Context Save Process
 
@@ -9,11 +33,14 @@ Save your current working context to enable recovery or handover. This creates a
 **IMPORTANT**: If you were not assigned a clear role ID, ask the user: "What role ID should I use for saving context files?"
 
 Common role IDs include:
+
 - `prompt-engineer`
 - `scrum-master`
+- `architect` (aka Product Architect)
 - `developer`
 - `qa-engineer`
-- `documentation`
+- `documentation-writer`
+- `debugger`
 - `general` (fallback if no specific role)
 
 ### 2. Identify Context Components
@@ -43,7 +70,7 @@ apm/agents/<role-id>/context/
 
 Create a comprehensive context file with this structure:
 
-```markdown
+````markdown
 # Agent Context Snapshot
 
 Generated: [Current timestamp ISO format]
@@ -75,12 +102,14 @@ Agent Instance: [If applicable]
 // Any code being developed
 // Include partial implementations
 ```
+````
 
 ### Recent Context
 
 #### Recent Git Commits
 
 List recent commits relevant to current work:
+
 - [Commit hash]: [Message] - [Issue refs]
 - [Commit hash]: [Message] - [Issue refs]
 
@@ -102,6 +131,7 @@ List recent commits relevant to current work:
 #### User Communications
 
 Recent important exchanges:
+
 - [Time]: User requested [what]
 - [Time]: Clarified [what]
 - [Time]: Approved [what]
@@ -171,7 +201,8 @@ To restore this context:
 3. Check GitHub issues referenced in commits
 4. Review any uncommitted changes with `git status`
 5. Continue with [specific next action]
-```
+
+````
 
 ### 5. Save Context Files
 
@@ -181,27 +212,30 @@ Execute these steps in order:
    ```bash
    # Save the context to latest.md
    apm/agents/<role-id>/context/latest.md
-   ```
+````
 
 2. **Create timestamped copy**:
+
    ```bash
    # Create timestamped archive (YYYYMMDD_HHMMSS format)
    apm/agents/<role-id>/context/YYYYMMDD_HHMMSS_context.md
    ```
 
 3. **Update index.md**:
+
    ```markdown
    # Context Save Index
 
    ## Latest Context
-   
+
    **File**: latest.md  
    **Updated**: [ISO timestamp]  
    **Summary**: [Brief description of current state and focus]
 
    ## Context History
 
-   ### [YYYYMMDD_HHMMSS]_context.md
+   ### [YYYYMMDD_HHMMSS]\_context.md
+
    - **Saved**: [ISO timestamp]
    - **Agent State**: [Brief status]
    - **Primary Focus**: [What was being worked on]
@@ -227,6 +261,7 @@ Confirm all files saved properly:
 - Purpose: [Why saved - checkpoint/handover/session-end]
 
 Next steps:
+
 - Continue working with saved checkpoint
 - Or prepare for handover using saved context
 - Or close session safely
@@ -237,7 +272,7 @@ Next steps:
 #### When to Save Context:
 
 - Before long operations
-- At natural break points  
+- At natural break points
 - Before switching major tasks
 - When approaching context limit
 - At end of work session
@@ -260,12 +295,98 @@ Next steps:
 - Verbose code listings (reference files instead)
 - Completed and closed items
 
-### 8. Git Integration Note
+### 8. Update Long-Term Memory
+
+After saving context, update your long-term memory at `apm/agents/<role-id>/MEMORY.md`:
+
+```markdown
+# Long-Term Memory - [Role Name]
+
+Last Updated: [ISO Timestamp]
+
+## User Preferences & Patterns
+
+### Communication Style
+- [Observed preference with examples]
+- [Preference discovered this session]
+
+### Technical Preferences
+- [Coding style observations]
+- [Tool preferences noticed]
+- [Naming conventions identified]
+
+### Project-Specific Patterns
+- [Architectural decisions observed]
+- [Repeated patterns in requests]
+- [Domain-specific terminology]
+
+## Role-Specific Learnings
+
+### Effective Approaches
+- [What works well for this role]
+- [Successful strategies discovered]
+
+### Common Pitfalls
+- [Mistakes to avoid]
+- [Edge cases encountered]
+
+### Process Improvements
+- [Better ways to handle tasks]
+- [Efficiency gains discovered]
+
+## Integration Points
+
+### Working with Other Agents
+- [Scrum Master interaction patterns]
+- [Developer handoff preferences]
+- [Documentation requirements]
+
+### GitHub Specifics
+- [Custom issue type patterns]
+- [PR review preferences]
+- [Commit message styles]
+
+## Evolution Log
+
+### [Today's Date]: [Key Learning]
+- **Context**: [What prompted this]
+- **Insight**: [What was learned]
+- **Application**: [How it changes behavior]
+
+[Previous entries...]
+```
+
+### 9. Memory Update Guidelines
+
+#### What to Add to Long-Term Memory:
+- User preferences discovered through interaction
+- Successful problem-solving approaches
+- Project-specific conventions noticed
+- Workflow optimizations discovered
+- Common error patterns to avoid
+- Effective communication patterns
+
+#### What NOT to Add:
+- Task-specific details (keep in context)
+- Temporary workarounds
+- One-off decisions
+- Information already in init prompts
+
+### 10. Git Integration Note
 
 Since this project uses git commits as its memory system:
 - Reference commits by hash when mentioning completed work
-- Include issue numbers in context for traceability  
+- Include issue numbers in context for traceability
 - Note any uncommitted changes that affect context
 - Follow commit guidelines in `.claude/commands/commit.md`
+- Commit both context and memory updates together
+
+### 11. Choose Save Type
+
+Based on your current situation, execute the appropriate save:
+
+1. **Quick Save**: Update latest.md + MEMORY.md + index.md
+2. **Full Archive**: All quick save items + create timestamped archive
+3. **Context Reset**: Generate handover artifacts + comprehensive memory update
 
 Save your current context following the structure above.

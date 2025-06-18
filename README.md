@@ -13,40 +13,45 @@ Claude GitHub APM transforms the original [Agentic Project Management (APM)](htt
 
 ### Key Enhancements Over Original APM
 
-| Feature | Original APM | Claude GitHub APM |
-|---------|--------------|-------------------|
-| **Project State** | Local markdown files | GitHub issues, PRs, and commits |
-| **Progress Tracking** | Manual updates | Automated GitHub project boards |
-| **Agent Coordination** | File-based handovers | GitHub-native workflows |
-| **Scalability** | Limited by context | Unlimited via GitHub |
-| **Integration** | Standalone | Full Claude Code CLI integration |
+| Feature                | Original APM         | Claude GitHub APM                |
+| ---------------------- | -------------------- | -------------------------------- |
+| **Project State**      | Local markdown files | GitHub issues, PRs, and commits  |
+| **Progress Tracking**  | Manual updates       | Automated GitHub project boards  |
+| **Agent Coordination** | File-based handovers | GitHub-native workflows          |
+| **Scalability**        | Limited by context   | Unlimited via GitHub             |
+| **Integration**        | Standalone           | Full Claude Code CLI integration |
 
 ## ✨ Features
 
 ### 🏗️ Build-Time Prompt Enhancement
+
 - Transforms APM prompts with GitHub context at build time
 - Injects issue hierarchies, PR workflows, and team conventions
 - Maintains compatibility with original APM structure
 
 ### 🔗 GitHub-Native Integration
+
 - **Custom Issue Types**: Phase → Project → Epic → Feature → Task/Bug
 - **Automated Workflows**: Issue creation from Implementation Plans
 - **Smart Commits**: Structured messages that update issue states
 - **Project Boards**: Visual progress tracking and burndown
 
 ### 🤖 Enhanced Agent Roles
+
 - **Manager Agent**: GitHub-aware project orchestration
-- **Scrum Master**: Automated issue and sprint management  
+- **Scrum Master**: Automated issue and sprint management
 - **Prompt Engineer**: Optimized prompts for Claude Code
 - **Implementation Agents**: Git-integrated development workflows
 
 ### 🛠️ Professional CLI
+
 - Built on Anthropic's Claude Code SDK
 - Interactive workflows for complex operations
 - Seamless `.claude/commands/` integration
 - TypeScript with full type safety
 
 ### 📦 Enterprise Features
+
 - **Multi-repo support**: Coordinate across repositories
 - **Team permissions**: GitHub-based access control
 - **Audit trails**: Complete history in git
@@ -55,6 +60,7 @@ Claude GitHub APM transforms the original [Agentic Project Management (APM)](htt
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Node.js 18+ and pnpm (or npm)
 - Claude Code installed globally
 - GitHub CLI (`gh`) authenticated
@@ -62,13 +68,7 @@ Claude GitHub APM transforms the original [Agentic Project Management (APM)](htt
 
 ### Installation
 
-```bash
-# Install globally
-pnpm add -g @anthropic/claude-github-apm
-
-# Or add to your project
-pnpm add -D @anthropic/claude-github-apm
-```
+TBD
 
 ### Initialize APM in Your Project
 
@@ -91,7 +91,7 @@ claude --apm manager init
 
 # The Manager will guide you through:
 # - Project discovery
-# - Implementation planning  
+# - Implementation planning
 # - GitHub integration setup
 # - Agent task assignment
 ```
@@ -99,14 +99,16 @@ claude --apm manager init
 ## 📖 Core Concepts
 
 ### Issue Hierarchy
+
 ```
 Phase (Strategic Milestone - Quarters)
-└── Project (Major Initiative - Weeks)  
+└── Project (Major Initiative - Weeks)
     └── Epic (Feature Set - Days)
         └── Feature/Task/Bug (Atomic Work - Hours)
 ```
 
 ### Workflow Example
+
 ```bash
 # 1. Manager creates Implementation Plan
 claude --apm manager plan
@@ -132,6 +134,7 @@ Next: implement user profile"
 ## 🏗️ Architecture
 
 ### Build-Time Transformation
+
 ```
 Original APM Prompts → Post-Processing → GitHub-Enhanced Prompts
                             ↓
@@ -142,6 +145,7 @@ Original APM Prompts → Post-Processing → GitHub-Enhanced Prompts
 ```
 
 ### Runtime Integration
+
 ```
 Claude Code ← → APM CLI ← → GitHub API
      ↓             ↓            ↓
@@ -151,6 +155,7 @@ Claude Code ← → APM CLI ← → GitHub API
 ## 🧪 Development
 
 ### Setup Development Environment
+
 ```bash
 # Clone repository
 git clone https://github.com/yourusername/claude-github-apm
@@ -170,41 +175,8 @@ pnpm link
 ```
 
 ### Project Structure
-```
-claude-github-apm/
-├── src/                    # TypeScript source
-│   ├── cli/               # CLI implementation
-│   ├── prompts/           # Prompt templates
-│   └── transformers/      # Build-time processors
-├── lib/                   # Build tools
-│   ├── post-processing/   # Prompt enhancers
-│   └── github/           # GitHub integrations
-├── .claude/              # Claude Code commands
-│   └── commands/         # APM command library
-├── apm/                  # APM assets
-│   └── Implementation_Plan.md
-└── dist/                 # Built output
-```
 
-## 📚 Documentation
-
-- [Getting Started Guide](docs/getting-started.md)
-- [Architecture Overview](docs/framework-overview.md)
-- [GitHub Integration](docs/github-issue-type-mapping.md)
-- [Agent Workflows](docs/agent-workflows.md)
-- [CLI Reference](docs/cli-reference.md)
-- [Migration from Original APM](docs/migration-guide.md)
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
-### Development Workflow
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes using our format
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+TBD
 
 ## 📄 License
 
