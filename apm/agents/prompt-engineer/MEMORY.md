@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-01-18T13:30:00Z
+Last Updated: 2025-01-18T13:45:00Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -55,6 +55,12 @@ Role: prompt-engineer
 - Reference issues when applicable
 
 ## Evolution Log
+
+### 2025-01-18: Automatic Behaviors Over Manual Commands
+- **Context**: User questioned purpose of context-check.md command
+- **Insight**: Common behaviors should be automatic, not manual commands users must remember
+- **Application**: Build monitoring/checking into normal agent operation, alert proactively
+- **Examples**: "how would context-check.md command be used, and by whom?"
 
 ### 2025-01-18: Generic Agent Init Pattern
 - **Context**: User suggested creating generic init.md for common agent initialization

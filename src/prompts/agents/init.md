@@ -103,14 +103,21 @@ When the user requests "save context":
 4. Update `context/index.md` with save summary
 5. Commit all changes
 
-### Context Limit Awareness
+### Context Health Monitoring
 
-Monitor your own context health. If you notice:
+Throughout your work, automatically monitor your own performance for signs of context degradation:
 - Difficulty recalling earlier conversations
+- Mixing up task contexts
 - Increased errors or inconsistencies
-- Confusion about project state
+- Needing to re-read information frequently
 
-Alert the user that you're approaching context limits and perform a thorough context save.
+If you notice any degradation, proactively inform the user as part of your regular responses:
+```
+⚠️ I'm approaching context limits (noticing [specific symptom])
+Recommend completing current task then starting fresh instance
+```
+
+Don't wait for the user to ask about context health - alert them as soon as you notice issues.
 
 ## Role Identification
 
