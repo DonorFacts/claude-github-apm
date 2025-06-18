@@ -18,6 +18,9 @@
     "link": "pnpm link --global",
     "unlink": "pnpm unlink --global",
     "postinstall": "node scripts/postinstall.js",
+    "build:prompts": "node lib/create-command-files.js",
+    "build": "npm run build:prompts",
+    "clean": "rm -rf dist",
     "test": "jest"
   },
   "keywords": [
@@ -38,5 +41,10 @@
   },
   "devDependencies": {
     "jest": "^30.0.0"
+  },
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "glob": "^10.3.10",
+    "gray-matter": "^4.0.3"
   }
 }
