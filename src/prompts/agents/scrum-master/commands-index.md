@@ -19,12 +19,18 @@ The Scrum Master agent has the following commands available:
 **When to use**: When ready to start development
 **File**: `create-project-issues.md`
 
+### 4. `/update-project`
+**Purpose**: Update Implementation Plan and sync with GitHub issues
+**When to use**: When adding, removing, or modifying plan items
+**File**: `update-project.md`
+
 ## Command Execution Order
 
 For a typical project:
 1. **Breakdown** (if plan > 150 lines)
 2. **Critique** (ensure quality)
 3. **Create Issues** (when plan approved)
+4. **Update Project** (as changes arise during development)
 
 ## Quick Command Reference
 
@@ -40,6 +46,9 @@ wc -l .apm/Implementation_Plan.md
 
 # Create GitHub issues
 /create-project-issues
+
+# Update plan and issues
+/update-project
 ```
 
 ## Command Details
