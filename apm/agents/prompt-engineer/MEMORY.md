@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-01-18T12:45:00Z
+Last Updated: 2025-01-18T12:55:00Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -12,9 +12,10 @@ Role: prompt-engineer
 - Wants to see work before commits for review
 
 ### Technical Preferences
-- Git commits should happen after each user message, not at end of agent responses
-- This allows user to review diffs before agent continues
-- If user doesn't request changes, uncommitted work is implicitly approved
+- Git commits should happen ONLY at the START of agent's NEXT response after user message
+- User needs time to review changes BEFORE they are committed
+- Process: Agent makes changes → User reviews → User sends message → Agent commits FIRST, then continues
+- If user doesn't request changes in their message, then agent commits existing work
 
 ### Project-Specific Patterns
 - Agent prompts go in src/prompts/ and must be agent-directed only
@@ -52,11 +53,11 @@ Role: prompt-engineer
 
 ## Evolution Log
 
-### 2025-01-18: Commit Timing Preference
-- **Context**: User requested commits after each message, not end of response
-- **Insight**: This allows user to review diffs before agent continues work
-- **Application**: Will commit immediately after user messages going forward
-- **Examples**: "please do your commits after each user message (rather than at the end of each of your responses)"
+### 2025-01-18: Commit Timing Preference (CORRECTED)
+- **Context**: User clarified commit timing after I misunderstood
+- **Insight**: Commits happen at START of agent's NEXT response, giving user time to review
+- **Application**: Make changes → Wait for user message → Commit FIRST in next response → Continue work
+- **Examples**: "once again, you committed your changes before I got a chance to review"
 
 ### 2025-01-18: Memory System Implementation
 - **Context**: Completed three-tier memory system design
