@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-01-18T14:15:00Z
+Last Updated: 2025-01-18T13:50:00Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -39,6 +39,7 @@ Role: prompt-engineer
 - Mixing user documentation into agent prompts
 - Committing too late (should be after user message)
 - Not maintaining own long-term memory
+- Wasting context by analyzing all existing prompts during init (only read what's specified in init.md files)
 
 ### Process Improvements
 
