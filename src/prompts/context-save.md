@@ -1,30 +1,6 @@
-# Save Current Context & Update Memory
+# Save Current Context
 
-Perform a context save operation that captures your current work state and updates your long-term memory with new learnings. This maintains both short-term context for recovery and long-term memory for continuous improvement.
-
-## Memory System Overview
-
-Our three-tier memory system:
-- **Short-term memory** (`context/` files): Current work state, active tasks, immediate context
-- **Long-term memory** (`MEMORY.md`): Learned preferences, patterns, role-specific insights
-- **Git commits**: Immutable project history and decisions
-
-## Save Types
-
-### 1. Quick Save (Most Common)
-- **When**: Task completion, natural break points, before switching focus
-- **Updates**: `latest.md`, `MEMORY.md` (new learnings), `index.md`
-- **Time**: ~2-3 minutes
-
-### 2. Full Archive (Periodic)
-- **When**: Major milestones, end of session, before complex tasks
-- **Updates**: Everything from quick save + timestamped archive
-- **Time**: ~5-7 minutes with reflection
-
-### 3. Context Reset Prep (Rare)
-- **When**: Approaching context limit warnings
-- **Creates**: Formal handover artifacts + comprehensive memory update
-- **Time**: ~10-15 minutes
+Save your current working context and update your long-term memory with any new learnings discovered during this work session.
 
 ## Context Save Process
 
@@ -381,12 +357,13 @@ Since this project uses git commits as its memory system:
 - Follow commit guidelines in `.claude/commands/commit.md`
 - Commit both context and memory updates together
 
-### 11. Choose Save Type
+### 11. Complete the Save
 
-Based on your current situation, execute the appropriate save:
+Execute these steps in order:
+1. Save context to `latest.md`
+2. Create timestamped archive copy
+3. Update `MEMORY.md` with new learnings
+4. Update `index.md` with save summary
+5. Commit all changes
 
-1. **Quick Save**: Update latest.md + MEMORY.md + index.md
-2. **Full Archive**: All quick save items + create timestamped archive
-3. **Context Reset**: Generate handover artifacts + comprehensive memory update
-
-Save your current context following the structure above.
+Your context has been saved and memories updated.
