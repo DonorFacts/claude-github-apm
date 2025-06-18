@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      Claude-Code-agentic-project-management:
-        specifier: github:pabg92/Claude-Code-agentic-project-management
-        version: https://codeload.github.com/pabg92/Claude-Code-agentic-project-management/tar.gz/f25cb2795419fa2c40283e91d4dcc3a15f4d3077
       fs-extra:
         specifier: ^11.2.0
         version: 11.3.0
@@ -466,10 +463,6 @@ packages:
     resolution: {integrity: sha512-k59o9ZyeyS0hAlcaKFezYSH2agQeRFEB7KoQLXl3Nb3rgkqT1NY9Vwy+SqODiLmYnEjxWJVRE/yq2jFVqdIxZw==}
     cpu: [x64]
     os: [win32]
-
-  Claude-Code-agentic-project-management@https://codeload.github.com/pabg92/Claude-Code-agentic-project-management/tar.gz/f25cb2795419fa2c40283e91d4dcc3a15f4d3077:
-    resolution: {tarball: https://codeload.github.com/pabg92/Claude-Code-agentic-project-management/tar.gz/f25cb2795419fa2c40283e91d4dcc3a15f4d3077}
-    version: 0.0.0
 
   ansi-escapes@4.3.2:
     resolution: {integrity: sha512-gKXj5ALrKWQLsYG9jlTRmR/xKluxHV+Z9QEwNIgCfM1/uwPMCuzVVnh5mwTd+OuBZcwSIMbqssNWRm1lE51QaQ==}
@@ -1869,8 +1862,6 @@ snapshots:
 
   '@unrs/resolver-binding-win32-x64-msvc@1.9.0':
     optional: true
-
-  Claude-Code-agentic-project-management@https://codeload.github.com/pabg92/Claude-Code-agentic-project-management/tar.gz/f25cb2795419fa2c40283e91d4dcc3a15f4d3077: {}
 
   ansi-escapes@4.3.2:
     dependencies:

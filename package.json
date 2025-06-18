@@ -43,7 +43,6 @@
     "jest": "^30.0.0"
   },
   "dependencies": {
-    "Claude-Code-agentic-project-management": "github:pabg92/Claude-Code-agentic-project-management",
     "fs-extra": "^11.2.0",
     "glob": "^10.3.10",
     "gray-matter": "^4.0.3"
