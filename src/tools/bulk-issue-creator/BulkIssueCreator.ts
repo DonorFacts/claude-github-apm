@@ -159,12 +159,18 @@ export class BulkIssueCreator {
         await this.createIssueSingle(items[0], repoId);
       } else {
         // Multiple issues, use batch creation
-        const issues = items.map(item => ({
-          title: item.title,
-          body: this.formatIssueBody(item),
-          issueType: this.plan.issue_types[item.type],
-          repositoryId: repoId
-        }));
+        const issues = items.map(item => {
+          const issueType = this.plan.issue_types[item.type];
+          if (!issueType) {
+            throw new Error(`No issue type mapping for type: ${item.type}`);
+          }
+          return {
+            title: item.title,
+            body: this.formatIssueBody(item),
+            issueType,
+            repositoryId: repoId
+          };
+        });
         
         const result = await this.githubClient.createIssuesBatch(issues);
         
@@ -196,10 +202,14 @@ export class BulkIssueCreator {
   
   private async createIssueSingle(item: PlanItem, repoId: string): Promise<void> {
     try {
+      const issueType = this.plan.issue_types[item.type];
+      if (!issueType) {
+        throw new Error(`No issue type mapping for type: ${item.type}`);
+      }
       const issue = await this.githubClient.createIssue({
         title: item.title,
         body: this.formatIssueBody(item),
-        issueType: this.plan.issue_types[item.type],
+        issueType,
         repositoryId: repoId
       });
       

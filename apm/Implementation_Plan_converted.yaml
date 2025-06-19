@@ -14,7 +14,7 @@ issue_types:
   story: MDT_Story
   task: MDT_Task
   bug: MDT_Bug
-  doc: MDT_Doc
+  doc: MDT_Task
 items:
   - id: phase-typescript-foundation-core-inf
     type: phase
