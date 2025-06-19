@@ -224,7 +224,7 @@ Objective: Replace shell scripts with robust TypeScript implementations.
    - Implement authentication handling.
    - Add retry logic and rate limiting.
    - Create error handling system.
-2. **Story**: Implement issue hierarchy management.
+2. **Story**: [#8] Implement issue hierarchy management.
    - Convert create-sub-issue.sh to TypeScript.
      _Guidance: Use GitHub GraphQL API for custom issue types_
    - Build parent-child relationship tracker.
