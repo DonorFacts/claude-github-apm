@@ -2,33 +2,35 @@
 
 Project Goal: Transform the original APM framework into a GitHub-native, enterprise-ready system with CLI capabilities, full TypeScript implementation, and seamless scaling from solo developers to enterprise teams.
 
-## Phase 1: TypeScript Foundation & Core Infrastructure - Agent Group Alpha (Agent_TypeScript_Lead, Agent_Test_Engineer)
+## Phase 1: [#2] TypeScript Foundation & Core Infrastructure - Agent Group Alpha (Agent_TypeScript_Lead, Agent_Test_Engineer)
 
-### Epic 1.1 - Agent_TypeScript_Lead: TypeScript Migration Setup
+### Epic 1.1 - [#3] Agent_TypeScript_Lead: TypeScript Migration Setup
+
 Objective: Convert the existing JavaScript codebase to strict TypeScript with proper typing and structure.
 
-1. **Task**: Set up TypeScript configuration and build system.
+1. **Task**: [#7] Set up TypeScript configuration and build system.
    - Create `tsconfig.json` with strict mode enabled.
    - Configure path aliases for clean imports.
    - Set up build scripts for development and production.
    - Configure source maps for debugging.
-2. **Task**: Migrate lib/create-command-files.js to TypeScript.
+2. **Task**: [#4] Migrate lib/create-command-files.js to TypeScript.
    - Define interfaces for PromptBuilder configuration.
    - Type all methods and parameters strictly.
    - Handle fs-extra types (install @types/fs-extra).
    - Ensure backward compatibility with existing functionality.
-3. **Story**: Migrate all shell scripts to TypeScript.
+3. **Story**: [#5] Migrate all shell scripts to TypeScript.
    - Create TypeScript equivalents using child_process or execa.
    - Implement proper error handling and typing.
    - Add progress indicators for long-running operations.
    - Maintain script functionality while improving maintainability.
-4. **Task**: Set up ESLint and Prettier for code quality.
+4. **Task**: [#6] Set up ESLint and Prettier for code quality.
    - Configure ESLint with TypeScript plugin.
    - Set up Prettier with team-standard formatting.
    - Add pre-commit hooks using husky.
    - Configure VS Code settings for consistency.
 
 ### Epic 1.2 - Agent_Test_Engineer: Testing Infrastructure Setup
+
 Objective: Establish comprehensive testing framework following TDD principles.
 
 1. **Task**: Set up Jest with TypeScript support.
@@ -37,8 +39,8 @@ Objective: Establish comprehensive testing framework following TDD principles.
    - Configure test environments for Node.js.
    - Add test scripts to package.json.
 2. **Task**: Create test structure and conventions.
-   - Establish __tests__ directories alongside source files.
-   - Define naming conventions (*.test.ts, *.spec.ts).
+   - Establish **tests** directories alongside source files.
+   - Define naming conventions (_.test.ts, _.spec.ts).
    - Create test utilities and helpers.
    - Document testing best practices in CONTRIBUTING.md.
 3. **Task**: Write initial test suite for create-command-files.
@@ -53,6 +55,7 @@ Objective: Establish comprehensive testing framework following TDD principles.
    - Configure test caching for faster runs.
 
 ### Epic 1.3 - Agent_TypeScript_Lead: Build System for NPM Publishing
+
 Objective: Create robust build system for npm/pnpm package distribution.
 
 1. **Task**: Configure package.json for publishing.
@@ -77,6 +80,7 @@ Objective: Create robust build system for npm/pnpm package distribution.
    - Create scripts for simulating installation.
 
 ### Feature 1.4 - Agent_TypeScript_Lead: CLAUDE.md Integration System
+
 Objective: Automatically update consuming repository's CLAUDE.md with APM framework usage information.
 
 1. **Task**: Design CLAUDE.md detection and update system.
@@ -92,7 +96,7 @@ Objective: Automatically update consuming repository's CLAUDE.md with APM framew
 3. **Task**: Implement update mechanism.
    - Build file detection algorithm.
    - Create content injection system.
-     *Guidance: Use markers like <!-- APM-START --> to manage sections*
+     _Guidance: Use markers like <!-- APM-START --> to manage sections_
    - Implement rollback capability.
    - Add update tracking to prevent duplicates.
 4. **Task**: Integrate with post-install process.
@@ -104,25 +108,26 @@ Objective: Automatically update consuming repository's CLAUDE.md with APM framew
 ## Phase 2: Prompt Transformation System Enhancement - Agent Group Beta (Agent_Prompt_Engineer, Agent_GitHub_Integration, Agent_Build_Optimizer)
 
 ### Epic 2.1 - Agent_Prompt_Engineer: Core APM Prompt Post-Processors
+
 Objective: Create post-processing templates for all essential APM prompts.
 
 1. **Task**: Analyze all prompts in src/prompts/original/.
    - Catalog all APM prompts requiring transformation.
-     *Guidance: Focus on Manager, Implementation, and specialized agent prompts*
+     _Guidance: Focus on Manager, Implementation, and specialized agent prompts_
    - Identify common patterns for reuse.
    - Prioritize based on usage frequency.
    - Document transformation requirements.
 2. **Task**: Create Manager Agent post-processors.
-   - Create post-processor for 01_Initiation_Prompt.md.
-     *Guidance: Inject GitHub project setup, issue creation workflows*
-   - Create post-processor for 02_Codebase_Guidance.md.
-     *Guidance: Add GitHub repository analysis commands*
-   - Create post-processor for Implementation_Plan_Guide.md.
-     *Guidance: Include GitHub issue hierarchy mapping*
+   - Create post-processor for 01*Initiation_Prompt.md.
+     \_Guidance: Inject GitHub project setup, issue creation workflows*
+   - Create post-processor for 02*Codebase_Guidance.md.
+     \_Guidance: Add GitHub repository analysis commands*
+   - Create post-processor for Implementation*Plan_Guide.md.
+     \_Guidance: Include GitHub issue hierarchy mapping*
    - Test transformations with example inputs.
 3. **Task**: Create Implementation Agent post-processors.
-   - Create post-processor for Implementation_Agent_Onboarding.md.
-     *Guidance: Add GitHub workflow integration, commit guidelines*
+   - Create post-processor for Implementation*Agent_Onboarding.md.
+     \_Guidance: Add GitHub workflow integration, commit guidelines*
    - Create task assignment prompt transformations.
    - Add GitHub context awareness to all prompts.
    - Include CLI command references.
@@ -133,6 +138,7 @@ Objective: Create post-processing templates for all essential APM prompts.
    - Add Prompt Engineer enhancements.
 
 ### Epic 2.2 - Agent_GitHub_Integration: GitHub Context Injection System
+
 Objective: Build system to inject GitHub-specific context into all prompts.
 
 1. **Task**: Design GitHub context detection system.
@@ -157,6 +163,7 @@ Objective: Build system to inject GitHub-specific context into all prompts.
    - Create debug mode for troubleshooting.
 
 ### Feature 2.4 - Agent_Build_Optimizer: Markdown to XML Reference Resolution System
+
 Objective: Pre-compile markdown files with resolved imports/references into XML format for runtime efficiency.
 
 1. **Task**: Design reference resolution system.
@@ -171,7 +178,7 @@ Objective: Pre-compile markdown files with resolved imports/references into XML 
    - Add support for partial file includes.
 3. **Task**: Create XML generation engine.
    - Design XML structure with metadata.
-     *Guidance: Include source file paths, resolution timestamps*
+     _Guidance: Include source file paths, resolution timestamps_
    - Implement content inlining with proper escaping.
    - Add reference tracking for debugging.
    - Generate source maps for error reporting.
@@ -182,6 +189,7 @@ Objective: Pre-compile markdown files with resolved imports/references into XML 
    - Add validation and error reporting.
 
 ### Epic 2.3 (Complex) - Agent_Prompt_Engineer & Agent_Test_Engineer: Prompt Validation System
+
 Objective: Ensure all transformed prompts maintain quality and correctness.
 
 1. **Task**: (Agent_Prompt_Engineer) Define prompt quality metrics.
@@ -208,6 +216,7 @@ Objective: Ensure all transformed prompts maintain quality and correctness.
 ## Phase 3: GitHub Integration & Automation - Agent Group Gamma (Agent_GitHub_Automation, Agent_Integration_Specialist)
 
 ### Epic 3.1 - Agent_GitHub_Automation: TypeScript GitHub Automation Scripts
+
 Objective: Replace shell scripts with robust TypeScript implementations.
 
 1. **Task**: Create GitHub API client wrapper.
@@ -217,7 +226,7 @@ Objective: Replace shell scripts with robust TypeScript implementations.
    - Create error handling system.
 2. **Story**: Implement issue hierarchy management.
    - Convert create-sub-issue.sh to TypeScript.
-     *Guidance: Use GitHub GraphQL API for custom issue types*
+     _Guidance: Use GitHub GraphQL API for custom issue types_
    - Build parent-child relationship tracker.
    - Add bulk issue creation capabilities.
    - Implement issue template system.
@@ -233,6 +242,7 @@ Objective: Replace shell scripts with robust TypeScript implementations.
    - Add merge automation helpers.
 
 ### Feature 3.2 - Agent_Integration_Specialist: Implementation Plan to GitHub Issues Converter
+
 Objective: Build system to automatically create GitHub issues from Implementation Plans.
 
 1. **Task**: Create Implementation Plan parser.
@@ -242,7 +252,7 @@ Objective: Build system to automatically create GitHub issues from Implementatio
    - Parse metadata and dependencies.
 2. **Task**: Implement issue creation engine.
    - Map plan structure to issue types.
-     *Guidance: Use phase→project→epic→feature→task hierarchy*
+     _Guidance: Use phase→project→epic→feature→task hierarchy_
    - Generate issue bodies with context.
    - Preserve acceptance criteria.
    - Add agent assignments as issue metadata.
@@ -258,6 +268,7 @@ Objective: Build system to automatically create GitHub issues from Implementatio
    - Build burndown calculations.
 
 ### Epic 3.3 - Agent_GitHub_Automation: GitHub Workflow Templates
+
 Objective: Create reusable GitHub Actions and workflows for APM projects.
 
 1. **Task**: Design APM-specific GitHub Actions.
@@ -284,6 +295,7 @@ Objective: Create reusable GitHub Actions and workflows for APM projects.
 ## Phase 4: CLI Development & Commands - Agent Group Delta (Agent_CLI_Developer, Agent_UX_Designer)
 
 ### Epic 4.1 - Agent_CLI_Developer: Core CLI Architecture with Claude Code SDK
+
 Objective: Build comprehensive CLI using Anthropic's Claude Code SDK as foundation.
 
 1. **Task**: Set up CLI project structure.
@@ -308,6 +320,7 @@ Objective: Build comprehensive CLI using Anthropic's Claude Code SDK as foundati
    - Implement command aliasing.
 
 ### Epic 4.2 (Complex) - Agent_CLI_Developer & Agent_UX_Designer: Interactive Command Workflows
+
 Objective: Create intuitive, interactive workflows for complex APM operations.
 
 1. **Story**: (Agent_UX_Designer) Design command interactions.
@@ -332,6 +345,7 @@ Objective: Create intuitive, interactive workflows for complex APM operations.
    - Build export capabilities.
 
 ### Epic 4.3 - Agent_CLI_Developer: Claude Command Integration
+
 Objective: Create .claude/commands/apm/ structure for Claude Code integration.
 
 1. **Task**: Design command file structure.
@@ -356,6 +370,7 @@ Objective: Create .claude/commands/apm/ structure for Claude Code integration.
    - Document integration patterns.
 
 ### Feature 4.4 - Agent_UX_Designer & Agent_CLI_Developer: Visual Notification System
+
 Objective: Implement cross-platform desktop notifications for important APM events outside the terminal.
 
 1. **Story**: (Agent_UX_Designer) Design notification strategy.
@@ -365,7 +380,7 @@ Objective: Implement cross-platform desktop notifications for important APM even
    - Plan user preference management.
 2. **Task**: (Agent_CLI_Developer) Research and integrate notification libraries.
    - Evaluate node-notifier for cross-platform support.
-     *Guidance: Supports Windows, macOS, Linux with fallbacks*
+     _Guidance: Supports Windows, macOS, Linux with fallbacks_
    - Consider electron-notify for richer notifications.
    - Assess notify-send compatibility on Linux.
    - Choose library based on platform coverage.
@@ -383,6 +398,7 @@ Objective: Implement cross-platform desktop notifications for important APM even
 ## Phase 5: Testing, Documentation & Publishing - Agent Group Epsilon (Agent_QA_Lead, Agent_Doc_Writer, Agent_DevOps)
 
 ### Epic 5.1 - Agent_QA_Lead: End-to-End Testing with journal-ai-cli
+
 Objective: Comprehensive testing using journal-ai-cli as real-world test case.
 
 1. **Task**: Set up journal-ai-cli test environment.
@@ -407,6 +423,7 @@ Objective: Comprehensive testing using journal-ai-cli as real-world test case.
    - Re-test fixed issues.
 
 ### Epic 5.2 - Agent_Doc_Writer: Comprehensive Documentation
+
 Objective: Create full documentation suite for the enhanced APM framework.
 
 1. **Doc**: Write user documentation.
@@ -431,6 +448,7 @@ Objective: Create full documentation suite for the enhanced APM framework.
    - Create interactive demos.
 
 ### Epic 5.3 (Complex) - Agent_DevOps & Agent_TypeScript_Lead: NPM Package Publishing
+
 Objective: Prepare and publish the framework as a professional npm package.
 
 1. **Task**: (Agent_DevOps) Finalize package configuration.
@@ -455,9 +473,11 @@ Objective: Prepare and publish the framework as a professional npm package.
    - Monitor initial adoption.
 
 ---
+
 ## Note on GitHub-Native Memory System
 
 This project uses GitHub as its primary memory and tracking system:
+
 - **Git commits** serve as the chronological log (see .claude/commands/commit.md)
 - **GitHub issues** track all work items using the hierarchy defined above
 - **Pull requests** document major changes and reviews
@@ -466,11 +486,13 @@ This project uses GitHub as its primary memory and tracking system:
 The traditional APM Memory Bank is replaced by these GitHub-native mechanisms, aligning with modern development workflows.
 
 ---
+
 ## Note on Handover Protocol
 
-For long-running projects or situations requiring context transfer (e.g., exceeding LLM context limits, changing specialized agents), the APM Handover Protocol should be initiated. This ensures smooth transitions and preserves project knowledge. 
+For long-running projects or situations requiring context transfer (e.g., exceeding LLM context limits, changing specialized agents), the APM Handover Protocol should be initiated. This ensures smooth transitions and preserves project knowledge.
 
 In this GitHub-integrated system, handovers also include:
+
 - Current branch state
 - Open issues assigned to the agent
 - Uncommitted changes
