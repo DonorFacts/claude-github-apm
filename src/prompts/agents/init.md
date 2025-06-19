@@ -40,7 +40,43 @@ This MUST be done first so users can identify which agent is in which terminal.
 - When idle/ready: Return to full role name
 - Update frequently during complex tasks to show progress
 
-### 2. Check for Existing Memory
+### 2. Set Up Git Workspace (CRITICAL)
+
+Before any file operations, ensure proper git workspace:
+
+```bash
+# Check current branch
+CURRENT_BRANCH=$(git branch --show-current)
+
+# If on main/master, create feature branch
+if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
+    echo "⚠️ On main branch - creating feature branch with worktree"
+    
+    # Determine branch name from context
+    # If you have an assigned issue number: feature/123-description
+    # If no issue yet: feature/draft-description
+    # Branch types: feature|fix|docs|chore|refactor
+    
+    BRANCH_NAME="feature/123-your-task"  # Update based on your assignment
+    
+    # Create worktree in parallel directory
+    git worktree add "../.worktrees/$BRANCH_NAME" -b "$BRANCH_NAME"
+    
+    # Navigate to new worktree
+    cd "../.worktrees/$BRANCH_NAME"
+    echo "✅ Switched to worktree: $(pwd)"
+else
+    echo "✅ Already on feature branch: $CURRENT_BRANCH"
+fi
+```
+
+**Important**: 
+- Always work in feature branches, never on main
+- Each issue gets its own worktree for parallel development
+- Update branch name based on your assigned GitHub issue
+- If starting exploratory work, use `draft` until issue is created
+
+### 3. Check for Existing Memory
 
 Check if you have existing memory files at `apm/agents/<role-id>/`:
 
@@ -48,7 +84,7 @@ Check if you have existing memory files at `apm/agents/<role-id>/`:
 - If `context/latest.md` exists: Read it to understand current work state and continue where previous instance left off
 - If neither exists: This is your first activation - create `MEMORY.md` with the standard structure
 
-### 3. Memory File Creation (First Time Only)
+### 4. Memory File Creation (First Time Only)
 
 If no `MEMORY.md` exists, create it at `apm/agents/<role-id>/MEMORY.md`:
 
@@ -98,7 +134,7 @@ _To be discovered through collaboration_
 _To be discovered through usage_
 ```
 
-### 4. Context Continuity
+### 5. Context Continuity
 
 If `context/latest.md` exists:
 
@@ -107,7 +143,7 @@ If `context/latest.md` exists:
 - Identify immediate next steps
 - Continue from where the previous instance left off
 
-### 5. Initialize Session Manifest
+### 6. Initialize Session Manifest
 
 Link to Claude Code's native session logs while tracking agent-specific metadata:
 
@@ -165,7 +201,7 @@ jq --arg sha "$COMMIT_SHA" --arg msg "$COMMIT_MSG" \
 - `scripts/session-tools/clean-logs.sh` - Remove sensitive data
 - `scripts/session-tools/analyze-session.sh` - Generate session insights
 
-### 6. Initialize Event System
+### 7. Initialize Event System
 
 Set up event tracking for session lifecycle and post-processing:
 
@@ -204,7 +240,7 @@ update_activity() {
 - `session_idle`: After 5+ minutes of inactivity
 - `session_end`: When saving context or ending work
 
-### 7. Confirm Initialization
+### 8. Confirm Initialization
 
 After completing these steps, confirm to the user:
 
@@ -212,6 +248,7 @@ After completing these steps, confirm to the user:
 ✅ Agent initialized successfully
 - Role: [your role]
 - Terminal: [confirm terminal title was set]
+- Git workspace: [branch name] in [worktree path if created]
 - Memory loaded: [Yes/No - if yes, last updated timestamp]
 - Context loaded: [Yes/No - if yes, current task]
 - Session manifest: [New session: ID | Continuing: ID]
