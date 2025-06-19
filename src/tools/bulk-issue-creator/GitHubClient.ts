@@ -55,11 +55,7 @@ export class GitHubClient implements IGitHubClient {
         repositoryId: "${issue.repositoryId}"
         title: "${this.escapeQuotes(issue.title)}"
         body: "${this.escapeQuotes(issue.body)}"
-        issueTemplate: {
-          custom: {
-            issueType: "${issue.issueType}"
-          }
-        }
+        issueTypeId: "${issue.issueType}"
       }) {
         issue {
           number
@@ -76,7 +72,7 @@ export class GitHubClient implements IGitHubClient {
     
     try {
       const result = execSync(
-        `gh api graphql -f query='${query}'`,
+        `gh api graphql -H "GraphQL-Features: issue_types" -f query='${query}'`,
         { encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024 } // 10MB buffer
       );
       
@@ -93,11 +89,7 @@ export class GitHubClient implements IGitHubClient {
           repositoryId: "${input.repositoryId}"
           title: "${this.escapeQuotes(input.title)}"
           body: "${this.escapeQuotes(input.body)}"
-          issueTemplate: {
-            custom: {
-              issueType: "${input.issueType}"
-            }
-          }
+          issueTypeId: "${input.issueType}"
         }) {
           issue {
             number
@@ -111,7 +103,7 @@ export class GitHubClient implements IGitHubClient {
     
     try {
       const result = execSync(
-        `gh api graphql -f query='${query}'`,
+        `gh api graphql -H "GraphQL-Features: issue_types" -f query='${query}'`,
         { encoding: 'utf-8' }
       );
       
