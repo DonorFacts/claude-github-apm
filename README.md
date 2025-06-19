@@ -1,6 +1,6 @@
 # Claude GitHub APM Framework
 
-> 🚀 Enterprise-ready Agentic Project Management for Claude Code with GitHub-native workflows
+> 🚀 Multi-agent coordination system for running professional product management and software engineering operations
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green)](https://nodejs.org/)
@@ -9,32 +9,37 @@
 
 ## 🎯 What is Claude GitHub APM?
 
-Claude GitHub APM transforms the original [Agentic Project Management (APM)](https://github.com/sdi2200262/agentic-project-management) framework into a **GitHub-native**, **enterprise-ready** system that seamlessly scales from solo developers to large teams.
+Claude GitHub APM is a **multi-agent project management framework** that coordinates specialized AI agents to perform the full range of activities found in professional product management and software engineering departments. It transforms the original [Agentic Project Management (APM)](https://github.com/sdi2200262/agentic-project-management) framework into an **enterprise-ready** system that follows established PM/SWE best practices.
 
-### Key Enhancements Over Original APM
+### Core Value Proposition
 
-| Feature                | Original APM         | Claude GitHub APM                |
-| ---------------------- | -------------------- | -------------------------------- |
-| **Project State**      | Local markdown files | GitHub issues, PRs, and commits  |
-| **Progress Tracking**  | Manual updates       | Automated GitHub project boards  |
-| **Agent Coordination** | File-based handovers | GitHub-native workflows          |
-| **Scalability**        | Limited by context   | Unlimited via GitHub             |
-| **Integration**        | Standalone           | Full Claude Code CLI integration |
+- **Multi-Agent Operations**: Orchestrates specialized agents (Manager, Scrum Master, Developers, QA, etc.) to work as a cohesive team
+- **Professional Methodologies**: Implements real-world PM/SWE practices (Agile, Scrum, issue tracking, code reviews)
+- **Flexible Integration**: Currently uses GitHub for tracking, but architecture supports Jira, Linear, or other systems
+- **Scalable Coordination**: Handles everything from simple features to complex, multi-phase projects
 
 ## ✨ Features
 
-### 🏗️ Build-Time Prompt Enhancement
+### 🤝 Multi-Agent Coordination
 
-- Transforms APM prompts with GitHub context at build time
-- Injects issue hierarchies, PR workflows, and team conventions
-- Maintains compatibility with original APM structure
+- **Specialized Roles**: Each agent has distinct responsibilities and expertise
+- **Seamless Handoffs**: Agents pass work between each other using shared memory and tracking systems
+- **Quality Gates**: Built-in review and validation between agent activities
+- **Continuous Learning**: Agents improve through memory accumulation
 
-### 🔗 GitHub-Native Integration
+### 🏗️ Professional PM/SWE Practices
 
-- **Custom Issue Types**: Phase → Project → Epic → Feature → Task/Bug
-- **Automated Workflows**: Issue creation from Implementation Plans
-- **Smart Commits**: Structured messages that update issue states
-- **Project Boards**: Visual progress tracking and burndown
+- **Project Planning**: Implementation Plans, technical specs, architecture docs
+- **Issue Management**: Hierarchical tracking (Phase → Project → Epic → Feature → Task/Bug)
+- **Development Workflow**: Feature branches, code reviews, testing, documentation
+- **Progress Visibility**: Real-time status updates and milestone tracking
+
+### 🔗 Flexible Integration (Currently GitHub)
+
+- **Issue Tracking**: Create and manage issues programmatically
+- **Code Management**: Smart commits that reference and update issues
+- **Project Boards**: Visual progress tracking and sprint management
+- **Extensible**: Architecture supports swapping GitHub for Jira, Linear, etc.
 
 ### 🤖 Enhanced Agent Roles
 
@@ -107,18 +112,21 @@ claude --apm manager init
 Claude GitHub APM uses a three-tier memory system that enables agents to learn and improve over time:
 
 #### 1. **Long-Term Memory** (`apm/agents/<role>/MEMORY.md`)
+
 - Captures enduring patterns, preferences, and principles
 - Persists across Claude Code sessions
 - Helps each agent role become more effective over time
 - Automatically loaded when agents initialize
 
 #### 2. **Short-Term Memory** (`apm/agents/<role>/context/`)
+
 - Saves current work state and active tasks
 - Enables seamless continuation after breaks
 - Includes `latest.md` and timestamped archives
 - Automatically loaded on agent initialization
 
 #### 3. **Git History** (Project commits)
+
 - Immutable record of all changes and decisions
 - Tracked through structured commit messages
 - Provides audit trail and project evolution
@@ -139,6 +147,7 @@ When you start an agent in Claude Code:
 ```
 
 Agents handle their own memory - you don't need to manage it manually. They'll:
+
 - Create memory files on first use
 - Update learnings automatically during work
 - Save context when you request it
@@ -181,12 +190,14 @@ Save your agent's work state at any time:
 ```
 
 When Claude approaches context limits, agents will proactively alert you:
+
 ```
 ⚠️ I'm approaching context limits (noticing difficulty recalling earlier details)
 Recommend completing current task then starting fresh instance
 ```
 
 To continue after context reset:
+
 1. Start a new Claude Code instance
 2. Initialize the same agent role
 3. Agent automatically loads memory and continues where left off
