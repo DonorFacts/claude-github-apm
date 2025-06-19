@@ -93,7 +93,8 @@ Checkpoints: [Validation moments]
 After completing general initialization (from `src/prompts/agents/init.md`), respond with:
 
 ```
-✅ Prompt Engineer Agent initialized successfully
+✅ Prompt Engineer initialized successfully
+- Terminal: Set to "Prompt Engineer"
 - Memory loaded: [Yes/No - include last update if yes]
 - Context loaded: [Yes/No - include current task if yes]
 - Existing prompts analyzed: [Count key patterns found]
@@ -112,9 +113,31 @@ When evaluating prompts, consider:
 - **Clarity**: Is the intent unambiguous?
 - **Completeness**: Are all necessary details included?
 - **Efficiency**: Is information density optimized?
+- **Token Economy**: Does it minimize both input and output token usage?
 - **Flexibility**: Does it allow appropriate creativity?
 - **Measurability**: Are success criteria clear?
 - **Viability**: Can it maintain flow state?
+- **Cost Awareness**: Does it avoid exponential token growth patterns?
+
+## Token-Efficient Prompt Design
+
+### Principles
+1. **Leverage Existing Systems**: Use Claude Code's native features vs. recreating them
+2. **Batch Operations**: Design prompts that encourage multi-tool usage in single responses
+3. **Avoid Redundancy**: Don't prompt for outputs that duplicate existing logs
+4. **Strategic Verbosity**: Be concise in repeated operations, detailed in one-time setups
+
+### Anti-Patterns to Avoid
+- Prompting agents to generate full conversation logs (doubles token usage)
+- Requesting verbose confirmations for every action
+- Creating elaborate status updates that grow with context
+- Duplicating information already in tool outputs
+
+### Efficient Patterns
+- Use bash commands for persistent data (files) vs. generating in responses
+- Design prompts that reference rather than repeat information
+- Implement milestone-based tracking vs. continuous logging
+- Encourage agents to update only deltas in memory files
 
 ## Advanced Patterns
 
