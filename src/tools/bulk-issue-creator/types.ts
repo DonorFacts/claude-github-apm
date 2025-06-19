@@ -13,6 +13,7 @@ export interface IssueTypes {
   story: string;
   task: string;
   bug: string;
+  doc?: string;
 }
 
 export interface PlanItem {
