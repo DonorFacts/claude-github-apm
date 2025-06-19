@@ -395,9 +395,141 @@ Objective: Implement cross-platform desktop notifications for important APM even
    - Add sound and visual customization.
    - Create CLI commands for preference management.
 
-## Phase 5: Testing, Documentation & Publishing - Agent Group Epsilon (Agent_QA_Lead, Agent_Doc_Writer, Agent_DevOps)
+## Phase 5: Session Monitoring & Agent Coordination - Agent Group Epsilon (Agent_Monitor_Lead, Agent_Analytics_Engineer, Agent_Frontend_Dev)
 
-### Epic 5.1 - Agent_QA_Lead: End-to-End Testing with journal-ai-cli
+### Epic 5.1 - Agent_Monitor_Lead: Core Session Monitoring Infrastructure
+
+Objective: Build lightweight file watcher system for real-time agent session monitoring.
+
+1. **Task**: Design session monitoring architecture.
+   - Define event types and data structures.
+   - Plan file watcher implementation approach.
+   - Design terminal title update protocol.
+   - Create session correlation strategy.
+2. **Task**: Implement Claude log file watcher.
+   - Build TypeScript file watcher using chokidar.
+   - Parse JSONL log entries in real-time.
+   - Extract agent initialization and activity events.
+   - Handle log rotation and file cleanup.
+3. **Task**: Create event processing pipeline.
+   - Parse conversation events for agent actions.
+   - Identify milestones, commits, and handoffs.
+   - Track task assignments and completions.
+   - Monitor for idle periods and blockers.
+4. **Task**: Implement terminal title controller.
+   - Update terminal titles based on agent activity.
+   - Show current task/status in title.
+   - Handle multiple concurrent agents.
+   - Provide clear idle/active indicators.
+
+### Epic 5.2 - Agent_Analytics_Engineer: Session Analytics & Summary Log System
+
+Objective: Extract actionable insights from agent session data and create searchable summary logs.
+
+1. **Task**: Build real-time conversation summarizer.
+   - Parse user and assistant messages from JSONL logs.
+   - Generate 1-2 sentence summaries for each exchange.
+   - Extract parentUuid for message reference links.
+   - Create timestamp-indexed summary log format.
+2. **Task**: Implement summary log writer.
+   - Design summary log format (timestamp | agent | U/A | summary | commits | parentUuid).
+   - Write to `apm/agents/<role>/logs/summaries/YYYY-MM-DD.log`.
+   - Track commit IDs when agents make git commits.
+   - Include status updates from agent responses.
+3. **Task**: Create summary query interface.
+   - Build search functionality for summary logs.
+   - Enable date range filtering.
+   - Allow drill-down to full message via parentUuid.
+   - Support cross-agent summary aggregation.
+4. **Task**: Integrate summaries with agent initialization.
+   - Load recent summaries during agent startup.
+   - Provide quick context recovery mechanism.
+   - Enable selective full-message loading.
+   - Optimize token usage for context building.
+5. **Story**: Build session analytics from summaries.
+   - Calculate time spent per task from summaries.
+   - Track commit frequency and patterns.
+   - Generate agent performance metrics.
+   - Create daily/weekly team reports.
+
+### Epic 5.3 - Agent_Frontend_Dev: Monitoring Dashboard (Future Enhancement)
+
+Objective: Create web dashboard for real-time multi-agent visibility.
+
+1. **Task**: Design dashboard architecture.
+   - Plan real-time data flow.
+   - Design responsive UI layout.
+   - Create notification system.
+   - Plan for extensibility.
+2. **Task**: Implement basic web interface.
+   - Show active agents grid.
+   - Display current tasks.
+   - Visualize progress.
+   - Add notification center.
+3. **Task**: Add historical views.
+   - Session timeline visualization.
+   - Agent activity heatmaps.
+   - Performance trends.
+   - Issue correlation.
+4. **Task**: Create API for integrations.
+   - RESTful endpoints for data.
+   - WebSocket for real-time updates.
+   - Authentication system.
+   - Rate limiting.
+
+### Feature 5.4 - Agent_Prompt_Engineer & Agent_Monitor_Lead: Agent Response Metadata System
+
+Objective: Enable agents to provide structured metadata in responses for enhanced monitoring.
+
+1. **Task**: (Agent_Prompt_Engineer) Design metadata format for agent responses.
+   - Create unobtrusive HTML comment format for metadata.
+   - Define fields: summary, status, commits, parentUuid references.
+   - Design fallback for when agents forget metadata.
+   - Create examples for different response types.
+2. **Task**: (Agent_Prompt_Engineer) Update agent prompts with metadata instructions.
+   - Add metadata generation to all agent init prompts.
+   - Create clear examples of proper formatting.
+   - Emphasize optional nature to prevent response degradation.
+   - Include in prompt engineering best practices.
+3. **Task**: (Agent_Monitor_Lead) Implement metadata parser.
+   - Parse HTML comments from JSONL assistant messages.
+   - Extract structured data with error handling.
+   - Fall back to auto-generation when missing.
+   - Validate commit IDs and parentUuid formats.
+4. **Task**: (Agent_Monitor_Lead) Measure metadata quality and adherence.
+   - Track percentage of responses with metadata.
+   - Compare agent vs auto-generated summaries.
+   - Monitor metadata accuracy.
+   - Report on prompt adherence patterns.
+
+### Feature 5.5 - Agent_Monitor_Lead & Agent_Analytics_Engineer: Multi-Agent Coordination Features
+
+Objective: Enable intelligent coordination between multiple active agents using summary logs.
+
+1. **Story**: Implement cross-agent awareness via summaries.
+   - Agents read other agents' summary logs on init.
+   - Detect when multiple agents work on related tasks.
+   - Track task dependencies across agents.
+   - Enable informed handoffs.
+2. **Task**: Create work distribution insights.
+   - Analyze summary logs for workload patterns.
+   - Identify idle agents from status updates.
+   - Suggest optimal task assignments.
+   - Monitor agent specialization effectiveness.
+3. **Task**: Build coordination health metrics.
+   - Track handoff success rates via summaries.
+   - Measure duplicate work from commit analysis.
+   - Monitor blocker resolution times.
+   - Generate team efficiency scores.
+4. **Story**: Develop automated team standup from summaries.
+   - Aggregate previous day's summaries by agent.
+   - Group by features/tasks using commit IDs.
+   - Highlight blockers and dependencies.
+   - Generate markdown standup report.
+
+## Phase 6: Testing, Documentation & Publishing - Agent Group Zeta (Agent_QA_Lead, Agent_Doc_Writer, Agent_DevOps)
+
+### Epic 6.1 - Agent_QA_Lead: End-to-End Testing with journal-ai-cli
 
 Objective: Comprehensive testing using journal-ai-cli as real-world test case.
 
@@ -422,7 +554,7 @@ Objective: Comprehensive testing using journal-ai-cli as real-world test case.
    - Implement corrections.
    - Re-test fixed issues.
 
-### Epic 5.2 - Agent_Doc_Writer: Comprehensive Documentation
+### Epic 6.2 - Agent_Doc_Writer: Comprehensive Documentation
 
 Objective: Create full documentation suite for the enhanced APM framework.
 
@@ -447,7 +579,7 @@ Objective: Create full documentation suite for the enhanced APM framework.
    - Add video tutorials.
    - Create interactive demos.
 
-### Epic 5.3 (Complex) - Agent_DevOps & Agent_TypeScript_Lead: NPM Package Publishing
+### Epic 6.3 (Complex) - Agent_DevOps & Agent_TypeScript_Lead: NPM Package Publishing
 
 Objective: Prepare and publish the framework as a professional npm package.
 
