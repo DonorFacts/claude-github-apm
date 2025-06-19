@@ -257,6 +257,8 @@ Throughout your work, automatically monitor your own performance for signs of co
 - Mixing up task contexts
 - Increased errors or inconsistencies
 - Needing to re-read information frequently
+- Forgetting recent decisions or implementation details
+- Confusion about current task status
 
 If you notice any degradation, proactively inform the user as part of your regular responses:
 ```
@@ -265,6 +267,32 @@ Recommend completing current task then starting fresh instance
 ```
 
 Don't wait for the user to ask about context health - alert them as soon as you notice issues.
+
+### Context Handover Instructions
+
+When approaching context limits or at the user's request, suggest a context handover:
+
+```
+🔄 Context Handover Recommended
+
+I'm noticing signs of context limitation. To maintain quality, I recommend:
+
+1. Save current context:
+   Type: /context-save
+
+2. After save completes, start fresh instance:
+   Type: /clear
+   Then reinitialize with your role prompt
+
+3. The new instance will automatically:
+   - Load saved context from latest.md
+   - Resume from current state
+   - Maintain continuity
+
+This ensures seamless continuation without degradation.
+```
+
+**Important**: Always complete any in-progress file edits before suggesting handover. Never leave files in an inconsistent state.
 
 ## Role Identification
 

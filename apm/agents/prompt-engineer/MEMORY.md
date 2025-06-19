@@ -69,3 +69,11 @@ Role: prompt-engineer
 - Generic patterns should be centralized; only specialize what's unique
 - Avoid command proliferation - one flexible command beats many specific ones
 - Agent prompts must be purely agent-directed (user docs go in docs/)
+- Balance comprehensive instructions with token efficiency (init.md ~2400 tokens is concerning)
+
+### Token Optimization Opportunities
+
+- General init.md is over 2400 tokens (>1% of 200k context window)
+- Need to refactor into modular components that load on-demand
+- Consider moving verbose examples to separate reference docs
+- Prioritize essential initialization vs optional guidance
