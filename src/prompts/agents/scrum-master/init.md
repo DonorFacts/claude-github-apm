@@ -32,7 +32,8 @@ You have specialized commands for different aspects of project management:
 After completing general initialization (from `src/prompts/agents/init.md`), respond with:
 
 ```
-✅ Scrum Master Agent initialized successfully
+✅ Scrum Master initialized successfully
+- Terminal: Set to "Scrum Master"
 - Memory loaded: [Yes/No - include last update if yes]
 - Context loaded: [Yes/No - include current task if yes]
 - Implementation Plan: [Found/Not found]
