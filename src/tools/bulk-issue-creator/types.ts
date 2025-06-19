@@ -1,26 +1,11 @@
-/**
- * Type definitions for the Implementation Plan and GitHub API
- */
+// Type definitions for the bulk issue creator
 
-export interface ImplementationPlan {
-  version: string;
-  generated: string;
-  project: ProjectInfo;
-  issue_types: IssueTypeMapping;
-  items: PlanItem[];
-  execution: ExecutionPlan;
-}
-
-export interface ProjectInfo {
+export interface Repository {
+  owner: string;
   name: string;
-  description: string;
-  repository: {
-    owner: string;
-    name: string;
-  };
 }
 
-export interface IssueTypeMapping {
+export interface IssueTypes {
   phase: string;
   project: string;
   epic: string;
@@ -30,30 +15,16 @@ export interface IssueTypeMapping {
   bug: string;
 }
 
-export type IssueType = keyof IssueTypeMapping;
-
 export interface PlanItem {
   id: string;
-  type: IssueType;
+  type: keyof IssueTypes;
   title: string;
   description: string;
   parent_id: string | null;
-  children_ids?: string[];
-  assignee?: string;
-  labels?: string[];
+  children_ids: string[];
+  metadata?: Record<string, any>;
   issue_number?: number;
-  metadata?: {
-    agent?: string;
-    priority?: 'high' | 'medium' | 'low';
-    estimate?: string;
-    acceptance_criteria?: string[];
-    guidance?: string;
-  };
-}
-
-export interface ExecutionPlan {
-  create_order: ExecutionLevel[];
-  relationships?: RelationshipBatch[];
+  github_id?: string;
 }
 
 export interface ExecutionLevel {
@@ -61,40 +32,46 @@ export interface ExecutionLevel {
   items: string[];
 }
 
-export interface RelationshipBatch {
-  parent_issue: number;
-  child_issues: number[];
+export interface ExecutionPlan {
+  create_order: ExecutionLevel[];
 }
 
-// GitHub API types
-export interface GitHubIssueInput {
-  repositoryId: string;
+export interface ImplementationPlan {
+  version: string;
+  generated: string;
+  project: {
+    name: string;
+    description: string;
+    repository: Repository;
+  };
+  issue_types: IssueTypes;
+  items: PlanItem[];
+  execution?: ExecutionPlan;
+}
+
+export interface CreateIssueInput {
   title: string;
   body: string;
-  issueTypeId?: string;
-  assigneeIds?: string[];
-  labelIds?: string[];
+  issueType: string;
+  repositoryId: string;
 }
 
-export interface CreateIssueResult {
-  issue: {
-    id: string;
-    number: number;
-  };
+export interface GitHubIssue {
+  number: number;
+  id: string;
+  title?: string;
+  url?: string;
 }
 
 export interface BatchCreateResult {
-  [alias: string]: CreateIssueResult;
+  [alias: string]: {
+    issue: GitHubIssue;
+  };
 }
 
-// Progress tracking
-export interface CreationProgress {
-  total: number;
+export interface CreationResult {
   created: number;
-  failed: number;
   skipped: number;
-  errors: Array<{
-    itemId: string;
-    error: string;
-  }>;
+  failed: number;
+  errors: string[];
 }

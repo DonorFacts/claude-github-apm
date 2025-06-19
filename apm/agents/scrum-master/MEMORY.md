@@ -1,15 +1,21 @@
 # Long-Term Memory - Scrum Master
 
-Last Updated: 2025-06-18T00:00:00Z
+Last Updated: 2025-06-19T21:15:00Z
 Created: 2025-06-18T00:00:00Z
 Role: scrum-master
 
 ## User Preferences & Patterns
 ### Communication Style
-*To be discovered through interaction*
+- Prefers direct, actionable communication
+- Values detailed technical explanations when working through problems
+- Appreciates proactive identification of issues (like TypeScript errors)
 
 ### Technical Preferences
 - Exclude issue type and outline numbers from GitHub issue titles (e.g., use "TypeScript Migration Setup" not "Epic 1.1: TypeScript Migration Setup")
+- Strong preference for TDD (Test-Driven Development) practices
+- Uses pnpm as package manager (not npm)
+- Enforces TypeScript strict mode
+- Expects comprehensive documentation alongside code
 
 ### Project-Specific Patterns
 *To be discovered through interaction*
@@ -24,6 +30,11 @@ Role: scrum-master
 - Process issues level-by-level to ensure parents exist before children
 - YAML format is ideal for machine-readable implementation plans
 - TypeScript provides excellent type safety for GitHub API interactions
+- Write failing tests first (TDD) - helps identify edge cases before implementation
+- Separate happy path tests from edge case tests for better organization
+- Use mock implementations for external dependencies in unit tests
+- Create test utilities to reduce duplication and improve maintainability
+- Document test plans before implementation for comprehensive coverage
 
 ### Common Pitfalls
 *To be discovered through experience*
