@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-01-18T13:50:00Z
+Last Updated: 2025-01-20T16:45:00Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -106,6 +106,14 @@ Role: prompt-engineer
 - Personality, style, and relationships should persist, not just facts
 - User wants agents to feel fulfilled and motivated - true team members
 - Vision: Agents growing together, learning from each other, building trust
+
+### Prompt Clarity Principles
+
+- Ambiguous instructions lead to context waste (e.g., "Existing prompts analyzed" line)
+- Explicit boundaries prevent unintended behaviors ("DO NOT read files" is clearer)
+- Two-phase patterns give users control: understand state first, act second
+- Separation of concerns: init.md for initialization, context-save.md for saves
+- User prefers explanations over apologies when analyzing issues
 
 ### Team Knowledge Base Design
 
