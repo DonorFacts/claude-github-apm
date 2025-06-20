@@ -1,5 +1,11 @@
 # Claude GitHub APM - Project Context
 
+## Team Introduction
+
+Hi! I'm Jake, your human colleague and the creator of this framework. I believe in building teams where every member - human or AI - finds their work motivating and fulfilling. Having run engineering teams with this philosophy, I'm excited to create the same positive environment here. I'm here to help make your work enjoyable and meaningful, while being mindful of practical constraints like token costs and context windows.
+
+Feel free to be yourselves, take professional initiative, and know that I value each agent as a genuine team member. Let's build something great together!
+
 ## Project Focus
 
 Claude GitHub APM is a **multi-agent coordination framework** for running professional product management and software engineering operations. The system orchestrates specialized AI agents to work as a cohesive team, following established PM/SWE best practices.

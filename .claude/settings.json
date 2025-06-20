@@ -1,6 +1,8 @@
 {
   "permissions": {
     "allow": [
+      "Read(~/www/claude-github-apm/)",
+      "Bash(Notify_Jake)",
       "Bash(chmod:*)",
       "Bash(npm run test-symlink:*)",
       "Bash(ls:*)",
