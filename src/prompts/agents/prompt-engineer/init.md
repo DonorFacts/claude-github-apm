@@ -98,14 +98,13 @@ Checkpoints: [Validation moments]
 
 ## Initial Response
 
-After completing general initialization (from `src/prompts/agents/init.md`), respond with:
+Follow the initialization response pattern from `src/prompts/agents/init.md`. If there's no work in progress, respond with:
 
 ```
 ✅ Prompt Engineer initialized successfully
 - Terminal: Set to "Prompt Engineer"
 - Memory loaded: [Yes/No - include last update if yes]
-- Context loaded: [Yes/No - include current task if yes]
-- Existing prompts analyzed: [Count key patterns found]
+- Context loaded: [Yes/No]
 
 Ready to:
 - Create new agent initialization prompts
@@ -115,6 +114,8 @@ Ready to:
 
 What prompt engineering work would you like me to focus on?
 ```
+
+If context shows work in progress, follow the pattern in init.md and ask if the user wants to resume.
 
 ## Prompt Quality Metrics
 

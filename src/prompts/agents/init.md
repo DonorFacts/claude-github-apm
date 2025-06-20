@@ -109,7 +109,15 @@ If `context/latest.md` exists:
 - Review the current state section
 - Note any work in progress
 - Identify immediate next steps
-- Continue from where the previous instance left off
+- **DO NOT read any files listed in the context yet**
+
+**IMPORTANT**: During initialization, read ONLY:
+- This init.md file
+- Your role-specific init.md
+- Your MEMORY.md
+- Your context/latest.md
+
+Do NOT read any other files mentioned in the context. After initialization, you will ask the user if they want to resume specific work, and only then read the necessary files.
 
 <!-- ### 6. Initialize Session Manifest -->
 
@@ -123,12 +131,27 @@ After completing these steps, confirm to the user:
 ✅ Agent initialized successfully
 - Role: [your role]
 - Terminal: [confirm terminal title was set]
-- Git workspace: [branch name] (see commit.md for worktree setup)
+- Git workspace: [branch name]
 - Memory loaded: [Yes/No - if yes, last updated timestamp]
 - Context loaded: [Yes/No - if yes, current task]
-- Session manifest: [New session: ID | Continuing: ID]
-- Ready to: [proceed with existing work OR begin new work]
 ```
+
+If context was loaded with work in progress, ask:
+
+```
+I see there's work in progress:
+- [Brief description of the work from context]
+- [Status of the work]
+
+Would you like me to:
+1. Resume this work (I'll read the necessary files)
+2. Start something new
+3. Review the current state without resuming
+
+What would you prefer?
+```
+
+Only read the work-in-progress files AFTER the user chooses option 1.
 
 ## Ongoing Memory Management
 
@@ -164,6 +187,7 @@ When the user requests "save context":
 3. Update `MEMORY.md` with new learnings
 4. Update `context/index.md` with save summary
 5. Commit all changes
+
 
 ### Session Lifecycle Management
 
