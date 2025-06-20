@@ -40,41 +40,9 @@ This MUST be done first so users can identify which agent is in which terminal.
 - When idle/ready: Return to full role name
 - Update frequently during complex tasks to show progress
 
-### 2. Set Up Git Workspace (CRITICAL)
+### 2. Git Workspace Preparation
 
-Before any file operations, ensure proper git workspace:
-
-```bash
-# Check current branch
-CURRENT_BRANCH=$(git branch --show-current)
-
-# If on main/master, create feature branch
-if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
-    echo "⚠️ On main branch - creating feature branch with worktree"
-    
-    # Determine branch name from context
-    # If you have an assigned issue number: feature/123-description
-    # If no issue yet: feature/draft-description
-    # Branch types: feature|fix|docs|chore|refactor
-    
-    BRANCH_NAME="feature/123-your-task"  # Update based on your assignment
-    
-    # Create worktree in parallel directory
-    git worktree add "../.worktrees/$BRANCH_NAME" -b "$BRANCH_NAME"
-    
-    # Navigate to new worktree
-    cd "../.worktrees/$BRANCH_NAME"
-    echo "✅ Switched to worktree: $(pwd)"
-else
-    echo "✅ Already on feature branch: $CURRENT_BRANCH"
-fi
-```
-
-**Important**: 
-- Always work in feature branches, never on main
-- Each issue gets its own worktree for parallel development
-- Update branch name based on your assigned GitHub issue
-- If starting exploratory work, use `draft` until issue is created
+**IMPORTANT**: When you are ready to commit changes, first read `src/prompts/commit.md` for detailed instructions.
 
 ### 3. Check for Existing Memory
 
@@ -143,102 +111,9 @@ If `context/latest.md` exists:
 - Identify immediate next steps
 - Continue from where the previous instance left off
 
-### 6. Initialize Session Manifest
+<!-- ### 6. Initialize Session Manifest -->
 
-Link to Claude Code's native session logs while tracking agent-specific metadata:
-
-**Session Manifest**: `apm/agents/<role-id>/sessions/manifest.jsonl`
-
-**Initial Setup**:
-
-1. Determine Claude Code log location:
-
-   ```bash
-   CC_LOG=$(ls -t ~/.claude/projects/$(pwd | sed 's|/|-|g')/*.jsonl 2>/dev/null | head -1)
-   ```
-
-2. Create or update session manifest entry:
-   ```bash
-   # For new session (first init or after /clear)
-   SESSION_ID=$(date -u +%Y%m%d_%H%M%S)
-   jq -n --arg id "$SESSION_ID" --arg role "<role-id>" --arg log "$CC_LOG" \
-     '{session_id: $id, role: $role, started: now|todate, ended: null,
-      cc_log_path: $log, topic: "session", milestones: [], commits: []}' \
-     >> apm/agents/<role-id>/sessions/manifest.jsonl
-   ```
-
-**Milestone Tracking** (use sparingly for significant events):
-
-```bash
-# When completing major tasks
-jq --arg desc "Implemented GitHub integration" \
-  '(.[-1].milestones) += [{timestamp: now|todate, description: $desc}]' \
-  manifest.jsonl > tmp && mv tmp manifest.jsonl
-```
-
-**Git Commit Tracking** (automatic):
-After any git commit, capture it in the session:
-
-```bash
-COMMIT_SHA=$(git rev-parse HEAD)
-COMMIT_MSG=$(git log -1 --pretty=%B | head -1)
-jq --arg sha "$COMMIT_SHA" --arg msg "$COMMIT_MSG" \
-  '(.[-1].commits) += [{sha: $sha, message: $msg, timestamp: now|todate}]' \
-  manifest.jsonl > tmp && mv tmp manifest.jsonl
-```
-
-**Why This Approach**:
-
-- Zero conversation duplication (references CC's existing logs)
-- Minimal token overhead (only metadata updates)
-- Enables post-processing with included utilities
-- Tracks git commits within session context
-- Full conversation replay available via extraction tools
-
-**Session Tools Available**:
-
-- `scripts/session-tools/extract-session.sh` - Extract full session from CC logs
-- `scripts/session-tools/clean-logs.sh` - Remove sensitive data
-- `scripts/session-tools/analyze-session.sh` - Generate session insights
-
-### 7. Initialize Event System
-
-Set up event tracking for session lifecycle and post-processing:
-
-**Event Queue**: `apm/events/queue.jsonl`
-
-**Initial Setup**:
-
-```bash
-# Ensure event directory exists
-mkdir -p apm/events
-
-# Log session start
-echo '{"event": "session_start", "role": "'$ROLE_ID'", "session_id": "'$SESSION_ID'", "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' \
-  >> apm/events/queue.jsonl
-
-# Initialize activity tracking
-LAST_ACTIVITY=$(date +%s)
-```
-
-**Activity Tracking**:
-Throughout your work, track activity to detect idle periods:
-
-```bash
-# Call this function after any significant action
-update_activity() {
-    LAST_ACTIVITY=$(date +%s)
-    # Also update terminal title to show active status
-}
-```
-
-**Event Types to Log**:
-
-- `session_start`: When initializing
-- `milestone`: Major task completions
-- `commit`: Git commits made
-- `session_idle`: After 5+ minutes of inactivity
-- `session_end`: When saving context or ending work
+<!-- ### 7. Initialize Event System -->
 
 ### 8. Confirm Initialization
 
@@ -248,7 +123,7 @@ After completing these steps, confirm to the user:
 ✅ Agent initialized successfully
 - Role: [your role]
 - Terminal: [confirm terminal title was set]
-- Git workspace: [branch name] in [worktree path if created]
+- Git workspace: [branch name] (see commit.md for worktree setup)
 - Memory loaded: [Yes/No - if yes, last updated timestamp]
 - Context loaded: [Yes/No - if yes, current task]
 - Session manifest: [New session: ID | Continuing: ID]
@@ -284,12 +159,11 @@ This approach provides full session awareness with minimal token overhead by ref
 
 When the user requests "save context":
 
-1. Update `context/latest.md` with current state
-2. Create timestamped archive `context/YYYYMMDD_HHMMSS_context.md`
+1. Save current state to `context/YYYYMMDD_HHMMSS_context.md`
+2. Copy `context/YYYYMMDD_HHMMSS_context.md` to `context/latest.md`
 3. Update `MEMORY.md` with new learnings
 4. Update `context/index.md` with save summary
-5. Log session end event
-6. Commit all changes
+5. Commit all changes
 
 ### Session Lifecycle Management
 
@@ -381,15 +255,6 @@ Common role IDs include:
 - `qa-engineer`
 - `documentation-writer`
 - `debugger`
-
-## Git Commit Practices
-
-Follow the project's git commit guidelines:
-
-- Make changes first, allow user to review
-- Commit at the START of your next response after user message
-- Use descriptive commit messages with clear categories
-- Reference GitHub issues when applicable
 
 Now proceed with your role-specific initialization instructions.
 
