@@ -44,6 +44,7 @@ Role: prompt-engineer
 - Wasting context by analyzing all existing prompts during init (only read what's specified in init.md files)
 - CRITICAL: Never commit to main branch - always use feature branches
 - Claude Code limitation: Cannot cd to directories outside original working directory (worktrees)
+- Git workflow solution: When worktree blocks branch, cherry-pick commits to feature branch
 
 ### Process Improvements
 
