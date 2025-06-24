@@ -52,6 +52,30 @@ Each agent role has specialized capabilities and maintains its own memory:
 - **QA Engineer** (`qa-engineer`): Comprehensive testing and validation
 - **Documentation Writer** (`documentation`): Technical docs and user guides
 
+### 🎯 Ad Hoc Agent Creation
+
+Transform any expertise-rich Claude Code session into a specialized agent! As you work through complex problems and develop deep knowledge, you can crystallize that expertise into a reusable agent role.
+
+```bash
+# After developing expertise in a conversation:
+/agent-ify <role-name>
+
+# The system will:
+# 1. Analyze conversation for expertise patterns
+# 2. Extract core competencies and insights  
+# 3. Create a new specialized agent with your knowledge
+# 4. Preserve your working style and communication patterns
+```
+
+This enables **organic agent development** where expertise emerges through real problem-solving rather than pre-planning. Your ad hoc agents integrate seamlessly with the existing team structure, complete with:
+
+- Specialized initialization prompt based on extracted expertise
+- Long-term memory pre-populated with discovered best practices
+- Context awareness of pitfalls and constraints encountered
+- Your unique problem-solving approach and communication style
+
+**Example**: After a deep debugging session on React performance, create a Performance Specialist agent that remembers your profiling techniques, common bottleneck patterns, and optimization strategies.
+
 ### 🛠️ Professional CLI
 
 - Built on Anthropic's Claude Code SDK
@@ -130,6 +154,16 @@ Claude GitHub APM uses a three-tier memory system that enables agents to learn a
 - Immutable record of all changes and decisions
 - Tracked through structured commit messages
 - Provides audit trail and project evolution
+
+#### Knowledge Extraction from Conversations
+
+The APM framework can analyze entire Claude Code sessions to extract:
+- Domain expertise and technical skills demonstrated
+- Successful approaches and best practices discovered
+- Pitfalls encountered and lessons learned
+- Communication patterns and problem-solving styles
+
+This extracted knowledge becomes the foundation for new ad hoc agents, ensuring that valuable expertise developed during work sessions is never lost.
 
 ### Agent Initialization
 
