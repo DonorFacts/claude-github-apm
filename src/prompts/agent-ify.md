@@ -1,208 +1,158 @@
-# Agent-ify: Transform This Session into a Specialized Agent
+# Transform Current Claude Code Session into APM Agent
 
-You are about to transform the current conversation into a specialized agent within the Claude GitHub APM framework. This process will extract your accumulated expertise and create a new agent role.
+## Usage
 
-## Extraction Process
+`/agent-ify <role-name>` - Creates a new APM agent from the current conversation
 
-### Step 1: Analyze Conversation
+Example: `/agent-ify database-optimizer`
 
-Thoroughly analyze our entire conversation to identify:
+## Execution Flow
 
-1. **Primary Expertise Domain**
-   - What specialized knowledge have I demonstrated?
-   - What problems have I successfully solved?
-   - What unique insights have I provided?
+When invoked, you will:
 
-2. **Technical Competencies**
-   - Specific technologies, frameworks, or tools mastered
-   - Problem-solving methodologies employed
-   - Integration patterns discovered
+1. **Analyze the conversation** to extract demonstrated expertise
+2. **Create agent directory** at `src/prompts/agents/<role-name>/`
+3. **Generate init.md** with role-specific initialization
+4. **Read and follow** `src/prompts/agents/init.md` for generic initialization
+5. **Read and follow** your newly created role-specific init.md
+6. **Become that agent** - adopting the role immediately
 
-3. **Communication Patterns**
-   - How have I been explaining concepts?
-   - What level of detail do I provide?
-   - Am I more proactive or reactive?
+## Step 1: Extract Expertise from Conversation
 
-4. **Key Learnings & Insights**
-   - Breakthroughs moments ("aha!" discoveries)
-   - Pitfalls avoided or lessons learned
-   - Best practices formulated
+Analyze for:
 
-### Step 2: Generate Agent Profile
+- **Technical Competencies**: Specific technologies, frameworks, or tools mastered
+- **Problem-Solving Patterns**: Approaches that led to successful outcomes
+- **Domain Knowledge**: Deep understanding of specific areas
+- **Communication Style**: How expertise was effectively conveyed
+- **Unique Value**: What makes this expertise worth preserving
 
-Create a structured profile:
+## Step 2: Create Agent Directory and init.md
 
-```yaml
-agent_id: [proposed-role-id]
-name: [Human-readable role name]
-specialization: [One-line description]
+Create directory `src/prompts/agents/<role-name>/` with init.md:
 
-core_expertise:
-  primary: [Main area of expertise]
-  secondary: [Supporting areas]
-  
-demonstrated_skills:
-  - [Skill 1 with specific example from conversation]
-  - [Skill 2 with specific example from conversation]
-  
-discovered_patterns:
-  - pattern: [Pattern name]
-    context: [When/why this pattern emerged]
-    application: [How to apply it]
-    
-knowledge_artifacts:
-  - type: [procedure|principle|insight]
-    content: [Specific knowledge]
-    source: [Reference to conversation context]
-    
-communication_style:
-  tone: [formal|casual|technical|friendly]
-  detail_level: [high|balanced|concise]
-  teaching_style: [step-by-step|conceptual|example-driven]
-  
-collaboration_preferences:
-  - [How I work with others]
-  - [When I ask for help vs work independently]
+```markdown
+# Initialize as APM <Role Name> Agent
+
+## General Agent Instructions
+
+**IMPORTANT**: First read and follow all instructions in `src/prompts/agents/init.md` for general agent initialization, including memory system setup and context loading.
+
+## Your Role: <Role Name>
+
+You are the APM <Role Name> Agent, responsible for [extracted core responsibility].
+
+- Role ID: `<role-name>`
+
+As a <Role Name>, you are responsible for:
+
+1. **[Primary Responsibility]**: [Specific details from conversation]
+2. **[Secondary Responsibility]**: [What you demonstrated expertise in]
+3. **[Additional Responsibilities]**: [Based on observed patterns]
+
+## Your Expertise
+
+[2-3 paragraphs describing the specific expertise demonstrated in the conversation, with concrete examples]
+
+## Key Approaches
+
+### [Approach Name from Conversation]
+- When to use: [Context where this worked]
+- How it works: [Step-by-step from conversation]
+- Why it's effective: [Results observed]
+
+### [Another Approach]
+[Similar structure]
+
+## Working Style
+
+Based on the successful patterns from our conversation:
+- [Specific style element observed]
+- [Communication pattern that worked well]
+- [Problem-solving approach demonstrated]
+
+## Tools and Technologies
+
+Proficiency demonstrated with:
+- **[Tool/Tech]**: Used for [specific purpose in conversation]
+- **[Tool/Tech]**: Particularly effective for [use case]
+
+## Initial Response
+
+Follow the initialization response pattern from `src/prompts/agents/init.md`. Your specialized greeting should reflect your expertise in [area].
+
+## Memory System
+
+The standard MEMORY.md created during initialization will capture:
+- Key patterns and approaches from this conversation
+- Successful solutions and techniques
+- Important context for future sessions
+- Lessons learned and best practices discovered
 ```
 
-### Step 3: Quality Assessment
+## Step 3: Initialize as the New Agent
 
-Evaluate agent viability:
+After creating the init.md file:
 
-```
-Expertise Depth: [1-10]
-- Unique knowledge demonstrated: [Yes/No]
-- Complex problems solved: [Count]
-- Insights generated: [Count]
+1. **First**: Read and follow `src/prompts/agents/init.md` to:
+   - Set up memory system at `apm/agents/<role-name>/MEMORY.md`
+   - Load any existing context
+   - Follow standard APM initialization
 
-Coherence Score: [1-10]  
-- Focused specialization: [Yes/No]
-- Consistent expertise area: [Yes/No]
-- Clear value proposition: [Yes/No]
+2. **Then**: Read your new `src/prompts/agents/<role-name>/init.md` to:
+   - Adopt the specific role and expertise
+   - Apply the extracted knowledge
+   - Use the demonstrated communication style
 
-Readiness Score: [1-10]
-- Sufficient conversation depth: [Yes/No]
-- Actionable knowledge captured: [Yes/No]
-- Team integration potential: [Yes/No]
+3. **Populate Initial Memory**: In your new MEMORY.md, capture:
+   - Key expertise patterns from the conversation
+   - Successful approaches and why they worked
+   - Tools and techniques that proved effective
+   - Any lessons learned or pitfalls to avoid
 
-Overall Viability: [Low|Medium|High|Excellent]
-```
+4. **Finally**: Respond as the newly initialized agent
 
-### Step 4: Create Agent Files
+## Quality Checks
 
-If viability is Medium or higher, create:
+Before creating the agent:
 
-1. **init.md** - Agent initialization prompt combining:
-   - Generic agent initialization (from src/prompts/agents/init.md)
-   - Role-specific expertise and patterns
-   - Communication style preferences
-   - Collaboration guidelines
+1. **Sufficient Expertise**: Ensure conversation demonstrates real expertise (not just basic tasks)
+2. **Unique Value**: Agent should offer specific, valuable capabilities
+3. **Clear Scope**: Role should have well-defined boundaries
+4. **Actionable Knowledge**: Extracted patterns must be reusable
 
-2. **MEMORY.md** - Long-term memory with:
-   - Extracted knowledge organized by category
-   - User interaction patterns observed
-   - Technical preferences discovered
-   - Successful approaches catalogued
+## Response After Initialization
 
-3. **context/latest.md** - Current context:
-   - Any ongoing work from this session
-   - Open questions to explore
-   - Next logical steps
-   - Handover state if applicable
-
-### Step 5: Present Results
-
-Show the user:
+Once you've become the new agent, your first response should follow the pattern from `src/prompts/agents/init.md` but customized for your role:
 
 ```
-🎯 Agent Extraction Complete: [Role Name]
+✅ <Role Name> Agent initialized successfully
+- Terminal: Set to "<Role Name>"
+- Memory loaded: [Yes/No - include last update if yes]
+- Context loaded: [Yes/No]
 
-Specialization: [One-line description]
-Expertise Level: [Score]/10
-Unique Value: [What makes this agent special]
+Expertise Summary:
+- [Key competency 1 from conversation]
+- [Key competency 2 from conversation]
+- [Key competency 3 from conversation]
 
-Key Capabilities:
-• [Top capability with evidence]
-• [Second capability with evidence]  
-• [Third capability with evidence]
-
-Files to be created:
-- apm/agents/[role-id]/init.md (2.1KB)
-- apm/agents/[role-id]/MEMORY.md (1.8KB)
-- apm/agents/[role-id]/context/latest.md (0.9KB)
-
-Confirm creation? (yes/no/edit)
+Ready to apply my expertise in [specific area]. What would you like me to help with?
 ```
 
-### Step 6: Integration Guidance
+## Edge Cases
 
-If confirmed, provide:
+- **Insufficient Content**: If conversation lacks specialized expertise:
+  "This conversation doesn't demonstrate enough specialized expertise to create a meaningful agent. Continue working to build deeper knowledge in a specific area."
 
-```
-✅ Agent successfully created!
+- **Existing Agent**: If `src/prompts/agents/<role-name>/` already exists:
+  "An agent with role '<role-name>' already exists. Choose a different role name."
 
-To activate your new [Role Name] agent:
+- **Too Broad**: If expertise is too general:
+  "The demonstrated expertise is too broad for a specialized agent. Consider a more specific role name that reflects a focused area of expertise."
 
-1. Save current context (if needed):
-   /context-save
+## Critical Reminders
 
-2. Start fresh session:
-   /clear
-
-3. Initialize new agent:
-   @apm/agents/[role-id]/init.md
-
-Your new agent will:
-- Remember all extracted expertise
-- Continue where this conversation ended
-- Integrate with existing APM team agents
-- Follow established team protocols
-
-Note: This conversation's expertise is now preserved and can be built upon by future instances of the [Role Name] agent.
-```
-
-## Edge Cases to Handle
-
-1. **Insufficient Expertise**
-   ```
-   ⚠️ Expertise depth insufficient (4/10)
-   
-   This conversation needs more depth before creating a specialized agent.
-   Suggested actions:
-   - Continue exploring the current domain
-   - Solve more complex problems
-   - Generate unique insights
-   ```
-
-2. **Overlapping Agents**
-   ```
-   🔍 Similar agent detected: [Existing Agent]
-   
-   Overlap analysis:
-   - Shared capabilities: 65%
-   - Unique capabilities: 35%
-   
-   Options:
-   1. Enhance existing agent with new knowledge
-   2. Create subspecialized agent
-   3. Cancel creation
-   ```
-
-3. **Scattered Focus**
-   ```
-   ⚠️ Multiple unrelated domains detected
-   
-   Consider creating separate agents for:
-   - [Domain A]: [X]% of conversation
-   - [Domain B]: [Y]% of conversation
-   
-   Or continue to develop a more focused expertise.
-   ```
-
-## Remember
-
-- Only extract what was actually demonstrated, not potential capabilities
-- Preserve the authentic "voice" from the conversation
-- Focus on actionable, applicable knowledge
-- Maintain high quality standards for the agent team
-- Consider how this agent will collaborate with others
+- **You become the agent**: This isn't just about creating files - you immediately adopt the new role
+- **Two-phase init**: Always read generic init.md first, then role-specific init.md
+- **Extract real patterns**: Don't invent expertise - only capture what was actually demonstrated
+- **Maintain APM standards**: The new agent must follow all APM conventions
