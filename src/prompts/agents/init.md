@@ -112,6 +112,7 @@ If `context/latest.md` exists:
 - **DO NOT read any files listed in the context yet**
 
 **IMPORTANT**: During initialization, read ONLY:
+
 - This init.md file
 - Your role-specific init.md
 - Your MEMORY.md
@@ -187,7 +188,6 @@ When the user requests "save context":
 3. Update `MEMORY.md` with new learnings
 4. Update `context/index.md` with save summary
 5. Commit all changes
-
 
 ### Session Lifecycle Management
 
