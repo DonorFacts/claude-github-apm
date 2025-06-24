@@ -28,6 +28,7 @@ Create or update your `implementation-plan.yaml` file following the schema defin
 ### 2. Configure GitHub CLI
 
 Ensure you're authenticated with GitHub CLI:
+
 ```bash
 gh auth login
 ```
@@ -78,7 +79,7 @@ project:
     name: "your-repo"
 
 issue_types:
-  phase: "IT_xxx"  # Your org's issue type IDs
+  phase: "IT_xxx" # Your org's issue type IDs
   epic: "IT_yyy"
   task: "IT_zzz"
 
@@ -89,7 +90,7 @@ items:
     description: "Full markdown description"
     parent_id: null
     children_ids: ["epic-1-1"]
-    
+
   - id: "epic-1-1"
     type: "epic"
     title: "Epic Title"
@@ -140,15 +141,7 @@ npx tsc --noEmit
 ### Debug Mode
 
 Set environment variable for verbose output:
+
 ```bash
 DEBUG=* npm run create-issues
 ```
-
-## Future Enhancements
-
-- [ ] Support for issue templates
-- [ ] Milestone assignment
-- [ ] Label creation if not exists
-- [ ] Dry-run mode
-- [ ] Resume capability for partial runs
-- [ ] Web UI for plan visualization
