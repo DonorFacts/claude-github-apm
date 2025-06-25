@@ -64,7 +64,7 @@ git checkout main
 git worktree add "../worktrees/feature-123-description" "feature-123-description"
 
 # 2. Open VS Code with Claude
-tsx open-worktree-vscode.ts "../worktrees/feature-123-description"
+tsx src/tools/worktree-manager/open-worktree-vscode.ts "../worktrees/feature-123-description"
 
 # 3. Validate (in VS Code terminal)
 pwd  # Confirm worktree path

@@ -11,7 +11,7 @@ We've been enhancing git worktree documentation and VS Code integration for the 
 ## Files Transferred from Main
 
 - `.vscode/tasks.json` - VS Code task configuration for auto-launching Claude
-- `open-worktree-vscode.ts` - TypeScript script to open worktrees with Claude
+- `src/tools/worktree-manager/open-worktree-vscode.ts` - TypeScript script to open worktrees with Claude
 - `src/prompts/git-worktrees.md` - Main worktree documentation (already updated)
 - `src/prompts/git-worktrees-uncommitted-changes.md` - Handling uncommitted changes
 - `src/prompts/worktree-handover-validation.md` - User validation steps

@@ -288,7 +288,7 @@ git stash -u -m "Unrelated changes"
 ```bash
 # User: "I need to add user authentication"
 # Agent creates worktree and opens new window
-tsx open-worktree-vscode.ts feature-auth-system
+tsx src/tools/worktree-manager/open-worktree-vscode.ts feature-auth-system
 
 # Later in original window...
 # User: "Add password validation"
