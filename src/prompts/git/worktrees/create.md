@@ -63,7 +63,25 @@ git checkout main
 # 3. Create worktree
 git worktree add "../worktrees/feature-123-description" "feature-123-description"
 
-# 4. Open VS Code and install dependencies
+# 4. Create handover file for the new Claude instance
+# CRITICAL: You MUST read src/prompts/git/worktrees/handover-template.md first
+# to understand role selection and handover structure
+echo "📖 Reading handover template for guidance..."
+# Read src/prompts/git/worktrees/handover-template.md
+
+# Generate handover file with date prefix at apm/worktree-handovers/YYYY_MM_DD-<branch>.md
+mkdir -p apm/worktree-handovers
+HANDOVER_FILE="apm/worktree-handovers/$(date +%Y_%m_%d)-feature-123-description.md"
+
+# Create the handover file based on the template you just read
+# Key decisions:
+# - Choose appropriate agent role for the task type
+# - Include all relevant context from this session
+# - Specify clear next steps for the new agent
+echo "✍️  Creating handover file at $HANDOVER_FILE"
+# Generate content following the template structure
+
+# 5. Open VS Code and install dependencies
 # This script works around Claude's cd limitation by using cwd option
 tsx src/tools/worktree-manager/open-worktree-vscode.ts "../worktrees/feature-123-description"
 ```
@@ -77,7 +95,7 @@ When on a feature branch with changes that belong to that feature:
 git add .
 git commit -m "feat: work in progress"
 
-# 2. Then follow Section A steps 2-5
+# 2. Then follow Section A steps 2-5 (switch to main, create worktree, handover, open VS Code)
 ```
 
 ## Section C: Main Branch with My Changes
@@ -92,7 +110,7 @@ git checkout -b feature-123-description
 git add .
 git commit -m "feat: initial work"
 
-# 3. Then follow Section A steps 2-5
+# 3. Then follow Section A steps 2-5 (switch to main, create worktree, handover, open VS Code)
 ```
 
 ## Section D: Mixed Changes (Mine + Others)
@@ -117,9 +135,10 @@ git commit -m "feat: initial work"
 # 5. Re-stash others' changes
 git stash -u -m "Others' changes - left on main"
 
-# 6. Continue with worktree creation (Section A steps 2-5)
+# 6. Continue with worktree creation
 git checkout main
 git stash pop  # Restore others' changes to main
+# Then follow Section A steps 3-5 (create worktree, handover, open VS Code)
 ```
 
 ## Section E: Only Others' Changes
@@ -134,7 +153,8 @@ git checkout -b feature-123-description
 git checkout main
 git stash pop  # Restore others' changes
 
-# Continue with worktree creation (Section A steps 3-5)
+# Continue with worktree creation
+# Follow Section A steps 3-5 (create worktree, handover, open VS Code)
 ```
 
 ## Post-Handoff Protocol
@@ -159,6 +179,7 @@ git worktree prune                            # Clean stale info
 
 | Your Situation | Required Guide |
 |----------------|----------------|
+| Creating effective handover files | `src/prompts/git/worktrees/handover-template.md` |
 | Files accidentally created in wrong directory | `src/prompts/git/worktrees/troubleshoot.md#file-transfer` |
 | Verifying handoff worked correctly | `src/prompts/git/worktrees/verify.md` |
 | Any errors or unexpected behavior | `src/prompts/git/worktrees/troubleshoot.md` |
@@ -168,8 +189,9 @@ git worktree prune                            # Clean stale info
 
 1. **ALWAYS assess situation before acting**
 2. **NEVER move changes you didn't make**
-3. **SEPARATE changes by authorship independently**
-4. **ENFORCE boundaries after handoff**
+3. **ALWAYS create handover file before opening VS Code**
+4. **SEPARATE changes by authorship independently**
+5. **ENFORCE boundaries after handoff**
 
 ## Determining Change Authorship
 
