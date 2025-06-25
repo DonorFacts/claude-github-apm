@@ -9,7 +9,7 @@ export interface WorktreeInfo {
 }
 
 export interface HandoffDecision {
-  action: 'redirect' | 'create-new' | 'continue-here';
+  action: "redirect" | "create-new" | "continue-here";
   targetWorktree?: string;
   reason: string;
 }
@@ -24,27 +24,27 @@ export function determineHandoffAction(
   // No worktrees exist - continue in current window
   if (existingWorktrees.length === 0) {
     return {
-      action: 'continue-here',
-      reason: 'No active worktrees found'
+      action: "continue-here",
+      reason: "No active worktrees found",
     };
   }
 
   // Get most recent worktree
   const mostRecent = getMostRecentWorktree(existingWorktrees);
-  
+
   // Check if user explicitly mentions different scope
   if (isExplicitlyDifferentScope(userRequest)) {
     return {
-      action: 'create-new',
-      reason: 'User explicitly mentioned different feature or scope'
+      action: "create-new",
+      reason: "User explicitly mentioned different feature or scope",
     };
   }
 
   // Default: redirect to most recent worktree
   return {
-    action: 'redirect',
+    action: "redirect",
     targetWorktree: mostRecent.path,
-    reason: 'Assuming work relates to active feature in worktree'
+    reason: "Assuming work relates to active feature in worktree",
   };
 }
 
@@ -53,13 +53,13 @@ export function determineHandoffAction(
  */
 export function getMostRecentWorktree(worktrees: WorktreeInfo[]): WorktreeInfo {
   if (worktrees.length === 0) {
-    throw new Error('No worktrees provided');
+    throw new Error("No worktrees provided");
   }
 
   // If we have creation dates, use them
-  if (worktrees.some(w => w.createdAt)) {
+  if (worktrees.some((w) => w.createdAt)) {
     return worktrees
-      .filter(w => w.createdAt)
+      .filter((w) => w.createdAt)
       .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())[0];
   }
 
@@ -72,24 +72,26 @@ export function getMostRecentWorktree(worktrees: WorktreeInfo[]): WorktreeInfo {
  */
 export function isExplicitlyDifferentScope(userRequest: string): boolean {
   const differentScopeIndicators = [
-    'different bug',
-    'different feature',
-    'unrelated',
-    'separate issue',
-    'another problem',
-    'switch to',
-    'new feature',
-    'different task'
+    "different bug",
+    "different feature",
+    "unrelated",
+    "separate issue",
+    "another problem",
+    "switch to",
+    "new feature",
+    "different task",
   ];
 
   const lowerRequest = userRequest.toLowerCase();
-  return differentScopeIndicators.some(indicator => 
+  return differentScopeIndicators.some((indicator) =>
     lowerRequest.includes(indicator)
   );
 }
 
 /**
- * Checks if a branch name indicates uncommitted work that should be moved
+ * Checks if uncommitted work CAN be moved from the current branch
+ * Note: This indicates if moving is technically appropriate, not if it should be done
+ * The actual decision requires additional context about the changes
  */
 export function shouldMoveUncommittedWork(
   currentBranch: string,
@@ -99,17 +101,21 @@ export function shouldMoveUncommittedWork(
     return false;
   }
 
-  // Never move changes from feature branches
-  if (currentBranch.match(/^(feature|fix|hotfix|bugfix)[-/]/)) {
-    return false;
-  }
-
-  // Move changes from main/master/develop
-  if (['main', 'master', 'develop', 'development'].includes(currentBranch)) {
+  // Always move changes from main/master/develop - these should stay clean
+  if (["main", "master", "develop", "development"].includes(currentBranch)) {
     return true;
   }
 
-  return false;
+  // For feature branches, we need more context to decide
+  // This function now just identifies if moving is POSSIBLE, not if it SHOULD happen
+  // The actual decision should involve checking:
+  // 1. Are the changes related to the current feature?
+  // 2. Were they made accidentally?
+  // 3. Does a more appropriate worktree exist?
+  
+  // For now, return true to indicate changes CAN be moved if needed
+  // The caller should make the final decision based on context
+  return true;
 }
 
 /**
@@ -128,12 +134,12 @@ export function isGeneralMaintenance(changedFiles: string[]): boolean {
     /^docs?\//,
     /tsconfig\.json$/,
     /jest\.config\./,
-    /\.eslintrc/
+    /\.eslintrc/,
   ];
 
   // If more than 50% of changes are maintenance files, it's likely maintenance
-  const maintenanceCount = changedFiles.filter(file =>
-    maintenancePatterns.some(pattern => pattern.test(file))
+  const maintenanceCount = changedFiles.filter((file) =>
+    maintenancePatterns.some((pattern) => pattern.test(file))
   ).length;
 
   return maintenanceCount > changedFiles.length / 2;
