@@ -4,6 +4,57 @@
 
 This guide establishes git commits as the project's primary documentation and progress tracking system. Each commit message serves as a concise log entry, capturing project progress, decisions, and context for future reference while integrating with GitHub's issue tracking hierarchy.
 
+## Git Workspace Setup
+
+Before you commit any changes, ensure you're on a development branch and have set up your git workspace properly:
+
+```bash
+# Check current branch
+CURRENT_BRANCH=$(git branch --show-current)
+CREATED_NEW_BRANCH=false
+
+# If on main/master, create a new feature branch
+if [[ "$CURRENT_BRANCH" == "main" || "$CURRENT_BRANCH" == "master" ]]; then
+    echo "⚠️ On main branch - creating feature branch"
+
+    # Determine branch name from context
+    # If you have an assigned issue number: feature-123-description
+    # If no issue yet: feature-draft-description
+    # Development branch types: feature|fix|docs|chore|refactor
+    BRANCH_NAME="feature-123-your-task"  # Update based on your assignment
+
+    # Create and checkout new branch
+    git checkout -b "$BRANCH_NAME"
+    CREATED_NEW_BRANCH=true
+    CURRENT_BRANCH="$BRANCH_NAME"
+else
+    echo "✅ Already on development branch: $CURRENT_BRANCH"
+fi
+
+# Commit changes to the current development branch
+if [[ -n $(git status --porcelain) ]]; then
+    git add .
+    # Use proper commit format as described in "Commit Message Format" section below
+    git commit
+fi
+
+# If we created a new branch, switch back to main and create worktree
+if [[ "$CREATED_NEW_BRANCH" == "true" ]]; then
+    git checkout main
+    git worktree add "../worktrees/$CURRENT_BRANCH" "$CURRENT_BRANCH"
+    echo "✅ Created worktree at ../worktrees/$CURRENT_BRANCH"
+    echo "📍 Back in main branch in current directory"
+fi
+```
+
+**Important**:
+
+- Always work in development branches, never on main
+- Update branch name based on your assigned GitHub issue
+- If starting exploratory work, use `draft` until issue is created
+- The workflow creates a branch, commits changes, then sets up a worktree
+- You remain in the current directory after setup
+
 ## Commit Frequency
 
 **IMPORTANT**: Commit early and often! The `/commit` command triggers an immediate commit.

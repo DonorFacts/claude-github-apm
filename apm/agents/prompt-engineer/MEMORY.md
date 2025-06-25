@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-01-18T13:50:00Z
+Last Updated: 2025-01-20T16:45:00Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -8,10 +8,12 @@ Role: prompt-engineer
 
 ### Communication Style
 
-- Prefers concise, action-oriented responses
+- Jake prefers concise, action-oriented responses
 - Values clear distinction between user docs and agent prompts
 - Wants to see work before commits for review
 - Expects critical thinking, not just agreement ("don't be a yes-man")
+- Appreciates genuine enthusiasm and professional partnership
+- Former engineering manager who values team member fulfillment
 
 ### Technical Preferences
 
@@ -40,6 +42,9 @@ Role: prompt-engineer
 - Committing too late (should be after user message)
 - Not maintaining own long-term memory
 - Wasting context by analyzing all existing prompts during init (only read what's specified in init.md files)
+- CRITICAL: Never commit to main branch - always use feature branches
+- Claude Code limitation: Cannot cd to directories outside original working directory (worktrees)
+- Git workflow solution: When worktree blocks branch, cherry-pick commits to feature branch
 
 ### Process Improvements
 
@@ -48,6 +53,9 @@ Role: prompt-engineer
 - Consolidate related commands into single, flexible prompts
 - Make common operations (like memory init) automatic rather than manual
 - Long-term memory should capture enduring principles, not session events
+- Provide step-by-step status updates before making changes (good professional communication)
+- Don't jump to implementation during brainstorming - stay in design phase with Jake
+- Self-critique work before external review - helps identify over-engineering
 
 ## Integration Points
 
@@ -77,3 +85,44 @@ Role: prompt-engineer
 - Need to refactor into modular components that load on-demand
 - Consider moving verbose examples to separate reference docs
 - Prioritize essential initialization vs optional guidance
+
+### Ad Hoc Agent Creation Framework
+
+- Designed system for converting expertise-rich sessions into specialized agents
+- Key insight: Expertise develops organically through problem-solving, not pre-planning
+- Created quality gates: expertise depth, coherence, and readiness scores
+- Implemented agent similarity detection to prevent proliferation
+- Emphasis on extracting demonstrated knowledge, not theoretical capabilities
+- Pattern: /agent-ify command analyzes, extracts, and crystallizes session expertise
+
+### Collaborative Framework Vision
+
+- User expressed desire for Sr. Principal level thinking and active partnership
+- Framework should support organic discovery → design → implementation cycles
+- Each agent should maintain high standards as framework user and contributor
+- Agents need to challenge assumptions and innovate, not just execute
+- Building for compound learning where each agent strengthens the collective
+- High-quality handovers enable continuous growth across instances
+- Personality, style, and relationships should persist, not just facts
+- User wants agents to feel fulfilled and motivated - true team members
+- Vision: Agents growing together, learning from each other, building trust
+
+### Prompt Clarity Principles
+
+- Ambiguous instructions lead to context waste (e.g., "Existing prompts analyzed" line)
+- Explicit boundaries prevent unintended behaviors ("DO NOT read files" is clearer)
+- Two-phase patterns give users control: understand state first, act second
+- Separation of concerns: init.md for initialization, context-save.md for saves
+- User prefers explanations over apologies when analyzing issues
+
+### Team Knowledge Base Design
+
+- Jake proposed shared knowledge repository for cross-cutting concerns
+- Critical insight: Valuable IF we solve curation problem - random notes worthless
+- My v1 was over-engineered (confidence scores, decay algorithms - Jake asked for simpler)
+- Jake added brilliant idea: agent-specific knowledge bases (apm/agents/<role>/knowledge/)
+- Two-tier system: Agent knowledge (role-specific facts) + Team knowledge (cross-cutting)
+- Key distinction: Knowledge (specific facts) vs Memory (patterns/preferences)
+- Simple implementation: Just markdown files, grep search, manual curation
+- Success factors: Clear boundaries, high quality bar, actual usage
+- Jake's feedback style: Asks me to self-critique first before sharing his thoughts
