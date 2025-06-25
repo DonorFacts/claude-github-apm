@@ -2,47 +2,55 @@
   "permissions": {
     "allow": [
       "Read(~/www/claude-github-apm/)",
+      
       "Bash(Notify_Jake)",
-      "Bash(chmod:*)",
-      "Bash(npm run test-symlink:*)",
-      "Bash(ls:*)",
-      "Bash(pnpm link:*)",
-      "Bash(rm:*)",
+      
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(mkdir:*)",
-      "Bash(npm install:*)",
-      "Bash(pnpm add:*)",
-      "Bash(pnpm test:*)",
-      "Bash(INIT_CWD=./test-temp-project node scripts/postinstall.js)",
-      "Bash(node:*)",
-      "Bash(mv:*)",
-      "Bash(if [ -d tmp ])",
-      "Bash(then mv tmp .tmp)",
-      "Bash(else mkdir -p .tmp)",
-      "Bash(fi)",
-      "Bash(npm search:*)",
-      "Bash(find:*)",
-      "Bash(ln:*)",
-      "Bash(touch:*)",
-      "Bash(pnpm install:*)",
       "Bash(git checkout:*)",
-      "Bash(gh api:*)",
-      "Bash(grep:*)",
-      "Bash(printf:*)",
-      "Bash(echo:*)",
-      "Bash(tty)",
-      "Bash(env)",
-      "Bash(cp:*)",
-      "Bash(gh repo view:*)",
-      "Bash(./src/scripts/create-sub-issue.sh:*)",
-      "Bash(gh issue edit:*)",
-      "WebFetch(domain:docs.anthropic.com)",
-      "WebFetch(domain:github.com)",
       "Bash(git pull:*)",
       "Bash(git push:*)",
       "Bash(git worktree:*)",
-      "Bash(touch:*"
+      
+      "Bash(gh api:*)",
+      "Bash(gh repo view:*)",
+      "Bash(gh issue edit:*)",
+      
+      "Bash(pnpm add:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm link:*)",
+      
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(npm search:*)",
+      
+      "Bash(node:*)",
+      "Bash(INIT_CWD=./test-temp-project node scripts/postinstall.js)",
+      
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(ln:*)",
+      "Bash(touch:*)",
+      "Bash(chmod:*)",
+      
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      
+      "Bash(printf:*)",
+      "Bash(echo:*)",
+      "Bash(tty)",
+      "Bash(env:*)",
+      
+      "Bash(if [ -d tmp ]; then mv tmp .tmp; else mkdir -p .tmp; fi)",
+      
+      "Bash(./src/scripts/create-sub-issue.sh)",
+      
+      "WebFetch(domain:docs.anthropic.com)",
+      "WebFetch(domain:github.com)"
     ],
     "deny": []
   }
