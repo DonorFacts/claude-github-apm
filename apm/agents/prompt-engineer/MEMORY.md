@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-01-20T16:45:00Z
+Last Updated: 2025-06-25T12:59:46Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -78,6 +78,9 @@ Role: prompt-engineer
 - Avoid command proliferation - one flexible command beats many specific ones
 - Agent prompts must be purely agent-directed (user docs go in docs/)
 - Balance comprehensive instructions with token efficiency (init.md ~2400 tokens is concerning)
+- Simplicity over tools - LLMs can generate files directly from templates
+- Handover systems enable true multi-window/multi-agent workflows
+- **Prompt command filenames should be verbs/action-directed** (e.g., "complete-handoff.md" not "handoff-complete.md")
 
 ### Token Optimization Opportunities
 
@@ -85,6 +88,9 @@ Role: prompt-engineer
 - Need to refactor into modular components that load on-demand
 - Consider moving verbose examples to separate reference docs
 - Prioritize essential initialization vs optional guidance
+- **Script Extraction Pattern**: Separate bash/code scripts from prompts (e.g., init-handover.md reduced from 752→250→62 tokens by moving logic to src/scripts/)
+- Store reusable scripts in src/scripts/<feature>/ and reference from prompts
+- This pattern dramatically reduces token usage while maintaining functionality
 
 ### Ad Hoc Agent Creation Framework
 
@@ -114,6 +120,37 @@ Role: prompt-engineer
 - Two-phase patterns give users control: understand state first, act second
 - Separation of concerns: init.md for initialization, context-save.md for saves
 - User prefers explanations over apologies when analyzing issues
+- Date specifications must be explicit ("TODAY'S date") to prevent copying examples
+- Handover files are critical touchpoints requiring absolute clarity
+- **CRITICAL**: Users NEVER read prompt files (src/prompts/**/*.md) - only agents do
+- If prompt contains user actions, agent must communicate them to user
+- User-facing documentation belongs in docs/**/*.md only
+- Agent prompts should include what to tell users, not expect users to read them
+
+### Token Optimization Discoveries
+
+**Critical Finding**: Every tool call adds 3-4 message entries to context window, consuming ~200-300 tokens each.
+
+**Meta-Script Pattern**: Generate comprehensive scripts instead of executing multiple commands
+- Example: 20+ individual commands → 3 tool calls (create script, chmod, execute)
+- Dramatic token reduction while maintaining functionality
+
+**File-Based State Management**: Use agent memory system for persistent state
+- MEMORY.md for long-term patterns and learnings
+- context/latest.md for current work state
+- Git commits for immutable history
+
+**Advanced Patterns**:
+- Declarative workflows: Define entire sessions upfront
+- Headless orchestration: Use `claude -p` for batch operations
+- Slash commands: Reusable workflows in .claude/commands/
+- Transaction batching: Queue operations, execute together
+
+**Terminal Update Optimization**: 
+- Milestone-only updates (5-10 vs 50+ per session)
+- File-based activity logging for minor updates
+- Event-driven updates only on phase transitions
+- Potential 80-90% reduction in update-related tokens
 
 ### Team Knowledge Base Design
 
@@ -126,3 +163,38 @@ Role: prompt-engineer
 - Simple implementation: Just markdown files, grep search, manual curation
 - Success factors: Clear boundaries, high quality bar, actual usage
 - Jake's feedback style: Asks me to self-critique first before sharing his thoughts
+
+### Terminal Productivity Patterns
+
+- VS Code limitation: Claude Code cannot invoke VS Code tasks from CLI (out of scope)
+- Terminal titles support emoji for instant visual status recognition
+- Relative paths critical for script portability across worktrees
+- Scripts should use ../../ navigation patterns, never absolute paths
+- Terminal status updates enable multi-window agent coordination
+- Emoji in terminal titles provide instant visual context switching
+
+### Prompt Optimization Insights
+
+- Discovered 70%+ token reduction possible while maintaining functionality
+- Example: init.md reduced from 5,289 to 1,439 tokens (72.8% reduction)
+- Key techniques: Remove redundant examples, consolidate similar instructions
+- Concise language often clearer than verbose explanations
+- Structured formats (numbered lists, clear sections) improve both clarity and tokens
+- Priority: Optimize frequently-used prompts that consume most context window
+- Balance: Maintain specificity while eliminating verbosity
+
+### State Management Clarification
+
+- The `.claude/` directory approach was incorrect for agent state
+- Agent memory system (MEMORY.md + context saves) is the proper approach
+- Context files provide handover capability between sessions
+- State should be file-based, not directory-based
+- Git commits provide immutable history
+
+### Tool Call Token Impact Discovery
+
+- **CRITICAL**: Every tool call adds 3-4 message entries (~200-300 tokens each)
+- Tool calls are conversations, not free operations
+- Batch operations can save 85-95% of tokens
+- Meta-scripts pattern proven effective for token reduction
+- Milestone-only updates for terminal status saves significant tokens

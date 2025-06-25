@@ -6,13 +6,16 @@ This template guides the creation of handover files when creating new worktrees.
 
 ## Handover File Location
 
-Create at: `apm/worktree-handovers/YYYY_MM_DD-<branch-name>.md`
+Create at: `apm/worktree-handovers/not-started/YYYY_MM_DD-<branch-name>.md`
 
 **CRITICAL**: Use TODAY'S date (the current date when creating the file)
 - Format: YYYY_MM_DD (year_month_day with underscores)
-- Example: If today is June 25, 2024, create: `apm/worktree-handovers/2024_06_25-feature-auth.md`
-- Example: If today is January 15, 2025, create: `apm/worktree-handovers/2025_01_15-feature-auth.md`
+- Directory: Always place in `not-started/` subdirectory
+- Example: If today is June 25, 2024, create: `apm/worktree-handovers/not-started/2024_06_25-feature-auth.md`
+- Example: If today is January 15, 2025, create: `apm/worktree-handovers/not-started/2025_01_15-feature-auth.md`
 - DO NOT use dates from examples - always use the CURRENT date
+
+**Note**: The agent will automatically move this file to `apm/worktree-handovers/completed/` after processing to ensure one-time use.
 
 ## Template Structure
 
