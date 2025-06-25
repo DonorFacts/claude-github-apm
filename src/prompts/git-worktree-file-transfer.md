@@ -55,7 +55,7 @@ EOF
 
 4. **Open VS Code in worktree**
 ```bash
-tsx open-worktree-vscode.ts "../worktrees/feature-branch"
+tsx src/tools/worktree-manager/open-worktree-vscode.ts "../worktrees/feature-branch"
 ```
 
 ## Why This Works
@@ -77,7 +77,7 @@ cp src/prompts/git-worktrees-*.md ../worktrees/feature-draft-git-worktree-docs/s
 cp worktree-handover-instructions.md ../worktrees/feature-draft-git-worktree-docs/
 
 # Opened VS Code
-tsx open-worktree-vscode.ts "../worktrees/feature-draft-git-worktree-docs"
+tsx src/tools/worktree-manager/open-worktree-vscode.ts "../worktrees/feature-draft-git-worktree-docs"
 ```
 
 ## Best Practices
