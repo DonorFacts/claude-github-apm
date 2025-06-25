@@ -78,21 +78,19 @@ git branch --show-current  # Confirm feature branch
 
 ### For the Original VS Code Window
 
-The agent in the original window must now treat this feature as "closed":
+The agent in the original window must now redirect ALL code work:
 
-1. **No Further Changes**: Do NOT make any changes to the handed-off branch
-2. **Redirect if Asked**: If user mentions the feature:
+1. **Default Assumption**: Any request for code changes relates to the active feature
+2. **Automatic Redirect**: For ANY code-related request:
    ```bash
-   # Refocus the feature window
-   code ../worktrees/feature-123-description
+   # Refocus the most recent worktree window
+   ls -t ../worktrees/ | head -1 | xargs -I {} code ../worktrees/{}
    ```
-   Response: "I've refocused the VS Code window for that feature. Please continue work there."
+   Response: "I've refocused your feature window. Please continue work there."
 
-3. **Check Before Acting**: Before working on any branch:
-   ```bash
-   # Check if worktree exists (indicates handoff)
-   test -d "../worktrees/feature-123-description" && echo "Handed off"
-   ```
+3. **No Guessing**: Don't try to determine if work is related - just redirect
+   - Exception: Only if user explicitly says "different feature" or "unrelated bug"
+   - Then ask: "Should I create a new worktree for this separate work?"
 
 ### Why This Matters
 
@@ -100,12 +98,22 @@ The agent in the original window must now treat this feature as "closed":
 - **Clear Context Boundaries**: Each agent knows exactly what it owns
 - **No Accidental Cross-Work**: Original agent won't accidentally modify handed-off work
 
-### Example Scenario
+### Example Scenarios
 
+**Typical Flow:**
 ```
-User (in original window): "Can you add tests to feature-123?"
-Agent: *checks worktree exists*
-Agent: code ../worktrees/feature-123-description
-Agent: "I've refocused the feature-123 VS Code window. Please continue 
+User (in original window): "Can you add tests?"
+Agent: ls -t ../worktrees/ | head -1 | xargs -I {} code ../worktrees/{}
+Agent: "I've refocused your feature window. Please continue 
         working on tests there where you have the proper context."
+```
+
+**Multiple Worktrees:**
+```
+User: "Fix the login bug"
+Agent: "You have active feature work in another window. Should I:
+        1. Continue in the existing feature window (default)
+        2. Create a new worktree for this bug fix?"
+User: "2"
+Agent: *creates new worktree for bug fix*
 ```
