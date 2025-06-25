@@ -12,10 +12,17 @@ describe('CommandClassifier', () => {
   });
 
   describe('classifyPrompts', () => {
-    it('should classify standalone files as public commands', () => {
+    it('should classify all non-underscore files as public commands', () => {
       mockFiles.set('src/prompts/commit.md', {
         path: 'src/prompts/commit.md',
         content: '# Git Commit Helper\nHelps create git commits',
+        imports: [],
+        importedBy: []
+      });
+      
+      mockFiles.set('src/prompts/context-save.md', {
+        path: 'src/prompts/context-save.md',
+        content: '# Context Save',
         imports: [],
         importedBy: []
       });
@@ -23,103 +30,75 @@ describe('CommandClassifier', () => {
       const result = classifier.classifyPrompts(mockFiles);
       
       expect(result.public).toContain('src/prompts/commit.md');
+      expect(result.public).toContain('src/prompts/context-save.md');
       expect(result.private).toHaveLength(0);
     });
 
-    it('should classify files only imported by others as private', () => {
-      mockFiles.set('src/prompts/agents/init.md', {
-        path: 'src/prompts/agents/init.md',
-        content: '# Generic Agent Init\n@import specific-init',
+    it('should exclude files with underscore prefix', () => {
+      mockFiles.set('src/prompts/_draft.md', {
+        path: 'src/prompts/_draft.md',
+        content: '# Draft content',
         imports: [],
-        importedBy: ['src/prompts/agents/developer/init.md']
+        importedBy: []
       });
 
-      mockFiles.set('src/prompts/agents/developer/init.md', {
-        path: 'src/prompts/agents/developer/init.md',
-        content: '# Developer Init\n@src/prompts/agents/init.md',
-        imports: ['src/prompts/agents/init.md'],
+      mockFiles.set('src/prompts/public.md', {
+        path: 'src/prompts/public.md',
+        content: '# Public content',
+        imports: [],
         importedBy: []
       });
 
       const result = classifier.classifyPrompts(mockFiles);
       
-      expect(result.public).toContain('src/prompts/agents/developer/init.md');
-      expect(result.private).toContain('src/prompts/agents/init.md');
+      expect(result.private).toContain('src/prompts/_draft.md');
+      expect(result.public).toContain('src/prompts/public.md');
     });
 
-    it('should handle circular dependencies gracefully', () => {
-      mockFiles.set('src/prompts/a.md', {
-        path: 'src/prompts/a.md',
-        content: '@import b.md',
-        imports: ['src/prompts/b.md'],
-        importedBy: ['src/prompts/b.md']
+    it('should exclude files in underscore directories', () => {
+      mockFiles.set('src/prompts/_utils/helper.md', {
+        path: 'src/prompts/_utils/helper.md',
+        content: '# Helper utilities',
+        imports: [],
+        importedBy: []
       });
 
-      mockFiles.set('src/prompts/b.md', {
-        path: 'src/prompts/b.md',
-        content: '@import a.md',
-        imports: ['src/prompts/a.md'],
-        importedBy: ['src/prompts/a.md']
+      mockFiles.set('src/prompts/_includes/base.md', {
+        path: 'src/prompts/_includes/base.md',
+        content: '# Base include',
+        imports: [],
+        importedBy: []
       });
 
       const result = classifier.classifyPrompts(mockFiles);
       
-      // Both should be private as they only import each other
-      expect(result.private).toContain('src/prompts/a.md');
-      expect(result.private).toContain('src/prompts/b.md');
+      expect(result.private).toContain('src/prompts/_utils/helper.md');
+      expect(result.private).toContain('src/prompts/_includes/base.md');
       expect(result.public).toHaveLength(0);
     });
 
-    it('should classify files imported but also used standalone as public', () => {
-      mockFiles.set('src/prompts/shared-workflow.md', {
-        path: 'src/prompts/shared-workflow.md',
-        content: '# Shared Workflow\nThis workflow can be used standalone or imported.',
-        imports: [],
-        importedBy: ['src/prompts/agent-task.md']
-      });
-
-      mockFiles.set('src/prompts/agent-task.md', {
-        path: 'src/prompts/agent-task.md',
-        content: '# Agent Task\n@import shared-workflow.md',
-        imports: ['src/prompts/shared-workflow.md'],
+    it('should include files regardless of import status', () => {
+      // File that imports others
+      mockFiles.set('src/prompts/workflow.md', {
+        path: 'src/prompts/workflow.md',
+        content: '# Workflow\n@import base.md',
+        imports: ['src/prompts/base.md'],
         importedBy: []
       });
 
-      // If it has no imports and could be a command, it's public
-      // even if imported by others
-      const result = classifier.classifyPrompts(mockFiles);
-      
-      expect(result.public).toContain('src/prompts/shared-workflow.md');
-      expect(result.public).toContain('src/prompts/agent-task.md');
-    });
-
-    it('should identify deeply nested private includes', () => {
+      // File that is imported by others
       mockFiles.set('src/prompts/base.md', {
         path: 'src/prompts/base.md',
-        content: '# Base include',
+        content: '# Base content',
         imports: [],
-        importedBy: ['src/prompts/middle.md']
-      });
-
-      mockFiles.set('src/prompts/middle.md', {
-        path: 'src/prompts/middle.md',
-        content: '@import base.md',
-        imports: ['src/prompts/base.md'],
-        importedBy: ['src/prompts/top.md']
-      });
-
-      mockFiles.set('src/prompts/top.md', {
-        path: 'src/prompts/top.md',
-        content: '@import middle.md',
-        imports: ['src/prompts/middle.md'],
-        importedBy: []
+        importedBy: ['src/prompts/workflow.md']
       });
 
       const result = classifier.classifyPrompts(mockFiles);
       
-      expect(result.public).toEqual(['src/prompts/top.md']);
-      expect(result.private).toContain('src/prompts/base.md');
-      expect(result.private).toContain('src/prompts/middle.md');
+      // Both should be public (no underscore)
+      expect(result.public).toContain('src/prompts/workflow.md');
+      expect(result.public).toContain('src/prompts/base.md');
     });
 
     it('should handle files with no content as private', () => {
@@ -130,40 +109,57 @@ describe('CommandClassifier', () => {
         importedBy: []
       });
 
+      mockFiles.set('src/prompts/whitespace.md', {
+        path: 'src/prompts/whitespace.md',
+        content: '   \n\n   ',
+        imports: [],
+        importedBy: []
+      });
+
       const result = classifier.classifyPrompts(mockFiles);
       
       expect(result.private).toContain('src/prompts/empty.md');
-      expect(result.public).toHaveLength(0);
+      expect(result.private).toContain('src/prompts/whitespace.md');
     });
 
-    it('should exclude WIP and test files from public commands', () => {
-      mockFiles.set('src/prompts/wip/experimental.md', {
-        path: 'src/prompts/wip/experimental.md',
-        content: '# Experimental feature',
+    it('should handle mixed scenarios correctly', () => {
+      // Public file
+      mockFiles.set('src/prompts/git/worktrees/create.md', {
+        path: 'src/prompts/git/worktrees/create.md',
+        content: '# Create worktree',
         imports: [],
         importedBy: []
       });
 
-      mockFiles.set('src/prompts/test/mock-prompt.md', {
-        path: 'src/prompts/test/mock-prompt.md',
-        content: '# Test prompt',
+      // Private file (underscore prefix)
+      mockFiles.set('src/prompts/_experimental/test.md', {
+        path: 'src/prompts/_experimental/test.md',
+        content: '# Test content',
+        imports: [],
+        importedBy: []
+      });
+
+      // Empty file
+      mockFiles.set('src/prompts/agents/empty.md', {
+        path: 'src/prompts/agents/empty.md',
+        content: '',
         imports: [],
         importedBy: []
       });
 
       const result = classifier.classifyPrompts(mockFiles);
       
-      expect(result.private).toContain('src/prompts/wip/experimental.md');
-      expect(result.private).toContain('src/prompts/test/mock-prompt.md');
-      expect(result.public).toHaveLength(0);
+      expect(result.public).toEqual(['src/prompts/git/worktrees/create.md']);
+      expect(result.private).toContain('src/prompts/_experimental/test.md');
+      expect(result.private).toContain('src/prompts/agents/empty.md');
     });
   });
 
   describe('isEligibleForPublic', () => {
-    it('should return true for top-level command files', () => {
+    it('should return true for files without underscore', () => {
       const file: PromptFile = {
-        path: 'src/prompts/commit.md',
-        content: '# Commit helper',
+        path: 'src/prompts/command.md',
+        content: '# Command',
         imports: [],
         importedBy: []
       };
@@ -171,15 +167,26 @@ describe('CommandClassifier', () => {
       expect(classifier.isEligibleForPublic(file)).toBe(true);
     });
 
-    it('should return false for files in excluded directories', () => {
-      const wipFile: PromptFile = {
-        path: 'src/prompts/wip/draft.md',
-        content: '# Draft',
+    it('should return false for files with underscore prefix', () => {
+      const file: PromptFile = {
+        path: 'src/prompts/_private.md',
+        content: '# Private',
         imports: [],
         importedBy: []
       };
 
-      expect(classifier.isEligibleForPublic(wipFile)).toBe(false);
+      expect(classifier.isEligibleForPublic(file)).toBe(false);
+    });
+
+    it('should return false for files in underscore directories', () => {
+      const file: PromptFile = {
+        path: 'src/prompts/_utils/helper.md',
+        content: '# Helper',
+        imports: [],
+        importedBy: []
+      };
+
+      expect(classifier.isEligibleForPublic(file)).toBe(false);
     });
 
     it('should return false for empty files', () => {
@@ -191,17 +198,6 @@ describe('CommandClassifier', () => {
       };
 
       expect(classifier.isEligibleForPublic(emptyFile)).toBe(false);
-    });
-
-    it('should return false for files that only contain imports', () => {
-      const importOnlyFile: PromptFile = {
-        path: 'src/prompts/imports-only.md',
-        content: '@import ./base.md\n@import ./utils.md',
-        imports: ['src/prompts/base.md', 'src/prompts/utils.md'],
-        importedBy: []
-      };
-
-      expect(classifier.isEligibleForPublic(importOnlyFile)).toBe(false);
     });
   });
 });

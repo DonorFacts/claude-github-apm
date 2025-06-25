@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, it, expect, beforeEach } from '@jest/globals';
 import { CommandNameTransformer } from '../../src/command-sync/command-name-transformer';
 
 describe('CommandNameTransformer', () => {
@@ -9,157 +9,78 @@ describe('CommandNameTransformer', () => {
   });
 
   describe('transform', () => {
-    it('should transform agent init files correctly', () => {
-      expect(transformer.transform('src/prompts/agents/init.md'))
-        .toBe('agent-init-generic.md');
-      
-      expect(transformer.transform('src/prompts/agents/developer/init.md'))
-        .toBe('agent-init-developer.md');
-      
-      expect(transformer.transform('src/prompts/agents/scrum-master/init.md'))
-        .toBe('agent-init-scrum-master.md');
-    });
-
-    it('should transform workflow files to appropriate domains', () => {
-      expect(transformer.transform('src/prompts/agents/developer/tdd-workflow.md'))
-        .toBe('test-tdd-workflow.md');
-      
-      expect(transformer.transform('src/prompts/commit.md'))
-        .toBe('git-workflow-commit.md');
-      
-      expect(transformer.transform('src/prompts/agents/developer/code-patterns.md'))
-        .toBe('code-pattern-collection.md');
-    });
-
-    it('should handle security and review files', () => {
-      expect(transformer.transform('src/prompts/agents/developer/security-checklist.md'))
-        .toBe('review-code-security.md');
-    });
-
-    it('should handle project management files', () => {
-      expect(transformer.transform('src/prompts/agents/scrum-master/create-project-issues.md'))
-        .toBe('project-issue-create-bulk.md');
-      
-      expect(transformer.transform('src/prompts/agents/scrum-master/breakdown-project-plan.md'))
-        .toBe('project-plan-breakdown.md');
-    });
-
-    it('should handle utility and meta files', () => {
+    it('should keep root level filenames unchanged', () => {
       expect(transformer.transform('src/prompts/context-save.md'))
-        .toBe('util-context-save.md');
+        .toBe('context-save.md');
       
       expect(transformer.transform('src/prompts/agent-ify.md'))
-        .toBe('meta-agent-create.md');
+        .toBe('agent-ify.md');
+      
+      expect(transformer.transform('src/prompts/reflect-for-docs.md'))
+        .toBe('reflect-for-docs.md');
     });
 
-    it('should handle documentation generation files', () => {
-      expect(transformer.transform('src/prompts/reflect-for-docs.md'))
-        .toBe('docs-generate-reflection.md');
+    it('should flatten nested paths with hyphens', () => {
+      expect(transformer.transform('src/prompts/git/commit.md'))
+        .toBe('git-commit.md');
+      
+      expect(transformer.transform('src/prompts/git/worktrees/create.md'))
+        .toBe('git-worktree-create.md');
+      
+      expect(transformer.transform('src/prompts/agents/developer/init.md'))
+        .toBe('agent-developer-init.md');
+    });
+
+    it('should convert plural directories to singular', () => {
+      expect(transformer.transform('src/prompts/agents/init.md'))
+        .toBe('agent-init.md');
+      
+      expect(transformer.transform('src/prompts/worktrees/verify.md'))
+        .toBe('worktree-verify.md');
+      
+      expect(transformer.transform('src/prompts/issues/create-bulk.md'))
+        .toBe('issue-create-bulk.md');
+      
+      expect(transformer.transform('src/prompts/patterns/collection.md'))
+        .toBe('pattern-collection.md');
+    });
+
+    it('should handle deep nesting correctly', () => {
+      expect(transformer.transform('src/prompts/agents/scrum-master/commands/index.md'))
+        .toBe('agent-scrum-master-commands-index.md');
+      
+      expect(transformer.transform('src/prompts/git/worktrees/troubleshoot.md'))
+        .toBe('git-worktree-troubleshoot.md');
+    });
+
+    it('should preserve hyphens in filenames', () => {
+      expect(transformer.transform('src/prompts/agents/scrum-master/create-project-issues.md'))
+        .toBe('agent-scrum-master-create-project-issues.md');
       
       expect(transformer.transform('src/prompts/team-knowledge-contribution.md'))
-        .toBe('docs-knowledge-contribute.md');
+        .toBe('team-knowledge-contribution.md');
     });
 
-    it('should handle collaboration files', () => {
-      expect(transformer.transform('src/prompts/agents/handover-quality.md'))
-        .toBe('agent-handover-quality.md');
+    it('should handle edge cases', () => {
+      // File without extension (shouldn't happen, but handle gracefully)
+      expect(transformer.transform('src/prompts/test'))
+        .toBe('test.md');
       
-      expect(transformer.transform('src/prompts/agents/inter-agent-collaboration.md'))
-        .toBe('agent-collab-guidelines.md');
-    });
-
-    it('should handle unknown files with fallback naming', () => {
-      expect(transformer.transform('src/prompts/unknown-new-file.md'))
-        .toBe('misc-unknown-new-file.md');
+      // File with multiple dots
+      expect(transformer.transform('src/prompts/test.backup.md'))
+        .toBe('test.backup.md');
       
-      expect(transformer.transform('src/prompts/agents/mystery-agent/special.md'))
-        .toBe('agent-mystery-agent-special.md');
+      // Empty path segments
+      expect(transformer.transform('src/prompts//git//commit.md'))
+        .toBe('git-commit.md');
     });
 
-    it('should preserve hyphens and handle edge cases', () => {
-      expect(transformer.transform('src/prompts/test-driven-development.md'))
-        .toBe('test-test-driven-development.md'); // 'test' keyword is detected
+    it('should not transform directories that are not in plural map', () => {
+      expect(transformer.transform('src/prompts/misc/helper.md'))
+        .toBe('misc-helper.md');
       
-      expect(transformer.transform('src/prompts/UPPERCASE-File.md'))
-        .toBe('misc-uppercase-file.md');
-    });
-  });
-
-  describe('getDomain', () => {
-    it('should identify agent domain', () => {
-      expect(transformer.getDomain('src/prompts/agents/developer/init.md'))
-        .toBe('agent');
-    });
-
-    it('should identify test domain from keywords', () => {
-      expect(transformer.getDomain('src/prompts/agents/developer/tdd-workflow.md'))
-        .toBe('test');
-    });
-
-    it('should identify git domain from keywords', () => {
-      expect(transformer.getDomain('src/prompts/commit.md'))
-        .toBe('git');
-    });
-
-    it('should identify project domain from keywords', () => {
-      expect(transformer.getDomain('src/prompts/create-project-issues.md'))
-        .toBe('project');
-    });
-
-    it('should return misc for unknown domains', () => {
-      expect(transformer.getDomain('src/prompts/random-file.md'))
-        .toBe('misc');
-    });
-  });
-
-  describe('getCategory', () => {
-    it('should extract category from agent paths', () => {
-      expect(transformer.getCategory('src/prompts/agents/developer/init.md', 'agent'))
-        .toBe('init');
-      
-      expect(transformer.getCategory('src/prompts/agents/handover-quality.md', 'agent'))
-        .toBe('handover');
-    });
-
-    it('should identify workflow category', () => {
-      expect(transformer.getCategory('src/prompts/commit.md', 'git'))
-        .toBe('workflow');
-      
-      expect(transformer.getCategory('src/prompts/tdd-workflow.md', 'test'))
-        .toBe('tdd');
-    });
-
-    it('should handle pattern files', () => {
-      expect(transformer.getCategory('src/prompts/code-patterns.md', 'code'))
-        .toBe('pattern');
-    });
-
-    it('should return general for unmatched categories', () => {
-      expect(transformer.getCategory('src/prompts/something.md', 'misc'))
-        .toBe('general');
-    });
-  });
-
-  describe('getAction', () => {
-    it('should extract action from filename', () => {
-      expect(transformer.getAction('src/prompts/create-project-issues.md'))
-        .toBe('create');
-      
-      expect(transformer.getAction('src/prompts/breakdown-project-plan.md'))
-        .toBe('breakdown');
-      
-      expect(transformer.getAction('src/prompts/reflect-for-docs.md'))
-        .toBe('reflection');
-    });
-
-    it('should handle init files', () => {
-      expect(transformer.getAction('src/prompts/agents/developer/init.md'))
-        .toBe('developer');
-    });
-
-    it('should use full filename for unmatched patterns', () => {
-      expect(transformer.getAction('src/prompts/unknown.md'))
-        .toBe('unknown');
+      expect(transformer.transform('src/prompts/util/context.md'))
+        .toBe('util-context.md');
     });
   });
 });
