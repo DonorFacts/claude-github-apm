@@ -100,4 +100,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## FINAL INSTRUCTION:
 
-As your very next task - **BEFORE ANYTHING ELSE** - check for a potential handover instruction file. To do this, first check the current branch name via `git branch --show-current`. If file exists at `apm/worktree-handovers/<branch-name>.md`, read and follow its instructions immediately. It will tell you precisely what to do next.
+As your very next task - **BEFORE ANYTHING ELSE** - check for a potential handover instruction file. To do this:
+1. Check the current branch name via `git branch --show-current`
+2. Look for handover files matching pattern: `apm/worktree-handovers/*-<branch-name>.md`
+   - Files use date prefix: `YYYY_MM_DD-<branch-name>.md`
+   - Example: `apm/worktree-handovers/2024_06_25-feature-auth.md`
+3. If found, read and follow its instructions immediately - it contains your role assignment and context
