@@ -16,12 +16,3 @@ export interface FileWatcherConfig {
   syncOnStart?: boolean;
 }
 
-export interface TransformRule {
-  pattern: RegExp;
-  transform: (match: RegExpMatchArray) => string;
-}
-
-export interface DomainMapping {
-  keywords: string[];
-  domain: string;
-}
