@@ -266,50 +266,64 @@ git stash -u -m "Unrelated changes"
 
 ### Original Agent Behavior After Handoff
 
-1. **Mark the conversation as closed for that feature**
-   - Do NOT make any further changes to the handed-off branch
-   - Consider the feature work as belonging to the new VS Code window
+1. **Assume ALL work requests relate to the handed-off feature**
+   - Users rarely switch contexts immediately after starting a feature
+   - Default action: redirect to the worktree window for ANY code changes
 
-2. **If user asks about the handed-off feature**
+2. **For ANY request that involves code changes**
    ```bash
-   # Refocus the other VS Code window
-   code ../worktrees/feature-123-description
+   # Find the most recent worktree
+   ls -t ../worktrees/ | head -1 | xargs -I {} code ../worktrees/{}
    ```
-   Then respond: "I've refocused the VS Code window for that feature. Please continue the work there where you have a fresh Claude instance with the proper context."
+   Response: "I've refocused the VS Code window for your feature work. Please continue there where you have the proper context."
 
-3. **Clear handoff indicators**
-   - The existence of a worktree directory indicates a handoff has occurred
-   - Check before making changes: `test -d ../worktrees/feature-123-description`
+3. **Only exception: Different scope detection**
+   - If user explicitly mentions unrelated work, ask:
+   "This seems like a different scope of work. Would you like me to:
+   1. Continue in the existing feature window (default)
+   2. Create a new worktree for this separate work?"
 
-### Example Handoff Flow
+### Example Real-World Flow
 
 ```bash
-# Original window creates worktree and opens new window
-tsx open-worktree-vscode.ts feature-123-description
+# User: "I need to add user authentication"
+# Agent creates worktree and opens new window
+tsx open-worktree-vscode.ts feature-auth-system
 
-# From this point, original agent should NOT:
-# - Checkout the feature branch
-# - Make changes to files on that branch
-# - Cherry-pick commits to that branch
+# Later in original window...
+# User: "Add password validation"
+# Agent: ls -t ../worktrees/ | head -1 | xargs -I {} code ../worktrees/{}
+# Agent: "I've refocused your feature window. Please continue there."
 
-# If user asks about feature-123 work:
-code ../worktrees/feature-123-description  # Refocus the window
-# "Please continue working on feature-123 in the dedicated VS Code window"
+# User: "Can you also update the README?"
+# Agent: ls -t ../worktrees/ | head -1 | xargs -I {} code ../worktrees/{}
+# Agent: "I've refocused your feature window. Documentation updates 
+#         should happen alongside your feature work."
+
+# User: "Actually, I need to fix a critical bug in production"
+# Agent: "This seems like a different scope of work. Would you like me to:
+#         1. Continue in the auth feature window (default)
+#         2. Create a new worktree for this bug fix?"
 ```
 
 ### Handoff State Check
 
-Before working on any feature branch:
+Before making ANY code changes:
 ```bash
-# Check if worktree exists (indicates handoff)
-if [ -d "../worktrees/feature-123-description" ]; then
-    echo "This feature has been handed off to another VS Code window"
-    code ../worktrees/feature-123-description
+# Check if ANY worktree exists (indicates active feature work)
+if [ -d "../worktrees" ] && [ "$(ls -A ../worktrees)" ]; then
+    # Redirect to most recent worktree
+    latest_worktree=$(ls -t ../worktrees/ | head -1)
+    code "../worktrees/$latest_worktree"
+    echo "Redirecting to active feature window"
     exit 1
 fi
 ```
 
-**Key Principle**: One feature, one window, one agent. This prevents conflicts and maintains clear context boundaries.
+**Key Principles**: 
+- **Default to redirect**: Assume user wants to continue feature work
+- **One feature, one window, one agent**: Prevents conflicts
+- **Explicit branching only**: Only create new worktrees when user confirms different scope
 
 ## Best Practices
 
