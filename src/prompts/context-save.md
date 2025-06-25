@@ -175,17 +175,37 @@ If context is for handover:
 - **Critical Information**: [Must know immediately]
 - **Watch Out For**: [Potential issues]
 - **Recommended Approach**: [Suggestions]
-- **Key Files to Review**: [Important paths]
+- **Key Files to Review**: [List exact file paths currently being worked on]
+- **Open PRs/Issues**: [GitHub URLs or issue numbers being addressed]
+- **Modified Files**: [Files with uncommitted changes]
+- **Work in Progress**: [Specific files and line numbers being edited]
+
+**IMPORTANT**: List exact file paths for reference, but mark them clearly:
+
+```
+DO NOT READ THESE FILES DURING INITIALIZATION
+These files will only be read if/when the user chooses to resume this work:
+- src/file1.ts (lines 45-89: implementing feature X)
+- src/file2.ts (lines 12-34: related changes)
+- docs/design.md (context for implementation)
+```
+
+This ensures the next instance knows what files are relevant but won't automatically read them during init.
 
 ## Recovery Instructions
 
 To restore this context:
 
-1. Load this context file from `apm/agents/<role-id>/context/latest.md`
-2. Review recent git commits with `git log --oneline -10`
-3. Check GitHub issues referenced in commits
-4. Review any uncommitted changes with `git status`
-5. Continue with [specific next action]
+1. During initialization, read ONLY:
+   - Your init files (generic + role-specific)
+   - Your MEMORY.md
+   - This context file
+2. Present work options to user and wait for direction
+3. If user chooses to resume:
+   - Read the specific files listed above
+   - Run `git status` to check for uncommitted changes
+   - Review recent commits if needed
+4. Continue with work as directed
 
 ````
 

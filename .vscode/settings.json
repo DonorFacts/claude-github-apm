@@ -1,0 +1,9 @@
+{
+  "terminal.integrated.tabs.title": "${sequence}",
+  "terminal.integrated.tabs.description": "${process}${separator}${cwdFolder}",
+  "terminal.integrated.tabs.separator": " - ",
+  "terminal.integrated.tabs.hideCondition": "never",
+  "terminal.integrated.tabs.showActiveTerminal": "singleTerminal",
+  "terminal.integrated.tabs.enableAnimation": true,
+  "terminal.integrated.tabs.location": "right"
+}
