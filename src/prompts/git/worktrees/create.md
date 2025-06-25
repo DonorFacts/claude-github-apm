@@ -69,9 +69,11 @@ git worktree add "../worktrees/feature-123-description" "feature-123-description
 echo "📖 Reading handover template for guidance..."
 # Read src/prompts/git/worktrees/handover-template.md
 
-# Generate handover file with date prefix at apm/worktree-handovers/YYYY_MM_DD-<branch>.md
+# Generate handover file with TODAY'S date prefix at apm/worktree-handovers/YYYY_MM_DD-<branch>.md
+# IMPORTANT: Use the CURRENT date when creating the file (not any date from examples)
 mkdir -p apm/worktree-handovers
 HANDOVER_FILE="apm/worktree-handovers/$(date +%Y_%m_%d)-feature-123-description.md"
+echo "📅 Using current date: $(date +%Y_%m_%d)"
 
 # Create the handover file based on the template you just read
 # Key decisions:
