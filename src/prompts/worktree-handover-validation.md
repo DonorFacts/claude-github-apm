@@ -71,3 +71,41 @@ pwd  # Confirm worktree path
 git branch --show-current  # Confirm feature branch
 # Claude should already be running
 ```
+
+## Post-Handoff Boundary Protocol
+
+**CRITICAL**: After the handoff is complete:
+
+### For the Original VS Code Window
+
+The agent in the original window must now treat this feature as "closed":
+
+1. **No Further Changes**: Do NOT make any changes to the handed-off branch
+2. **Redirect if Asked**: If user mentions the feature:
+   ```bash
+   # Refocus the feature window
+   code ../worktrees/feature-123-description
+   ```
+   Response: "I've refocused the VS Code window for that feature. Please continue work there."
+
+3. **Check Before Acting**: Before working on any branch:
+   ```bash
+   # Check if worktree exists (indicates handoff)
+   test -d "../worktrees/feature-123-description" && echo "Handed off"
+   ```
+
+### Why This Matters
+
+- **One Feature = One Window = One Agent**: Prevents conflicts and confusion
+- **Clear Context Boundaries**: Each agent knows exactly what it owns
+- **No Accidental Cross-Work**: Original agent won't accidentally modify handed-off work
+
+### Example Scenario
+
+```
+User (in original window): "Can you add tests to feature-123?"
+Agent: *checks worktree exists*
+Agent: code ../worktrees/feature-123-description
+Agent: "I've refocused the feature-123 VS Code window. Please continue 
+        working on tests there where you have the proper context."
+```

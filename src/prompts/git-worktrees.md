@@ -260,6 +260,57 @@ git stash -u -m "Unrelated changes"
 
 **Agent Rule**: Never leave uncommitted changes on main. Either move them to the feature branch or get explicit user direction.
 
+## Post-Handoff Protocol
+
+**CRITICAL**: After creating a worktree and opening it in a new VS Code window, the original agent must treat that feature as "handed off":
+
+### Original Agent Behavior After Handoff
+
+1. **Mark the conversation as closed for that feature**
+   - Do NOT make any further changes to the handed-off branch
+   - Consider the feature work as belonging to the new VS Code window
+
+2. **If user asks about the handed-off feature**
+   ```bash
+   # Refocus the other VS Code window
+   code ../worktrees/feature-123-description
+   ```
+   Then respond: "I've refocused the VS Code window for that feature. Please continue the work there where you have a fresh Claude instance with the proper context."
+
+3. **Clear handoff indicators**
+   - The existence of a worktree directory indicates a handoff has occurred
+   - Check before making changes: `test -d ../worktrees/feature-123-description`
+
+### Example Handoff Flow
+
+```bash
+# Original window creates worktree and opens new window
+tsx open-worktree-vscode.ts feature-123-description
+
+# From this point, original agent should NOT:
+# - Checkout the feature branch
+# - Make changes to files on that branch
+# - Cherry-pick commits to that branch
+
+# If user asks about feature-123 work:
+code ../worktrees/feature-123-description  # Refocus the window
+# "Please continue working on feature-123 in the dedicated VS Code window"
+```
+
+### Handoff State Check
+
+Before working on any feature branch:
+```bash
+# Check if worktree exists (indicates handoff)
+if [ -d "../worktrees/feature-123-description" ]; then
+    echo "This feature has been handed off to another VS Code window"
+    code ../worktrees/feature-123-description
+    exit 1
+fi
+```
+
+**Key Principle**: One feature, one window, one agent. This prevents conflicts and maintains clear context boundaries.
+
 ## Best Practices
 
 1. **Create worktrees outside current directory**: Use `../worktrees/` to avoid cluttering project
