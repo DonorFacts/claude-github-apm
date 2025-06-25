@@ -134,12 +134,14 @@ describe('Handoff Protocol', () => {
       expect(shouldMoveUncommittedWork('develop', true)).toBe(true);
     });
 
-    it('should not move uncommitted changes from feature branches', () => {
+    it('should indicate changes CAN be moved from feature branches', () => {
       // Arrange & Act & Assert
-      expect(shouldMoveUncommittedWork('feature-auth', true)).toBe(false);
-      expect(shouldMoveUncommittedWork('fix-bug-123', true)).toBe(false);
-      expect(shouldMoveUncommittedWork('hotfix/security', true)).toBe(false);
-      expect(shouldMoveUncommittedWork('bugfix/memory-leak', true)).toBe(false);
+      // Changed: now returns true to indicate moving is POSSIBLE
+      // The actual decision requires more context
+      expect(shouldMoveUncommittedWork('feature-auth', true)).toBe(true);
+      expect(shouldMoveUncommittedWork('fix-bug-123', true)).toBe(true);
+      expect(shouldMoveUncommittedWork('hotfix/security', true)).toBe(true);
+      expect(shouldMoveUncommittedWork('bugfix/memory-leak', true)).toBe(true);
     });
   });
 
