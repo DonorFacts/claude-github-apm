@@ -3,6 +3,9 @@
 ## Overview
 This test plan covers the handoff protocol behavior when creating worktrees and transferring work between VS Code windows.
 
+## Updated Approach: Prompt Engineering
+After critical assessment, we've moved from brittle pattern matching to leveraging LLM's natural language understanding through clear prompt instructions. The agent uses its language understanding to determine user intent rather than relying on fragile string matching.
+
 ## Test Categories
 
 ### 1. Worktree Creation Tests

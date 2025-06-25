@@ -267,6 +267,24 @@ git stash -u -m "Unrelated changes"
 
 **Agent Rule**: Never leave uncommitted changes on main. Either move them to the feature branch or get explicit user direction.
 
+### Deciding Whether to Move Uncommitted Changes
+
+When you find uncommitted changes:
+
+1. **From main/master/develop** → Always move to the feature branch
+   - These branches should stay clean
+   - Changes were likely meant for feature work
+
+2. **From feature branches** → Requires analysis:
+   - **Move if**: Changes appear accidental or unrelated to that feature
+   - **Keep if**: Changes are clearly part of that feature's work
+   - **Ask if**: Uncertain about the changes' purpose
+
+3. **Maintenance changes** (>50% config/docs files) → Ask user:
+   - Package.json, README, configs might be general updates
+   - Could belong on main or in the feature
+   - "These look like general maintenance changes. Should I commit them separately?"
+
 ## Post-Handoff Protocol
 
 **CRITICAL**: After creating a worktree and opening it in a new VS Code window, the original agent must treat that feature as "handed off":
@@ -313,46 +331,57 @@ tsx src/tools/worktree-manager/open-worktree-vscode.ts feature-auth-system
 #         2. Create a new worktree for this bug fix?"
 ```
 
-### Handoff State Check
+### Handoff Decision Logic
 
-Before making ANY code changes, use the handoff checker:
+Before making ANY code changes, follow this decision process:
+
+1. **Check if worktrees exist**:
 ```bash
-# Pass the ACTUAL user message to analyze their intent
-# Example: User says "Can you fix the login validation?"
-USER_MESSAGE="Can you fix the login validation?"
-tsx src/tools/worktree-manager/check-worktree-handoff.ts "$USER_MESSAGE"
-HANDOFF_STATUS=$?
-
-case $HANDOFF_STATUS in
-  0)
-    # Continue in current window
-    echo "No worktrees found, continuing here"
-    ;;
-  1)
-    # Redirect to worktree (path is in stdout)
-    WORKTREE_PATH=$(tsx src/tools/worktree-manager/check-worktree-handoff.ts "$USER_REQUEST")
-    code "$WORKTREE_PATH"
-    echo "I've refocused your feature window. Please continue work there."
-    exit 0
-    ;;
-  2)
-    # Ask about creating new worktree
-    echo "This seems like different work. Would you like me to:"
-    echo "1. Continue in the existing feature window (default)"
-    echo "2. Create a new worktree for this separate work?"
-    # Handle user response...
-    ;;
-esac
+if [ -d "../worktrees" ] && [ "$(ls -A ../worktrees)" ]; then
+    WORKTREE_EXISTS=true
+    LATEST_WORKTREE=$(ls -t ../worktrees/ | head -1)
+else
+    WORKTREE_EXISTS=false
+fi
 ```
 
-For simple checks without user request context:
+2. **If worktrees exist, analyze the user's request using your language understanding**:
+
+**DEFAULT ASSUMPTION**: User wants to continue working on the active feature in the worktree.
+
+**Signs of CONTINUING existing work** (redirect without asking):
+- Any request to modify, test, document, or refactor code
+- Questions about the current implementation
+- Bug fixes or improvements to existing features
+- Adding related functionality
+- No explicit mention of switching context
+
+**Signs of STARTING new work** (ask before creating new worktree):
+- Explicit context switches:
+  - "different bug", "unrelated issue", "separate feature"
+  - "actually, I need to...", "let's switch to...", "forget that..."
+  - "new feature", "another problem", "different task"
+- Mentions a completely different component/module than what's in the worktree
+- Clear pivot in conversation direction
+
+**When UNCERTAIN**:
+- If you're genuinely unsure whether it's related to current work
+- Ask briefly: "Is this related to your work in feature-X, or should I create a new worktree for this?"
+- Default to redirecting if user doesn't clearly indicate it's different work
+
+3. **Take action based on analysis**:
 ```bash
-# Just check if ANY worktree exists
-if [ -d "../worktrees" ] && [ "$(ls -A ../worktrees)" ]; then
-    latest_worktree=$(ls -t ../worktrees/ | head -1)
-    code "../worktrees/$latest_worktree"
-    echo "Redirecting to active feature window"
+# Default: Redirect to existing worktree
+if [ "$WORKTREE_EXISTS" = true ]; then
+    code "../worktrees/$LATEST_WORKTREE"
+    echo "I've refocused your feature window. Please continue work there."
+    exit 0
 fi
+
+# If you determine it's explicitly different work:
+# Ask: "This seems like different work. Would you like me to:
+#       1. Continue in the existing feature window (default)
+#       2. Create a new worktree for this separate work?"
 ```
 
 **Key Principles**: 
