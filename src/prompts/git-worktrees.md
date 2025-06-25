@@ -141,6 +141,13 @@ if [[ "$CREATED_NEW_BRANCH" == "true" ]]; then
     git checkout main
     git worktree add "../worktrees/$CURRENT_BRANCH" "$CURRENT_BRANCH"
     echo "✅ Created worktree at ../worktrees/$CURRENT_BRANCH"
+    
+    # Install dependencies in the new worktree
+    echo "📦 Installing dependencies in worktree..."
+    cd "../worktrees/$CURRENT_BRANCH"
+    pnpm install
+    cd -  # Return to main directory
+    echo "✅ Dependencies installed"
     echo "📍 Back in main branch in current directory"
     
     # Open VS Code in the new worktree with Claude Code running
@@ -308,15 +315,41 @@ tsx src/tools/worktree-manager/open-worktree-vscode.ts feature-auth-system
 
 ### Handoff State Check
 
-Before making ANY code changes:
+Before making ANY code changes, use the handoff checker:
 ```bash
-# Check if ANY worktree exists (indicates active feature work)
+# Check what action to take based on user request
+tsx src/tools/worktree-manager/check-worktree-handoff.ts "$USER_REQUEST"
+HANDOFF_STATUS=$?
+
+case $HANDOFF_STATUS in
+  0)
+    # Continue in current window
+    echo "No worktrees found, continuing here"
+    ;;
+  1)
+    # Redirect to worktree (path is in stdout)
+    WORKTREE_PATH=$(tsx src/tools/worktree-manager/check-worktree-handoff.ts "$USER_REQUEST")
+    code "$WORKTREE_PATH"
+    echo "I've refocused your feature window. Please continue work there."
+    exit 0
+    ;;
+  2)
+    # Ask about creating new worktree
+    echo "This seems like different work. Would you like me to:"
+    echo "1. Continue in the existing feature window (default)"
+    echo "2. Create a new worktree for this separate work?"
+    # Handle user response...
+    ;;
+esac
+```
+
+For simple checks without user request context:
+```bash
+# Just check if ANY worktree exists
 if [ -d "../worktrees" ] && [ "$(ls -A ../worktrees)" ]; then
-    # Redirect to most recent worktree
     latest_worktree=$(ls -t ../worktrees/ | head -1)
     code "../worktrees/$latest_worktree"
     echo "Redirecting to active feature window"
-    exit 1
 fi
 ```
 

@@ -40,7 +40,11 @@
     "url": "git+https://github.com/DonorFacts/claude-github-apm.git"
   },
   "devDependencies": {
-    "jest": "^30.0.0"
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.0.4",
+    "jest": "^30.0.0",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "fs-extra": "^11.2.0",
