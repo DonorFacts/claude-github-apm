@@ -214,6 +214,52 @@ git cherry-pick temp-changes
 git branch -d temp-changes
 ```
 
+## Handling Uncommitted Changes
+
+**IMPORTANT**: If you have uncommitted changes when trying to create a worktree:
+
+### Default Agent Behavior
+1. Move ALL uncommitted changes to the new feature branch
+2. This keeps main clean and preserves work in progress
+3. Agent assumes changes are related to the upcoming feature
+
+### When Agent Should Ask User
+- Changes to config files (package.json, tsconfig.json, etc.)
+- Updates to documentation (README.md, CLAUDE.md)
+- Changes spanning multiple unrelated features
+- Modifications that look like general fixes
+
+### Quick Decision Flow
+```bash
+# Check uncommitted changes
+git status --porcelain
+
+# If on main with changes, default action:
+git checkout -b feature-123-description  # Takes changes with you
+git add . && git commit -m "wip: starting feature"
+git checkout main  # Now clean
+git worktree add "../worktrees/feature-123-description" "feature-123-description"
+```
+
+### Alternative: Selective Handling
+```bash
+# Stash everything first
+git stash -u -m "Mixed changes"
+
+# Create clean feature branch
+git checkout -b feature-123-description
+
+# Cherry-pick relevant changes
+git stash pop
+git add -p  # Interactive: choose what belongs
+
+# Commit feature work, re-stash the rest
+git commit -m "feat: start implementation"
+git stash -u -m "Unrelated changes"
+```
+
+**Agent Rule**: Never leave uncommitted changes on main. Either move them to the feature branch or get explicit user direction.
+
 ## Best Practices
 
 1. **Create worktrees outside current directory**: Use `../worktrees/` to avoid cluttering project
@@ -222,6 +268,7 @@ git branch -d temp-changes
 4. **Document worktree usage**: Note in commits when worktree workflow was used
 5. **Prefer staying in main directory**: Only reference worktrees, don't try to cd into them
 6. **Let VS Code handle navigation**: The automated setup opens the correct directory
+7. **Handle uncommitted changes explicitly**: Never leave work uncommitted on main
 
 ## Common Issues and Solutions
 
