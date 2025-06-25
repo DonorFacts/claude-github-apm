@@ -1,11 +1,11 @@
-# Git Worktrees - Validation Guide
+# Git Worktrees - Complete Handoff
 
-## When to Use This Guide
+## When to Use This Command
 
-- After creating a worktree and opening VS Code
-- To verify handoff was successful
-- When something seems wrong with the setup
-- To understand the post-handoff boundary protocol
+- Immediately after Step 6 in create.md
+- To complete the handoff process
+- To prompt user for validation
+- To learn boundary enforcement rules
 
 ## What Should Happen
 
@@ -16,24 +16,24 @@ After running the worktree creation workflow:
 3. **Claude Started**: Terminal panel with Claude prompt
 4. **Correct Context**: Feature branch, not main
 
-## User Validation Steps
+## Agent: Prompt User to Validate
 
-In the new VS Code window's terminal:
+After creating a worktree, prompt the user with these validation steps:
 
-```bash
-# 1. Verify location (should be worktree, not main)
-pwd
-# Expected: /path/to/worktrees/feature-123-description
+```
+Please switch to the new VS Code window and verify:
 
-# 2. Verify branch (should be feature, not main)
-git branch --show-current
-# Expected: feature-123-description
+1. Run 'pwd' - you should be in the worktree directory
+   (e.g., /path/to/worktrees/feature-123-description)
 
-# 3. Verify git status (should be clean or show your changes)
-git status
+2. Run 'git branch --show-current' - you should see your feature branch
+   (not main/master)
 
-# 4. Claude should already be running
-# You should see Claude's interface in the terminal
+3. Check that Claude is running in the terminal
+   (you should see Claude's interface)
+
+4. If everything looks correct, tell me "verified" and continue your work there.
+   If something seems wrong, let me know what you're seeing.
 ```
 
 ## Post-Handoff Boundary Protocol

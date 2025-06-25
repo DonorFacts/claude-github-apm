@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - DO NOT WASTE TOKENS, be succinct and concise.
 - If the User provides you with just a .md file reference and no other information, then YOU MUST treat the .md contents as specific instructions from the User for you to immediately follow exactly.
 - ALWAYS use strict TypeScript rather than creating Bash `.sh` scripts. Execute `.ts` files via `tsx <file>`.
+- ALWAYS invoke local scripts using relative paths (e.g., `./src/scripts/foo.sh`) rather than absolute paths. This ensures portability across different environments and worktrees.
 - YOU MUST follow TDD practices every time you implement new functionality, fix bugs, or otherwise modify application behavior:
   1.  List happy path and edge cases
   2.  Identify acceptance criteria for each case
@@ -98,11 +99,3 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - **Instructions File Path**: `src/prompts/multiple-questions.md`
    - **Instructions Summary**: Ask the user whether they want to move this new subject to a separate Claude conversation in a new Terminal tab, and create a new issue for it, appending as context the latest messages relevant to the new subject. And include the end of the initial Claude prompt an instruction for carrying over this conversation (either answering the user's last question (if not answered), summarizing where you both left off, providing a link to the new issue, and asking the user to continue the conversation in the new Terminal tab, maybe even sharing the keyboard shortcut to switch to the new tab))
 
-## FINAL INSTRUCTION:
-
-As your very next task - **BEFORE ANYTHING ELSE** - check for a potential handover instruction file. To do this:
-1. Check the current branch name via `git branch --show-current`
-2. Look for handover files matching pattern: `apm/worktree-handovers/*-<branch-name>.md`
-   - Files use date prefix: `YYYY_MM_DD-<branch-name>.md`
-   - Example: `apm/worktree-handovers/2024_06_25-feature-auth.md`
-3. If found, read and follow its instructions immediately - it contains your role assignment and context

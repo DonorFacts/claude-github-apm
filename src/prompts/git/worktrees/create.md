@@ -4,6 +4,8 @@
 
 Claude Code cannot `cd` outside the original working directory. Git worktrees enable branch management by creating separate directories that Claude can reference but not navigate to.
 
+**For users**: See `docs/workflow/worktree-handover.md` for understanding the handover system.
+
 ## STOP: Assess Your Situation First
 
 Before taking ANY action, determine your current state:
@@ -69,10 +71,10 @@ git worktree add "../worktrees/feature-123-description" "feature-123-description
 echo "📖 Reading handover template for guidance..."
 # Read src/prompts/git/worktrees/handover-template.md
 
-# Generate handover file with TODAY'S date prefix at apm/worktree-handovers/YYYY_MM_DD-<branch>.md
+# Generate handover file with TODAY'S date prefix at apm/worktree-handovers/not-started/YYYY_MM_DD-<branch>.md
 # IMPORTANT: Use the CURRENT date when creating the file (not any date from examples)
-mkdir -p apm/worktree-handovers
-HANDOVER_FILE="apm/worktree-handovers/$(date +%Y_%m_%d)-feature-123-description.md"
+mkdir -p apm/worktree-handovers/not-started
+HANDOVER_FILE="apm/worktree-handovers/not-started/$(date +%Y_%m_%d)-feature-123-description.md"
 echo "📅 Using current date: $(date +%Y_%m_%d)"
 
 # Create the handover file based on the template you just read
@@ -86,6 +88,29 @@ echo "✍️  Creating handover file at $HANDOVER_FILE"
 # 5. Open VS Code and install dependencies
 # This script works around Claude's cd limitation by using cwd option
 tsx src/tools/worktree-manager/open-worktree-vscode.ts "../worktrees/feature-123-description"
+
+# 6. Complete the handoff
+# Agent: Prompt the user to validate the setup
+echo ""
+echo "✅ Worktree created and VS Code opened!"
+echo ""
+echo "Please switch to the new VS Code window and verify:"
+echo ""
+echo "1. Run 'pwd' - you should be in the worktree directory"
+echo "   (e.g., /path/to/worktrees/feature-123-description)"
+echo ""
+echo "2. Run 'git branch --show-current' - you should see your feature branch"
+echo "   (not main/master)"
+echo ""
+echo "3. Check that Claude is running in the terminal"
+echo ""
+echo "4. If everything looks correct, tell me 'verified' and continue there."
+echo "   If something seems wrong, let me know what you're seeing."
+echo ""
+echo "From now on, I'll redirect all code work to that window."
+
+# Agent: Also study src/prompts/git/worktrees/complete-handoff.md#post-handoff-boundary-protocol
+# to understand how to enforce boundaries going forward
 ```
 
 ## Section B: Feature Branch with Related Changes
@@ -97,7 +122,7 @@ When on a feature branch with changes that belong to that feature:
 git add .
 git commit -m "feat: work in progress"
 
-# 2. Then follow Section A steps 2-5 (switch to main, create worktree, handover, open VS Code)
+# 2. Then follow Section A steps 2-6 (switch to main, create worktree, handover, open VS Code, complete handoff)
 ```
 
 ## Section C: Main Branch with My Changes
@@ -112,7 +137,7 @@ git checkout -b feature-123-description
 git add .
 git commit -m "feat: initial work"
 
-# 3. Then follow Section A steps 2-5 (switch to main, create worktree, handover, open VS Code)
+# 3. Then follow Section A steps 2-6 (switch to main, create worktree, handover, open VS Code, complete handoff)
 ```
 
 ## Section D: Mixed Changes (Mine + Others)
@@ -140,7 +165,7 @@ git stash -u -m "Others' changes - left on main"
 # 6. Continue with worktree creation
 git checkout main
 git stash pop  # Restore others' changes to main
-# Then follow Section A steps 3-5 (create worktree, handover, open VS Code)
+# Then follow Section A steps 3-6 (create worktree, handover, open VS Code, complete handoff)
 ```
 
 ## Section E: Only Others' Changes
@@ -156,18 +181,34 @@ git checkout main
 git stash pop  # Restore others' changes
 
 # Continue with worktree creation
-# Follow Section A steps 3-5 (create worktree, handover, open VS Code)
+# Follow Section A steps 3-6 (create worktree, handover, open VS Code, complete handoff)
 ```
 
 ## Post-Handoff Protocol
 
-After creating a worktree, enforce strict boundaries:
+**IMPORTANT**: This happens immediately after Step 6 above.
 
-1. **Redirect ALL code requests** to the worktree window
-2. **Only create new worktree** if user explicitly mentions different work
-3. **One feature = One window = One agent**
+### Agent Actions (Automatic)
 
-Details: See `src/prompts/git/worktrees/verify.md`
+After prompting the user to verify, the agent must:
+
+1. **Read boundary rules**: Study `src/prompts/git/worktrees/complete-handoff.md#post-handoff-boundary-protocol`
+2. **Start enforcing**: From this point forward, redirect all code work
+3. **Stay in role**: Continue as current agent but with boundary awareness
+
+### User Actions (Manual)
+
+The user should:
+1. Switch to the new VS Code window
+2. Verify Claude is running
+3. Continue feature work there
+
+### Ongoing Behavior
+
+From this point forward:
+- **Original agent**: Redirects code requests to the worktree window
+- **New agent**: Handles all feature implementation
+- **Clear separation**: One feature = One window = One agent
 
 ## Quick Reference
 
@@ -182,8 +223,9 @@ git worktree prune                            # Clean stale info
 | Your Situation | Required Guide |
 |----------------|----------------|
 | Creating effective handover files | `src/prompts/git/worktrees/handover-template.md` |
+| Understanding handover initialization | `src/prompts/git/worktrees/init-handover.md` |
 | Files accidentally created in wrong directory | `src/prompts/git/worktrees/troubleshoot.md#file-transfer` |
-| Verifying handoff worked correctly | `src/prompts/git/worktrees/verify.md` |
+| Agent: Learn validation prompts & boundary rules | `src/prompts/git/worktrees/complete-handoff.md` |
 | Any errors or unexpected behavior | `src/prompts/git/worktrees/troubleshoot.md` |
 | Making commits after setup | `src/prompts/git/commit.md` |
 
