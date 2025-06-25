@@ -79,7 +79,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 | Critique a project plan        | `src/prompts/agents/scrum-master/critique-project-plan.md` |
 | Provide constructive criticism | `src/prompts/wip/constructive-criticism-guidelines.md`     |
 | Debugging methodology          | `src/prompts/debugging-lessons/DEBUGGING-METHODOLOGY.md`   |
-| Git worktree setup             | `src/prompts/git-worktrees.md`                             |
+| Git worktree setup             | `src/prompts/git/worktrees/create.md`                      |
 | Code review                    | `src/prompts/code-review.md`                               |
 
 ## Other Unique Situations and Instructions for Addressing Each:
@@ -92,7 +92,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
    - **Instructions File Path**: `src/prompts/new-request.md`
    - **Instructions Summary**: Ask user if they'd like a new issue created, new branch w/ git worktree, and new VS Code window w/ Claude in the terminal loaded.
-   - **Note**: When creating worktrees, follow `src/prompts/git-worktrees.md` for handling uncommitted changes
+   - **Note**: When creating worktrees, follow `src/prompts/git/worktrees/create.md`
 
 2. **User starts asking 2+ questions that seem unrelated to current work**:
    - **Instructions File Path**: `src/prompts/multiple-questions.md`
