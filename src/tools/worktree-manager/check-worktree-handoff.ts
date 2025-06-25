@@ -4,6 +4,13 @@
  * CLI tool to check if work should be redirected to a worktree
  * Usage: tsx check-worktree-handoff.ts "<user request>"
  * 
+ * Pass the ACTUAL user message/request as the argument.
+ * The tool analyzes the request to determine intent.
+ * 
+ * Examples:
+ *   tsx check-worktree-handoff.ts "Can you add tests to the auth module?"
+ *   tsx check-worktree-handoff.ts "I need to fix a different bug"
+ * 
  * Exit codes:
  * 0 - Continue in current window
  * 1 - Redirect to worktree (prints path to stdout)

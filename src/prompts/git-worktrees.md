@@ -317,8 +317,10 @@ tsx src/tools/worktree-manager/open-worktree-vscode.ts feature-auth-system
 
 Before making ANY code changes, use the handoff checker:
 ```bash
-# Check what action to take based on user request
-tsx src/tools/worktree-manager/check-worktree-handoff.ts "$USER_REQUEST"
+# Pass the ACTUAL user message to analyze their intent
+# Example: User says "Can you fix the login validation?"
+USER_MESSAGE="Can you fix the login validation?"
+tsx src/tools/worktree-manager/check-worktree-handoff.ts "$USER_MESSAGE"
 HANDOFF_STATUS=$?
 
 case $HANDOFF_STATUS in
