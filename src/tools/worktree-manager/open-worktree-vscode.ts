@@ -2,16 +2,26 @@
 
 import { execSync } from 'child_process';
 import { platform } from 'os';
-import { existsSync, mkdirSync, copyFileSync } from 'fs';
+import { existsSync, mkdirSync, copyFileSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 
 /**
  * Opens VS Code in a worktree directory with Claude auto-launch via tasks.json
  */
-function openWorktreeInVSCode(worktreePath: string): void {
+export function openWorktreeInVSCode(worktreePath: string): void {
   console.log(`🚀 Opening VS Code in worktree: ${worktreePath}`);
   
   try {
+    // Install dependencies in the worktree first
+    console.log(`📦 Installing dependencies in worktree...`);
+    try {
+      execSync(`cd "${worktreePath}" && pnpm install`, { stdio: 'inherit' });
+      console.log(`✅ Dependencies installed`);
+    } catch (error) {
+      console.error(`⚠️  Failed to install dependencies: ${(error as Error).message}`);
+      console.log(`💡 You may need to run 'pnpm install' manually in the worktree`);
+    }
+    
     // Ensure .vscode directory exists in worktree
     const vscodeDir = join(worktreePath, '.vscode');
     if (!existsSync(vscodeDir)) {
@@ -49,7 +59,7 @@ function openWorktreeInVSCode(worktreePath: string): void {
         ]
       };
       
-      require('fs').writeFileSync(tasksTarget, JSON.stringify(tasksContent, null, 2));
+      writeFileSync(tasksTarget, JSON.stringify(tasksContent, null, 2));
       console.log('📋 Created tasks.json in worktree (Claude will auto-launch)');
     }
     
@@ -61,7 +71,7 @@ function openWorktreeInVSCode(worktreePath: string): void {
       execSync(`open -a "Visual Studio Code" "${worktreePath}"`, { stdio: 'inherit' });
     } else if (osPlatform === 'win32') {
       // On Windows, try common VS Code paths
-      execSync(`start "" "C:\\Program Files\\Microsoft VS Code\\Code.exe" "${worktreePath}"`, { stdio: 'inherit', shell: true });
+      execSync(`start "" "C:\\Program Files\\Microsoft VS Code\\Code.exe" "${worktreePath}"`, { stdio: 'inherit', shell: 'cmd.exe' });
     } else {
       // On Linux, try the code command
       execSync(`code "${worktreePath}"`, { stdio: 'inherit' });
@@ -82,13 +92,16 @@ function openWorktreeInVSCode(worktreePath: string): void {
   }
 }
 
-// Get worktree path from command line argument
-const worktreePath = process.argv[2];
+// CLI execution
+if (require.main === module) {
+  // Get worktree path from command line argument
+  const worktreePath = process.argv[2];
 
-if (!worktreePath) {
-  console.error('❌ Usage: tsx open-worktree-vscode.ts <worktree-path>');
-  console.error('   Example: tsx open-worktree-vscode.ts ../worktrees/feature-branch');
-  process.exit(1);
+  if (!worktreePath) {
+    console.error('❌ Usage: tsx open-worktree-vscode.ts <worktree-path>');
+    console.error('   Example: tsx open-worktree-vscode.ts ../worktrees/feature-branch');
+    process.exit(1);
+  }
+
+  openWorktreeInVSCode(worktreePath);
 }
-
-openWorktreeInVSCode(worktreePath);
