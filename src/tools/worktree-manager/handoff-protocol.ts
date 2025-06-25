@@ -16,6 +16,17 @@ export interface HandoffDecision {
 
 /**
  * Determines what action to take based on existing worktrees and user request
+ * 
+ * @param existingWorktrees - List of active worktrees
+ * @param userRequest - The raw user request/message to analyze for intent
+ * @returns Decision about whether to redirect, create new, or continue
+ * 
+ * @example
+ * // Agent usage:
+ * const decision = determineHandoffAction(
+ *   getWorktrees(),
+ *   "Can you fix the login bug?" // Pass the actual user message
+ * );
  */
 export function determineHandoffAction(
   existingWorktrees: WorktreeInfo[],
@@ -69,6 +80,14 @@ export function getMostRecentWorktree(worktrees: WorktreeInfo[]): WorktreeInfo {
 
 /**
  * Detects if user is explicitly asking about different work
+ * This is a heuristic-based approach that looks for key phrases
+ * 
+ * @param userRequest - The raw user message to analyze
+ * @returns true if user seems to be talking about different work
+ * 
+ * @example
+ * isExplicitlyDifferentScope("Fix a different bug") // true
+ * isExplicitlyDifferentScope("Add more tests") // false
  */
 export function isExplicitlyDifferentScope(userRequest: string): boolean {
   const differentScopeIndicators = [
@@ -112,7 +131,7 @@ export function shouldMoveUncommittedWork(
   // 1. Are the changes related to the current feature?
   // 2. Were they made accidentally?
   // 3. Does a more appropriate worktree exist?
-  
+
   // For now, return true to indicate changes CAN be moved if needed
   // The caller should make the final decision based on context
   return true;
