@@ -81,6 +81,10 @@ Role: prompt-engineer
 - Simplicity over tools - LLMs can generate files directly from templates
 - Handover systems enable true multi-window/multi-agent workflows
 - **Prompt command filenames should be verbs/action-directed** (e.g., "complete-handoff.md" not "handoff-complete.md")
+- **PR Creation Pattern**: Always check for existing PRs before creating new ones
+  - Script pattern preferred: handles open PRs, closed PRs, and merged PRs appropriately
+  - gh pr create fails with error if PR already exists for branch
+  - Update existing open PRs instead of attempting duplicate creation
 
 ### Token Optimization Opportunities
 
@@ -134,6 +138,13 @@ Role: prompt-engineer
 **Meta-Script Pattern**: Generate comprehensive scripts instead of executing multiple commands
 - Example: 20+ individual commands → 3 tool calls (create script, chmod, execute)
 - Dramatic token reduction while maintaining functionality
+
+**CRITICAL RULE**: Lengthy bash scripts do NOT belong in prompt.md files!
+- Impairs agent memory in the long run
+- Consumes extra tokens unnecessarily
+- Instead: Create .sh or .ts files in src/scripts/ referenced from prompts
+- Scripts must be well-commented for future development needs
+- This pattern saves 80-90% of tokens while maintaining functionality
 
 **File-Based State Management**: Use agent memory system for persistent state
 - MEMORY.md for long-term patterns and learnings
