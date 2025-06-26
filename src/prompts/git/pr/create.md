@@ -2,9 +2,41 @@
 
 Create comprehensive PRs by analyzing commit history and changes.
 
-## IMPORTANT: Check for Existing PRs First
+## IMPORTANT: Check for GitHub Issue First
 
-Before creating a new PR, ALWAYS check if one already exists:
+Before creating a PR, ensure there's a GitHub issue to track the work:
+
+```bash
+# Extract issue number from branch name (format: feature-123-description)
+CURRENT_BRANCH=$(git branch --show-current)
+ISSUE_NUMBER=$(echo "$CURRENT_BRANCH" | grep -o 'feature-[0-9]*' | grep -o '[0-9]*' || echo "")
+
+if [ -z "$ISSUE_NUMBER" ]; then
+    echo "⚠️  No issue number found in branch name: $CURRENT_BRANCH"
+    echo "Creating GitHub issue first..."
+    
+    # Use the PR analysis to create meaningful issue
+    ISSUE_TITLE=$(git log --format="%s" main..HEAD | head -1 | cut -d: -f2- | sed 's/^ *//')
+    ISSUE_BODY=$(./src/scripts/git/generate-issue-body.sh)
+    
+    # Create issue and capture number
+    ISSUE_NUMBER=$(gh issue create \
+        --title "$ISSUE_TITLE" \
+        --body "$ISSUE_BODY" \
+        --label "enhancement" \
+        --assignee "@me" \
+        --json number \
+        --jq '.number')
+    
+    echo "✅ Created GitHub issue #$ISSUE_NUMBER"
+else
+    echo "✅ Using existing issue #$ISSUE_NUMBER from branch name"
+fi
+```
+
+## IMPORTANT: Check for Existing PRs Second
+
+After ensuring we have an issue, check if PR already exists:
 
 ```bash
 # Check for existing open PR for current branch
@@ -15,7 +47,7 @@ if [[ -n "$EXISTING_PR" ]]; then
     PR_URL=$(echo "$EXISTING_PR" | jq -r '.url')
     echo "✅ Open PR already exists: #$PR_NUM - $PR_URL"
     echo "Updating existing PR body..."
-    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh)"
+    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh "$ISSUE_NUMBER")"
     exit 0
 fi
 
@@ -26,7 +58,7 @@ if [[ -n "$CLOSED_PR" ]] && [[ "$(echo "$CLOSED_PR" | jq -r '.mergedAt')" == "nu
     PR_NUM=$(echo "$CLOSED_PR" | jq -r '.number')
     echo "🔄 Reopening closed PR #$PR_NUM"
     gh pr reopen "$PR_NUM"
-    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh)"
+    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh "$ISSUE_NUMBER")"
     exit 0
 fi
 
@@ -37,8 +69,8 @@ echo "📝 Creating new PR..."
 ## Quick Command (After Checking)
 
 ```bash
-# Push branch and create PR with analyzed content
-gh pr create --title "<type>: <concise summary>" --body "$(./src/scripts/git/generate-pr-body.sh)"
+# Push branch and create PR with analyzed content (including issue link)
+gh pr create --title "<type>: <concise summary>" --body "$(./src/scripts/git/generate-pr-body.sh "$ISSUE_NUMBER")"
 ```
 
 ## Full Workflow
@@ -179,7 +211,7 @@ fi
 echo "📝 Creating new PR..."
 gh pr create \
   --title "$TITLE" \
-  --body "$(./src/scripts/git/generate-pr-body.sh)" \
+  --body "$(./src/scripts/git/generate-pr-body.sh "$ISSUE_NUMBER")" \
   --assignee @me
 ```
 
@@ -192,11 +224,11 @@ gh pr create
 # Method 2: Direct with generated body - for new PRs only
 gh pr create \
   --title "feat: implement comprehensive feature set" \
-  --body "$(./src/scripts/git/generate-pr-body.sh)"
+  --body "$(./src/scripts/git/generate-pr-body.sh "$ISSUE_NUMBER")"
 
 # Method 3: Update existing PR
 gh pr edit <PR_NUMBER> \
-  --body "$(./src/scripts/git/generate-pr-body.sh)"
+  --body "$(./src/scripts/git/generate-pr-body.sh "$ISSUE_NUMBER")"
 ```
 
 ## Best Practices

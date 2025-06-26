@@ -3,6 +3,7 @@
 
 BRANCH=$(git branch --show-current)
 COMMIT_COUNT=$(git log --format="%H" main..HEAD | wc -l)
+ISSUE_NUMBER="$1"  # Optional issue number parameter
 
 # Extract first commit type and summary for PR title hint
 FIRST_COMMIT=$(git log --reverse --format="%s" main..HEAD | head -1)
@@ -71,10 +72,20 @@ done
 # Extract issues
 echo "## Related Issues"
 echo ""
-ISSUES=$(git log --format="%B" main..HEAD | grep -oE "(Issues|Fixes|Closes): #[0-9]+" | sort | uniq)
-if [ -n "$ISSUES" ]; then
-    echo "$ISSUES"
-else
+
+# If issue number was provided as parameter, include it
+if [ -n "$ISSUE_NUMBER" ]; then
+    echo "Closes: #$ISSUE_NUMBER"
+fi
+
+# Also extract any issues from commit messages
+COMMIT_ISSUES=$(git log --format="%B" main..HEAD | grep -oE "(Issues|Fixes|Closes): #[0-9]+" | sort | uniq)
+if [ -n "$COMMIT_ISSUES" ]; then
+    echo "$COMMIT_ISSUES"
+fi
+
+# If no issues found anywhere
+if [ -z "$ISSUE_NUMBER" ] && [ -z "$COMMIT_ISSUES" ]; then
     echo "No issues referenced in commits"
 fi
 echo ""
