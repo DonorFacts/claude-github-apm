@@ -2,76 +2,36 @@
 
 Create comprehensive PRs by analyzing commit history and changes.
 
-## IMPORTANT: Check for GitHub Issue First
+## Usage
 
-Before creating a PR, ensure there's a GitHub issue to track the work:
-
-```bash
-# Extract issue number from branch name (format: feature-123-description)
-CURRENT_BRANCH=$(git branch --show-current)
-ISSUE_NUMBER=$(echo "$CURRENT_BRANCH" | grep -o 'feature-[0-9]*' | grep -o '[0-9]*' || echo "")
-
-if [ -z "$ISSUE_NUMBER" ]; then
-    echo "⚠️  No issue number found in branch name: $CURRENT_BRANCH"
-    echo "Creating GitHub issue first..."
-    
-    # Use the PR analysis to create meaningful issue
-    ISSUE_TITLE=$(git log --format="%s" main..HEAD | head -1 | cut -d: -f2- | sed 's/^ *//')
-    ISSUE_BODY=$(./src/scripts/git/generate-issue-body.sh)
-    
-    # Create issue and capture number
-    ISSUE_NUMBER=$(gh issue create \
-        --title "$ISSUE_TITLE" \
-        --body "$ISSUE_BODY" \
-        --label "enhancement" \
-        --assignee "@me" \
-        --json number \
-        --jq '.number')
-    
-    echo "✅ Created GitHub issue #$ISSUE_NUMBER"
-else
-    echo "✅ Using existing issue #$ISSUE_NUMBER from branch name"
-fi
-```
-
-## IMPORTANT: Check for Existing PRs Second
-
-After ensuring we have an issue, check if PR already exists:
+Execute the complete PR creation workflow:
 
 ```bash
-# Check for existing open PR for current branch
-EXISTING_PR=$(gh pr list --head "$(git branch --show-current)" --state open --json number,url --jq '.[0]')
+# Automatic workflow (detects issues, handles existing PRs)
+./src/scripts/git/pr-create.sh
 
-if [[ -n "$EXISTING_PR" ]]; then
-    PR_NUM=$(echo "$EXISTING_PR" | jq -r '.number')
-    PR_URL=$(echo "$EXISTING_PR" | jq -r '.url')
-    echo "✅ Open PR already exists: #$PR_NUM - $PR_URL"
-    echo "Updating existing PR body..."
-    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh "$ISSUE_NUMBER")"
-    exit 0
-fi
-
-# Check for closed PR that might need reopening
-CLOSED_PR=$(gh pr list --head "$(git branch --show-current)" --state closed --json number,mergedAt --jq '.[0]')
-
-if [[ -n "$CLOSED_PR" ]] && [[ "$(echo "$CLOSED_PR" | jq -r '.mergedAt')" == "null" ]]; then
-    PR_NUM=$(echo "$CLOSED_PR" | jq -r '.number')
-    echo "🔄 Reopening closed PR #$PR_NUM"
-    gh pr reopen "$PR_NUM"
-    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh "$ISSUE_NUMBER")"
-    exit 0
-fi
-
-# If no PR exists, create new one
-echo "📝 Creating new PR..."
+# With custom title
+./src/scripts/git/pr-create.sh "feat: implement comprehensive feature set"
 ```
 
-## Quick Command (After Checking)
+## What the Script Does
 
-```bash
-# Push branch and create PR with analyzed content (including issue link)
-gh pr create --title "<type>: <concise summary>" --body "$(./src/scripts/git/generate-pr-body.sh "$ISSUE_NUMBER")"
-```
+The script performs these steps automatically:
+
+### 1. GitHub Issue Management
+- Extracts issue number from branch name (`feature-123-description` format)
+- If no issue number found, creates meaningful issue from commit analysis
+- Uses first commit for title and detailed analysis for body
+
+### 2. Existing PR Detection
+- Checks for open PRs and updates body with latest changes
+- Finds closed PRs and reopens if appropriate (not merged)
+- Avoids duplicate PR creation
+
+### 3. New PR Creation
+- Pushes branch to origin if needed
+- Creates PR with comprehensive body linking to GitHub issue
+- Auto-assigns to current user
 
 ## Full Workflow
 
