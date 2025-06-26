@@ -4,7 +4,7 @@
     {
       "label": "Claude",
       "type": "shell",
-      "command": "claude 'Check for handover file and run if exists'",
+      "command": "claude '@src/prompts/git/worktrees/init-handover.md'",
       "presentation": {
         "reveal": "always",
         "panel": "new",
