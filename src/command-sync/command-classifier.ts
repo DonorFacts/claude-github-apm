@@ -19,6 +19,12 @@ export class CommandClassifier {
         continue;
       }
       
+      // Check if file is README.md
+      if (path.endsWith('/README.md') || path === 'README.md') {
+        privateIncludes.push(path);
+        continue;
+      }
+      
       // All other files are public commands
       publicCommands.push(path);
     }
@@ -37,6 +43,11 @@ export class CommandClassifier {
     
     // Check if empty
     if (!file.content.trim()) {
+      return false;
+    }
+    
+    // Check if README.md
+    if (file.path.endsWith('/README.md') || file.path === 'README.md') {
       return false;
     }
     
