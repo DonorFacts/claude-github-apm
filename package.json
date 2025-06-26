@@ -17,7 +17,7 @@
     "dev": "echo 'Framework ready for linking'",
     "link": "pnpm link --global",
     "unlink": "pnpm unlink --global",
-    "build:prompts": "node lib/create-command-files.js",
+    "build:prompts": "tsx src/command-sync/index.ts",
     "build": "npm run build:prompts",
     "clean": "rm -rf dist",
     "test": "jest",
