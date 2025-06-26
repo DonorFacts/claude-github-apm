@@ -40,9 +40,9 @@ while IFS= read -r event; do
             echo "[${TIMESTAMP}] Session ended: $ROLE ($SESSION_ID)"
             
             # Trigger post-processing
-            if [ -f "scripts/session-tools/post-process-session.sh" ]; then
+            if [ -f "src/scripts/session-tools/post-process-session.sh" ]; then
                 echo "Running post-processing for session $SESSION_ID..."
-                ./scripts/session-tools/post-process-session.sh "$SESSION_ID" "$ROLE"
+                ./src/scripts/session-tools/post-process-session.sh "$SESSION_ID" "$ROLE"
             fi
             ;;
             
