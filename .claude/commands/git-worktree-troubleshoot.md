@@ -38,7 +38,8 @@ cp my-files.ts ../worktrees/feature-branch/
 
 # 3. Create handover note
 BRANCH_NAME="feature-branch"
-cat > "apm/worktree-handovers/${BRANCH_NAME}.md" << EOF
+mkdir -p apm/worktree-handovers/not-started
+cat > "apm/worktree-handovers/not-started/$(date +%Y_%m_%d)-${BRANCH_NAME}.md" << EOF
 # Handover: ${BRANCH_NAME}
 
 ## Files Transferred

@@ -109,6 +109,7 @@ The system automatically transforms file paths into command names:
 - Files starting with `_` (e.g., `_draft.md`)
 - Files in directories starting with `_` (e.g., `_includes/helper.md`)
 - Empty files
+- README.md files (used for documentation, not commands)
 
 ### Command Imports
 
