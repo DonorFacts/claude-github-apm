@@ -16,16 +16,16 @@ echo "=== Post-Processing Session $SESSION_ID for $ROLE ==="
 
 # 1. Extract session from Claude Code logs
 echo "Extracting session data..."
-./scripts/session-tools/extract-session.sh "$SESSION_ID" "$ROLE" > "apm/agents/$ROLE/sessions/${SESSION_ID}_full.jsonl"
+./src/scripts/session-tools/extract-session.sh "$SESSION_ID" "$ROLE" > "apm/agents/$ROLE/sessions/${SESSION_ID}_full.jsonl"
 
 # 2. Clean sensitive data
 echo "Cleaning sensitive data..."
-./scripts/session-tools/clean-logs.sh < "apm/agents/$ROLE/sessions/${SESSION_ID}_full.jsonl" \
+./src/scripts/session-tools/clean-logs.sh < "apm/agents/$ROLE/sessions/${SESSION_ID}_full.jsonl" \
     > "apm/agents/$ROLE/sessions/${SESSION_ID}_clean.jsonl"
 
 # 3. Generate session analysis
 echo "Analyzing session..."
-./scripts/session-tools/analyze-session.sh < "apm/agents/$ROLE/sessions/${SESSION_ID}_clean.jsonl" \
+./src/scripts/session-tools/analyze-session.sh < "apm/agents/$ROLE/sessions/${SESSION_ID}_clean.jsonl" \
     > "apm/agents/$ROLE/sessions/${SESSION_ID}_analysis.txt"
 
 # 4. Extract patterns for memory update
@@ -74,8 +74,8 @@ if [ "$CURRENT_TOPIC" = "session" ]; then
 fi
 
 # 6. Optional: Send notification (requires node-notifier)
-if command -v node >/dev/null 2>&1 && [ -f "scripts/notify.js" ]; then
-    node scripts/notify.js "Session Complete" "Post-processing finished for $ROLE session $SESSION_ID"
+if command -v node >/dev/null 2>&1 && [ -f "src/scripts/notify.js" ]; then
+    node src/scripts/notify.js "Session Complete" "Post-processing finished for $ROLE session $SESSION_ID"
 fi
 
 echo "=== Post-Processing Complete ==="
