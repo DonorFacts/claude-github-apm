@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { CommandNameTransformer } from '../../src/command-sync/command-name-transformer';
+import { CommandNameTransformer } from '../../src/scripts/command-sync/command-name-transformer';
 
 describe('CommandNameTransformer', () => {
   let transformer: CommandNameTransformer;

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { CommandClassifier } from '../../src/command-sync/command-classifier';
-import { PromptFile } from '../../src/command-sync/types';
+import { CommandClassifier } from '../../src/scripts/command-sync/command-classifier';
+import { PromptFile } from '../../src/scripts/command-sync/types';
 
 describe('CommandClassifier', () => {
   let classifier: CommandClassifier;
