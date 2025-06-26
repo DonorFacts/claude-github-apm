@@ -51,3 +51,10 @@ coverage/
 .tmp/
 
 _x_*
+
+
+# Command Shortcuts
+-/
+
+# Claude Commands
+.claude/commands/
