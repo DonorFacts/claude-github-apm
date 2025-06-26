@@ -139,7 +139,7 @@ Commands can include other files using:
 ### Command Line Options
 
 ```bash
-tsx src/command-sync/index.ts [options]
+tsx src/scripts/command-sync/index.ts [options]
 
 Options:
   -w, --watch      Watch for changes

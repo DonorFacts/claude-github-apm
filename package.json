@@ -17,12 +17,12 @@
     "dev": "echo 'Framework ready for linking'",
     "link": "pnpm link --global",
     "unlink": "pnpm unlink --global",
-    "build:prompts": "node lib/create-command-files.js",
+    "build:prompts": "tsx src/scripts/command-sync/index.ts",
     "build": "npm run build:prompts",
     "clean": "rm -rf dist",
     "test": "jest",
-    "watch:commands": "tsx src/command-sync/index.ts --watch",
-    "sync:commands": "tsx src/command-sync/index.ts"
+    "watch:commands": "tsx src/scripts/command-sync/index.ts --watch",
+    "sync:commands": "tsx src/scripts/command-sync/index.ts"
   },
   "keywords": [
     "claude",
