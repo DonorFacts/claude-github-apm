@@ -66,24 +66,25 @@ git checkout main
 git worktree add "../worktrees/feature-123-description" "feature-123-description"
 
 # 4. Create handover file for the new Claude instance
-# CRITICAL: You MUST read src/prompts/git/worktrees/handover-template.md first
-# to understand role selection and handover structure
-echo "📖 Reading handover template for guidance..."
-# Read src/prompts/git/worktrees/handover-template.md
+# CRITICAL: The handover file MUST be created in BOTH locations:
+# - Main directory: apm/worktree-handovers/not-started/
+# - Worktree directory: ../worktrees/<branch>/apm/worktree-handovers/not-started/
+# This ensures the new agent can find it regardless of directory issues
 
-# Generate handover file with TODAY'S date prefix at apm/worktree-handovers/not-started/YYYY_MM_DD-<branch>.md
-# IMPORTANT: Use the CURRENT date when creating the file (not any date from examples)
-mkdir -p apm/worktree-handovers/not-started
-HANDOVER_FILE="apm/worktree-handovers/not-started/$(date +%Y_%m_%d)-feature-123-description.md"
-echo "📅 Using current date: $(date +%Y_%m_%d)"
+# Option A: Use the handover creation script (RECOMMENDED)
+echo "📖 Creating handover file in both locations..."
+./src/scripts/git-worktree/create-handover.sh "feature-123-description" "developer" "Brief purpose description"
+echo "✅ Handover created! Edit the file to add specific details."
 
-# Create the handover file based on the template you just read
-# Key decisions:
-# - Choose appropriate agent role for the task type
-# - Include all relevant context from this session
-# - Specify clear next steps for the new agent
-echo "✍️  Creating handover file at $HANDOVER_FILE"
-# Generate content following the template structure
+# Option B: Manual creation (if script not available)
+# Read template first: src/prompts/git/worktrees/handover-template.md
+# Then create in BOTH locations:
+# mkdir -p apm/worktree-handovers/not-started
+# mkdir -p ../worktrees/feature-123-description/apm/worktree-handovers/not-started
+# HANDOVER_FILE="$(date +%Y_%m_%d)-feature-123-description.md"
+# Create content in both:
+# - apm/worktree-handovers/not-started/$HANDOVER_FILE
+# - ../worktrees/feature-123-description/apm/worktree-handovers/not-started/$HANDOVER_FILE
 
 # 5. Open VS Code and install dependencies
 # This script works around Claude's cd limitation by using cwd option
@@ -122,7 +123,7 @@ When on a feature branch with changes that belong to that feature:
 git add .
 git commit -m "feat: work in progress"
 
-# 2. Then follow Section A steps 2-6 (switch to main, create worktree, handover, open VS Code, complete handoff)
+# 2. Then follow Section A steps 2-6 (switch to main, create worktree, create handover IN BOTH LOCATIONS, open VS Code, complete handoff)
 ```
 
 ## Section C: Main Branch with My Changes
@@ -137,7 +138,7 @@ git checkout -b feature-123-description
 git add .
 git commit -m "feat: initial work"
 
-# 3. Then follow Section A steps 2-6 (switch to main, create worktree, handover, open VS Code, complete handoff)
+# 3. Then follow Section A steps 2-6 (switch to main, create worktree, create handover IN BOTH LOCATIONS, open VS Code, complete handoff)
 ```
 
 ## Section D: Mixed Changes (Mine + Others)
@@ -165,7 +166,7 @@ git stash -u -m "Others' changes - left on main"
 # 6. Continue with worktree creation
 git checkout main
 git stash pop  # Restore others' changes to main
-# Then follow Section A steps 3-6 (create worktree, handover, open VS Code, complete handoff)
+# Then follow Section A steps 3-6 (create worktree, create handover IN BOTH LOCATIONS, open VS Code, complete handoff)
 ```
 
 ## Section E: Only Others' Changes
@@ -181,7 +182,7 @@ git checkout main
 git stash pop  # Restore others' changes
 
 # Continue with worktree creation
-# Follow Section A steps 3-6 (create worktree, handover, open VS Code, complete handoff)
+# Follow Section A steps 3-6 (create worktree, create handover IN BOTH LOCATIONS, open VS Code, complete handoff)
 ```
 
 ## Post-Handoff Protocol
@@ -233,9 +234,23 @@ git worktree prune                            # Clean stale info
 
 1. **ALWAYS assess situation before acting**
 2. **NEVER move changes you didn't make**
-3. **ALWAYS create handover file before opening VS Code**
+3. **ALWAYS create handover file IN BOTH LOCATIONS before opening VS Code**
 4. **SEPARATE changes by authorship independently**
 5. **ENFORCE boundaries after handoff**
+6. **VERIFY handover exists in worktree directory**
+
+## Common Handover Issues & Solutions
+
+### Issue: "Handover file not found in worktree"
+**Cause**: File only created in main directory, not in worktree
+**Solution**: 
+```bash
+# Use the script that creates in both locations:
+./src/scripts/git-worktree/create-handover.sh "<branch>" "<role>" "<purpose>"
+
+# Or manually copy to worktree:
+cp apm/worktree-handovers/not-started/*.md ../worktrees/<branch>/apm/worktree-handovers/not-started/
+```
 
 ## Determining Change Authorship
 
