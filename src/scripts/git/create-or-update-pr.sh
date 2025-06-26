@@ -37,7 +37,7 @@ if [[ -n "$EXISTING_PR" ]]; then
     echo "📝 Updating PR body with latest changes..."
     
     # Update PR body
-    gh pr edit "$PR_NUM" --body "$(./scripts/git/generate-pr-body.sh)"
+    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh)"
     
     echo "✨ PR updated successfully!"
     echo "🔗 $PR_URL"
@@ -55,7 +55,7 @@ if [[ -n "$CLOSED_PR" ]] && [[ "$(echo "$CLOSED_PR" | jq -r '.mergedAt')" == "nu
     
     # Reopen and update
     gh pr reopen "$PR_NUM"
-    gh pr edit "$PR_NUM" --body "$(./scripts/git/generate-pr-body.sh)"
+    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh)"
     
     echo "✨ PR reopened and updated!"
     echo "🔗 $PR_URL"
@@ -77,7 +77,7 @@ fi
 echo "📝 Creating new PR..."
 PR_URL=$(gh pr create \
   --title "$TITLE" \
-  --body "$(./scripts/git/generate-pr-body.sh)" \
+  --body "$(./src/scripts/git/generate-pr-body.sh)" \
   --assignee @me \
   2>&1 | grep -oE 'https://github\.com/[^/]+/[^/]+/pull/[0-9]+' | head -1)
 

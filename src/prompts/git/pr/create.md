@@ -15,7 +15,7 @@ if [[ -n "$EXISTING_PR" ]]; then
     PR_URL=$(echo "$EXISTING_PR" | jq -r '.url')
     echo "✅ Open PR already exists: #$PR_NUM - $PR_URL"
     echo "Updating existing PR body..."
-    gh pr edit "$PR_NUM" --body "$(./scripts/git/generate-pr-body.sh)"
+    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh)"
     exit 0
 fi
 
@@ -26,7 +26,7 @@ if [[ -n "$CLOSED_PR" ]] && [[ "$(echo "$CLOSED_PR" | jq -r '.mergedAt')" == "nu
     PR_NUM=$(echo "$CLOSED_PR" | jq -r '.number')
     echo "🔄 Reopening closed PR #$PR_NUM"
     gh pr reopen "$PR_NUM"
-    gh pr edit "$PR_NUM" --body "$(./scripts/git/generate-pr-body.sh)"
+    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh)"
     exit 0
 fi
 
@@ -38,7 +38,7 @@ echo "📝 Creating new PR..."
 
 ```bash
 # Push branch and create PR with analyzed content
-gh pr create --title "<type>: <concise summary>" --body "$(./scripts/git/generate-pr-body.sh)"
+gh pr create --title "<type>: <concise summary>" --body "$(./src/scripts/git/generate-pr-body.sh)"
 ```
 
 ## Full Workflow
@@ -129,7 +129,7 @@ Based on changes:
 
 ### 5. Script Output
 
-The script `scripts/git/generate-pr-body.sh` automatically:
+The script `src/scripts/git/generate-pr-body.sh` automatically:
 - Analyzes all commits since main branch
 - Groups changes by type (feat, fix, docs, etc.)
 - Extracts key improvements and metrics
@@ -158,7 +158,7 @@ if [[ -n "$EXISTING_PR" ]]; then
     PR_URL=$(echo "$EXISTING_PR" | jq -r '.url')
     echo "✅ Open PR already exists: #$PR_NUM - $PR_URL"
     echo "Updating PR body..."
-    gh pr edit "$PR_NUM" --body "$(./scripts/git/generate-pr-body.sh)"
+    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh)"
     echo "PR updated successfully!"
     exit 0
 fi
@@ -170,7 +170,7 @@ if [[ -n "$CLOSED_PR" ]] && [[ "$(echo "$CLOSED_PR" | jq -r '.mergedAt')" == "nu
     PR_NUM=$(echo "$CLOSED_PR" | jq -r '.number')
     echo "🔄 Reopening closed PR #$PR_NUM"
     gh pr reopen "$PR_NUM"
-    gh pr edit "$PR_NUM" --body "$(./scripts/git/generate-pr-body.sh)"
+    gh pr edit "$PR_NUM" --body "$(./src/scripts/git/generate-pr-body.sh)"
     echo "PR reopened and updated!"
     exit 0
 fi
@@ -179,7 +179,7 @@ fi
 echo "📝 Creating new PR..."
 gh pr create \
   --title "$TITLE" \
-  --body "$(./scripts/git/generate-pr-body.sh)" \
+  --body "$(./src/scripts/git/generate-pr-body.sh)" \
   --assignee @me
 ```
 
@@ -192,11 +192,11 @@ gh pr create
 # Method 2: Direct with generated body - for new PRs only
 gh pr create \
   --title "feat: implement comprehensive feature set" \
-  --body "$(./scripts/git/generate-pr-body.sh)"
+  --body "$(./src/scripts/git/generate-pr-body.sh)"
 
 # Method 3: Update existing PR
 gh pr edit <PR_NUMBER> \
-  --body "$(./scripts/git/generate-pr-body.sh)"
+  --body "$(./src/scripts/git/generate-pr-body.sh)"
 ```
 
 ## Best Practices
