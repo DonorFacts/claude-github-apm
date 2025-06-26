@@ -194,6 +194,34 @@ Agent: "This sounds like separate work. Should I:
 ✅ Original agent redirects appropriately  
 ✅ Clear separation of concerns
 
+## Final Handoff Confirmation
+
+After the user confirms validation, display this message to close the handoff:
+
+```
+🎯 HANDOFF COMPLETE
+
+This conversation is now closed for feature work.
+All development should continue in the new worktree window.
+
+┌─────────────────────────────────────────────┐
+│  🚫 THIS WINDOW: Framework & project work   │
+│  ✅ WORKTREE WINDOW: Feature development    │
+└─────────────────────────────────────────────┘
+
+📋 WORKFLOW REMINDERS:
+
+In the WORKTREE window:
+• Use `/git-pr-create` when ready to create pull requests
+• Complete all feature development there
+
+When ALL work is complete and merged to main:
+• Return to THIS window
+• Use `/git-worktrees-remove` to clean up the worktree
+
+Only return here if you encounter issues with the worktree setup itself.
+```
+
 ## Summary
 
 1. **Validate** the setup worked correctly
