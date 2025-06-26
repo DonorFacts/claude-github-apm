@@ -17,7 +17,7 @@ mkdir -p "$(dirname "$EVENT_QUEUE")"
 while true; do
     if [ -s "$EVENT_QUEUE" ]; then
         echo "Processing new events..."
-        ./scripts/session-tools/process-events.sh
+        ./src/scripts/session-tools/process-events.sh
     fi
     
     sleep "$POLL_INTERVAL"

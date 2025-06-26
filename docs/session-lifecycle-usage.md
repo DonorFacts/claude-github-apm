@@ -117,7 +117,7 @@ The session lifecycle complements the three-tier memory:
 
 ### Events Not Processing
 - Check if `apm/events/queue.jsonl` exists
-- Ensure scripts are executable: `chmod +x scripts/session-tools/*.sh`
+- Ensure scripts are executable: `chmod +x src/scripts/session-tools/*.sh`
 - Look for lock file: `apm/events/.processing.lock`
 
 ### Session Not Found
@@ -128,4 +128,4 @@ The session lifecycle complements the three-tier memory:
 ### No Notifications
 - Install node-notifier: `npm install node-notifier`
 - Check system notification permissions
-- Run notify test: `node scripts/notify.js "Test" "Message"`
+- Run notify test: `node src/scripts/notify.js "Test" "Message"`
