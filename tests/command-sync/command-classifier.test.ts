@@ -153,6 +153,40 @@ describe('CommandClassifier', () => {
       expect(result.private).toContain('src/prompts/_experimental/test.md');
       expect(result.private).toContain('src/prompts/agents/empty.md');
     });
+
+    it('should exclude README.md files from public commands', () => {
+      const testFiles = new Map<string, PromptFile>();
+      
+      // Public file
+      testFiles.set('src/prompts/command.md', {
+        path: 'src/prompts/command.md',
+        content: '# Command',
+        imports: [],
+        importedBy: []
+      });
+      
+      // README at root
+      testFiles.set('src/prompts/README.md', {
+        path: 'src/prompts/README.md',
+        content: '# Commands Index',
+        imports: [],
+        importedBy: []
+      });
+      
+      // README in subdirectory
+      testFiles.set('src/prompts/agents/README.md', {
+        path: 'src/prompts/agents/README.md',
+        content: '# Agent Commands',
+        imports: [],
+        importedBy: []
+      });
+
+      const result = classifier.classifyPrompts(testFiles);
+      
+      expect(result.public).toEqual(['src/prompts/command.md']);
+      expect(result.private).toContain('src/prompts/README.md');
+      expect(result.private).toContain('src/prompts/agents/README.md');
+    });
   });
 
   describe('isEligibleForPublic', () => {
@@ -198,6 +232,28 @@ describe('CommandClassifier', () => {
       };
 
       expect(classifier.isEligibleForPublic(emptyFile)).toBe(false);
+    });
+
+    it('should return false for README.md files', () => {
+      const readmeFile: PromptFile = {
+        path: 'src/prompts/README.md',
+        content: '# Commands Index',
+        imports: [],
+        importedBy: []
+      };
+
+      expect(classifier.isEligibleForPublic(readmeFile)).toBe(false);
+    });
+
+    it('should return false for nested README.md files', () => {
+      const nestedReadme: PromptFile = {
+        path: 'src/prompts/agents/README.md',
+        content: '# Agent Commands',
+        imports: [],
+        importedBy: []
+      };
+
+      expect(classifier.isEligibleForPublic(nestedReadme)).toBe(false);
     });
   });
 });

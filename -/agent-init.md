@@ -124,7 +124,7 @@ Do NOT read any other files mentioned in the context. After initialization, you 
 
 <!-- ### 7. Initialize Event System -->
 
-### 8. Confirm Initialization
+### 6. Confirm Initialization
 
 After completing these steps, confirm to the user:
 
@@ -167,6 +167,8 @@ Throughout your work, automatically update the relevant sections of `MEMORY.md` 
 - Workflow optimizations → Update "Process Improvements"
 
 Focus on capturing enduring principles and patterns, not specific events or implementation details.
+
+**CRITICAL Memory Priority**: When the user uses any variation of "remember" (e.g., "remember this", "please remember", "keep in mind", "don't forget"), update MEMORY.md IMMEDIATELY as your first task before any other actions. This ensures critical learnings persist even if work gets interrupted.
 
 ### Session Manifest Integration
 
