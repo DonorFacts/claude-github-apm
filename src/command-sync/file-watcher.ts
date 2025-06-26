@@ -113,30 +113,48 @@ export class FileWatcher {
   private async syncFileContent(file: PromptFile): Promise<void> {
     // Transform the filename
     const transformedName = this.transformer.transform(file.path);
-    const targetFile = path.join(this.options.targetPath, transformedName);
     
-    // Ensure target directory exists
-    const targetDir = path.dirname(targetFile);
-    if (!fs.existsSync(targetDir)) {
-      fs.mkdirSync(targetDir, { recursive: true });
+    // Sync to both target directories
+    const targetPaths = [
+      this.options.targetPath,  // .claude/commands
+      '-'  // Shortcut folder
+    ];
+    
+    for (const targetPath of targetPaths) {
+      const targetFile = path.join(targetPath, transformedName);
+      
+      // Ensure target directory exists
+      const targetDir = path.dirname(targetFile);
+      if (!fs.existsSync(targetDir)) {
+        fs.mkdirSync(targetDir, { recursive: true });
+      }
+      
+      // Write the file
+      fs.writeFileSync(targetFile, file.content);
     }
-    
-    // Write the file
-    fs.writeFileSync(targetFile, file.content);
   }
   
   private async removeCommand(filePath: string): Promise<void> {
     try {
       // Transform the filename to get the target path
       const transformedName = this.transformer.transform(filePath);
-      const targetFile = path.join(this.options.targetPath, transformedName);
       
-      // Remove the file if it exists
-      if (fs.existsSync(targetFile)) {
-        fs.unlinkSync(targetFile);
+      // Remove from both target directories
+      const targetPaths = [
+        this.options.targetPath,  // .claude/commands
+        '-'  // Shortcut folder
+      ];
+      
+      for (const targetPath of targetPaths) {
+        const targetFile = path.join(targetPath, transformedName);
+        
+        // Remove the file if it exists
+        if (fs.existsSync(targetFile)) {
+          fs.unlinkSync(targetFile);
+        }
       }
     } catch (error) {
-      console.error(`Error removing command ${this.options.targetPath}/${this.transformer.transform(filePath)}:`, error);
+      console.error(`Error removing command:`, error);
     }
   }
 }

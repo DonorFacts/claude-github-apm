@@ -47,7 +47,7 @@ async function main() {
   
   console.log(`Command Sync System`);
   console.log(`Source: ${sourcePath}`);
-  console.log(`Target: ${targetPath}`);
+  console.log(`Targets: ${targetPath} and -/`);
   console.log(`Mode: ${options.watch ? 'Watch' : 'Sync Once'}`);
   console.log('');
   
