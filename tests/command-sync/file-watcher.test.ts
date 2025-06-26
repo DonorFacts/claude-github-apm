@@ -1,8 +1,8 @@
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { FileWatcher } from '../../src/command-sync/file-watcher';
-import { PromptAnalyzer } from '../../src/command-sync/prompt-analyzer';
-import { CommandClassifier } from '../../src/command-sync/command-classifier';
-import { CommandNameTransformer } from '../../src/command-sync/command-name-transformer';
+import { FileWatcher } from '../../src/scripts/command-sync/file-watcher';
+import { PromptAnalyzer } from '../../src/scripts/command-sync/prompt-analyzer';
+import { CommandClassifier } from '../../src/scripts/command-sync/command-classifier';
+import { CommandNameTransformer } from '../../src/scripts/command-sync/command-name-transformer';
 
 // Mock the dependencies
 jest.mock('fs');
