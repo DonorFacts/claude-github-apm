@@ -130,6 +130,10 @@ Role: prompt-engineer
 - If prompt contains user actions, agent must communicate them to user
 - User-facing documentation belongs in docs/**/*.md only
 - Agent prompts should include what to tell users, not expect users to read them
+- **CRITICAL**: ALWAYS edit prompt commands in src/prompts/**/*.md - NEVER in built files (-/ or .claude/commands/)
+  - Built files are generated outputs that get overwritten by pnpm build:prompts
+  - Editing built files is wasted work that will be lost
+  - Source files in src/prompts/ are the single source of truth
 
 ### Token Optimization Discoveries
 
