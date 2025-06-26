@@ -27,6 +27,22 @@ if [[ "$CREATED_NEW_BRANCH" == "true" ]]; then
 fi
 ```
 
+## CRITICAL: Build Prompts Before Staging
+
+If you modified any prompt command files (`src/prompts/**/*.md`), you MUST build them first:
+
+```bash
+# Check if you modified prompt files
+git status | grep "src/prompts/.*\.md"
+
+# If yes, build prompts BEFORE staging
+pnpm build:prompts
+
+# This creates/updates files in:
+# - -/              (command shortcuts)
+# - .claude/commands/  (Claude commands)
+```
+
 ## CRITICAL: Selective Staging
 
 **NEVER use `git add .`** - Only stage YOUR changes:
@@ -38,8 +54,10 @@ git status
 # 2. Identify YOUR files (ones you created/edited this session)
 # NOT yours: other agents' work, system files, unrelated changes
 
-# 3. Add ONLY your files
+# 3. Add ONLY your files INCLUDING built commands
 git add src/file-i-edited.ts docs/file-i-created.md
+# If you modified prompts, also add the built files:
+git add -/your-command.md .claude/commands/your-command.md
 
 # 4. Verify before commit
 git diff --staged
@@ -164,6 +182,25 @@ git log --follow -p path/to/file
 2. Use `wip:` for checkpoints
 3. Include issue numbers always
 4. Don't batch unrelated changes
+
+### Prompt Command Example
+```bash
+# 1. You modified a prompt command
+echo "Modified: src/prompts/git/pr/create.md"
+
+# 2. Build the prompts
+pnpm build:prompts
+# Output: ✓ Synced create.md → -/git-pr-create.md
+#         ✓ Synced create.md → .claude/commands/git-pr-create.md
+
+# 3. Stage ALL related files
+git add src/prompts/git/pr/create.md
+git add -/git-pr-create.md
+git add .claude/commands/git-pr-create.md
+
+# 4. Commit with clear message
+git commit -m "feat: improve PR creation command with duplicate checks"
+```
 
 ## Best Practices
 
