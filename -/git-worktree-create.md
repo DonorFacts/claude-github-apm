@@ -10,15 +10,21 @@ Claude Code cannot `cd` outside the original working directory. Git worktrees en
 
 Before creating any worktree, ensure you have a GitHub issue to track the work:
 
-**Note**: If your branch name already contains an issue number (e.g., `feature/8-description`), you can skip this step.
-
-For new issues:
 ```bash
+# Check if working on existing issue
+echo "Are you working on an existing GitHub issue? (If yes, note the issue number)"
+echo "If no existing issue, create one now:"
+
+# Create GitHub issue for the work
 gh issue create \
     --title "Brief description of the work" \
     --body "Detailed description of what needs to be done" \
     --label "enhancement" \
     --assignee "@me"
+
+# Capture the issue number for branch naming
+ISSUE_NUMBER=$(gh issue list --assignee "@me" --state open --limit 1 --json number --jq '.[0].number')
+echo "Issue created: #$ISSUE_NUMBER"
 ```
 
 ## STOP: Assess Your Situation Second
@@ -71,22 +77,84 @@ Are you on main/master/develop?
 When starting fresh with no uncommitted changes:
 
 ```bash
-# Use the comprehensive worktree creation script
-./src/scripts/git/worktree-create.sh "feature-ISSUE_NUMBER-brief-description" "developer" "Brief purpose description"
+# 1. Ensure you have the issue number from the previous step
+# ISSUE_NUMBER should be set from the GitHub issue creation above
+if [ -z "$ISSUE_NUMBER" ]; then
+    echo "ERROR: No issue number found. Please create a GitHub issue first."
+    echo "Run: gh issue create --title 'Your work description' --assignee '@me'"
+    exit 1
+fi
 
-# Examples:
-# ./src/scripts/git/worktree-create.sh "feature-123-auth" "developer" "Implement user authentication"
-# ./src/scripts/git/worktree-create.sh "feature/8-test-bulk-issue-creation" "developer" "Fix TypeScript errors"
+# 2. Create descriptive branch name with issue number
+BRANCH_NAME="feature-$ISSUE_NUMBER-brief-description"
+echo "Creating branch: $BRANCH_NAME"
 
-# The script will:
-# 1. Auto-detect issue number from branch name
-# 2. Create branch and worktree
-# 3. Generate handover file with proper agent role
-# 4. Open VS Code in the worktree
-# 5. Display completion instructions
+# 3. Create feature branch if on main
+git checkout -b "$BRANCH_NAME"
+
+# 4. Switch back to main
+git checkout main
+
+# 5. Create worktree
+git worktree add "../worktrees/$BRANCH_NAME" "$BRANCH_NAME"
+
+# 6. Create handover file for the new Claude instance
+# CRITICAL: The handover file MUST be created in BOTH locations to ensure the new agent can find it
+# Option A: Use the handover creation script (RECOMMENDED)
+echo "📖 Creating handover file in both locations..."
+./src/scripts/git-worktree/create-handover.sh "$BRANCH_NAME" "developer" "Brief purpose description"
+echo "✅ Handover created! Edit the file to add specific details."
+
+# Option B: Manual creation (if script not available)
+# Read template first: src/prompts/git/worktrees/handover-template.md
+# Then create in BOTH locations:
+mkdir -p apm/worktree-handovers/not-started
+mkdir -p "../worktrees/$BRANCH_NAME/apm/worktree-handovers/not-started"
+HANDOVER_FILE="$(date +%Y_%m_%d)-$BRANCH_NAME.md"
+echo "📅 Using current date: $(date +%Y_%m_%d)"
+# Create content in both:
+# - apm/worktree-handovers/not-started/$HANDOVER_FILE  
+# - ../worktrees/$BRANCH_NAME/apm/worktree-handovers/not-started/$HANDOVER_FILE
+# IMPORTANT: Include GitHub issue #$ISSUE_NUMBER reference in the handover file
+
+# 7. Open VS Code and install dependencies
+# This script works around Claude's cd limitation by using cwd option
+tsx src/tools/worktree-manager/open-worktree-vscode.ts "../worktrees/$BRANCH_NAME"
+
+# 8. Complete the handoff
+# Agent: Prompt the user to validate the setup
+echo ""
+echo "✅ Worktree created and VS Code opened!"
+echo "✅ GitHub issue #$ISSUE_NUMBER is being tracked"
+echo ""
+echo "Please switch to the new VS Code window and verify:"
+echo ""
+echo "1. Run 'pwd' - you should be in the worktree directory"
+echo "   (e.g., /path/to/worktrees/$BRANCH_NAME)"
+echo ""
+echo "2. Run 'git branch --show-current' - you should see your feature branch"
+echo "   (should be: $BRANCH_NAME)"
+echo ""
+echo "3. Check that Claude is running in the terminal"
+echo ""
+echo "4. If everything looks correct, continue your work there."
+echo "   If something seems wrong, let me know what you're seeing."
+echo ""
+echo "🎯 HANDOFF COMPLETE"
+echo ""
+echo "This conversation is now closed for feature work."
+echo "All development should continue in the new worktree window."
+echo ""
+echo "┌─────────────────────────────────────────────┐"
+echo "│  🚫 THIS WINDOW: Framework & project work   │"
+echo "│  ✅ WORKTREE WINDOW: Feature development    │"
+echo "└─────────────────────────────────────────────┘"
+echo ""
+echo "Only return here if you encounter issues with the worktree setup itself."
+
+# Agent: Also study src/prompts/git/worktrees/complete-handoff.md#post-handoff-boundary-protocol
+# to understand how to enforce boundaries going forward
 ```
-
-**Agent: After running the script, study `src/prompts/git/worktrees/complete-handoff.md#post-handoff-boundary-protocol` to understand how to enforce boundaries going forward.**
 
 ## Section B: Feature Branch with Related Changes
 
@@ -97,8 +165,7 @@ When on a feature branch with changes that belong to that feature:
 git add .
 git commit -m "feat: work in progress"
 
-# 2. Then use the worktree creation script
-./src/scripts/git/worktree-create.sh "feature-ISSUE_NUMBER-brief-description" "developer" "Brief purpose description"
+# 2. Then follow Section A steps 4-8 (switch to main, create worktree, handover, open VS Code, complete handoff)
 ```
 
 ## Section C: Main Branch with My Changes
@@ -106,15 +173,17 @@ git commit -m "feat: work in progress"
 When on main with changes YOU (the agent) made during this session:
 
 ```bash
-# 1. Create branch WITH changes (they move automatically)
-git checkout -b "feature-ISSUE_NUMBER-brief-description"
+# 1. Ensure you have issue number (from GitHub issue creation step)
+BRANCH_NAME="feature-$ISSUE_NUMBER-brief-description"
 
-# 2. Commit them
+# 2. Create branch WITH changes (they move automatically)
+git checkout -b "$BRANCH_NAME"
+
+# 3. Commit them
 git add .
 git commit -m "feat: initial work"
 
-# 3. Then use the worktree creation script
-./src/scripts/git/worktree-create.sh "feature-ISSUE_NUMBER-brief-description" "developer" "Brief purpose description"
+# 4. Then follow Section A steps 4-8 (switch to main, create worktree, handover, open VS Code, complete handoff)
 ```
 
 ## Section D: Mixed Changes (Mine + Others)
@@ -122,27 +191,30 @@ git commit -m "feat: initial work"
 When you have both your changes and others' changes:
 
 ```bash
-# 1. Stash everything
+# 1. Ensure you have issue number (from GitHub issue creation step)
+BRANCH_NAME="feature-$ISSUE_NUMBER-brief-description"
+
+# 2. Stash everything
 git stash -u -m "Mixed changes on main"
 
-# 2. Create feature branch
-git checkout -b "feature-ISSUE_NUMBER-brief-description"
+# 3. Create feature branch
+git checkout -b "$BRANCH_NAME"
 
-# 3. Apply stash and selectively add YOUR changes only
+# 4. Apply stash and selectively add YOUR changes only
 git stash pop
 git add file1.ts file2.ts  # Only files YOU modified
 git reset file3.ts file4.ts # Files modified by others
 
-# 4. Commit your changes
+# 5. Commit your changes
 git commit -m "feat: initial work"
 
-# 5. Re-stash others' changes and restore to main
+# 6. Re-stash others' changes
 git stash -u -m "Others' changes - left on main"
+
+# 7. Continue with worktree creation
 git checkout main
 git stash pop  # Restore others' changes to main
-
-# 6. Then use the worktree creation script
-./src/scripts/git/worktree-create.sh "feature-ISSUE_NUMBER-brief-description" "developer" "Brief purpose description"
+# Then follow Section A steps 5-8 (create worktree, handover, open VS Code, complete handoff)
 ```
 
 ## Section E: Only Others' Changes
@@ -150,14 +222,18 @@ git stash pop  # Restore others' changes to main
 When all uncommitted changes are from others:
 
 ```bash
-# 1. Preserve others' changes and create clean feature branch
+# 1. Ensure you have issue number (from GitHub issue creation step)
+BRANCH_NAME="feature-$ISSUE_NUMBER-brief-description"
+
+# 2. Leave changes untouched on main
+# Create clean feature branch
 git stash -u -m "Others' changes - preserving"
-git checkout -b "feature-ISSUE_NUMBER-brief-description"
+git checkout -b "$BRANCH_NAME"
 git checkout main
 git stash pop  # Restore others' changes
 
-# 2. Then use the worktree creation script
-./src/scripts/git/worktree-create.sh "feature-ISSUE_NUMBER-brief-description" "developer" "Brief purpose description"
+# 3. Continue with worktree creation
+# Follow Section A steps 5-8 (create worktree, handover, open VS Code, complete handoff)
 ```
 
 ## Post-Handoff Protocol
@@ -209,9 +285,23 @@ git worktree prune                                   # Clean stale info
 
 1. **ALWAYS assess situation before acting**
 2. **NEVER move changes you didn't make**
-3. **ALWAYS create handover file before opening VS Code**
+3. **ALWAYS create handover file IN BOTH LOCATIONS before opening VS Code**
 4. **SEPARATE changes by authorship independently**
 5. **ENFORCE boundaries after handoff**
+6. **VERIFY handover exists in worktree directory**
+
+## Common Handover Issues & Solutions
+
+### Issue: "Handover file not found in worktree"
+**Cause**: File only created in main directory, not in worktree
+**Solution**: 
+```bash
+# Use the script that creates in both locations:
+./src/scripts/git-worktree/create-handover.sh "<branch>" "<role>" "<purpose>"
+
+# Or manually copy to worktree:
+cp apm/worktree-handovers/not-started/*.md ../worktrees/<branch>/apm/worktree-handovers/not-started/
+```
 
 ## Determining Change Authorship
 
