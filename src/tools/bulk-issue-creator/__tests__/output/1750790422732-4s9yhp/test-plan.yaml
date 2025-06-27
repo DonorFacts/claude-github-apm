@@ -1,0 +1,79 @@
+version: '1.0'
+generated: '2025-06-24'
+project:
+  name: Test Project
+  description: Test project for bulk issue creator
+  repository:
+    owner: DonorFacts
+    name: claude-github-apm-test
+items:
+  - description: ''
+    parent_id: null
+    children_ids: []
+    metadata: {}
+    id: item-0
+    type: task
+    title: Level 0
+  - description: ''
+    parent_id: item-0
+    children_ids: []
+    metadata: {}
+    id: item-1
+    type: task
+    title: Level 1
+  - description: ''
+    parent_id: item-1
+    children_ids: []
+    metadata: {}
+    id: item-2
+    type: task
+    title: Level 2
+  - description: ''
+    parent_id: item-2
+    children_ids: []
+    metadata: {}
+    id: item-3
+    type: task
+    title: Level 3
+  - description: ''
+    parent_id: item-3
+    children_ids: []
+    metadata: {}
+    id: item-4
+    type: task
+    title: Level 4
+  - description: ''
+    parent_id: item-4
+    children_ids: []
+    metadata: {}
+    id: item-5
+    type: task
+    title: Level 5
+  - description: ''
+    parent_id: item-5
+    children_ids: []
+    metadata: {}
+    id: item-6
+    type: task
+    title: Level 6
+  - description: ''
+    parent_id: item-6
+    children_ids: []
+    metadata: {}
+    id: item-7
+    type: task
+    title: Level 7
+  - description: ''
+    parent_id: item-7
+    children_ids: []
+    metadata: {}
+    id: item-8
+    type: task
+    title: Level 8
+  - description: ''
+    parent_id: item-8
+    children_ids: []
+    metadata: {}
+    id: item-9
+    type: task
+    title: Level 9

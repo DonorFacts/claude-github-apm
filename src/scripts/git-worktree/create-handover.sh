@@ -1,0 +1,113 @@
+#!/bin/bash
+# create-handover.sh - Creates handover files in both main and worktree directories
+# This ensures the handover is accessible from both locations
+
+set -e
+
+# Colors for output
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Usage
+if [ $# -lt 3 ]; then
+    echo "Usage: $0 <branch-name> <agent-role> <purpose>"
+    echo "Example: $0 feature-auth developer 'Implement user authentication'"
+    exit 1
+fi
+
+BRANCH_NAME="$1"
+AGENT_ROLE="$2"
+PURPOSE="$3"
+DATE_PREFIX=$(date +%Y_%m_%d)
+HANDOVER_FILENAME="${DATE_PREFIX}-${BRANCH_NAME}.md"
+
+# Get the current working directory (should be main repo)
+MAIN_DIR=$(pwd)
+WORKTREE_DIR="../worktrees/${BRANCH_NAME}"
+
+# Function to create handover content
+create_handover_content() {
+    cat << EOF
+# Worktree Handover: ${BRANCH_NAME}
+
+## Agent Initialization
+
+**Role**: ${AGENT_ROLE}  
+**Initialize with**: \`src/prompts/agents/${AGENT_ROLE}/init.md\`
+
+## Task Context
+
+**GitHub Issue**: #<number>  
+**Purpose**: ${PURPOSE}  
+**Scope**: <detailed description of what needs to be done>
+
+## Memory Transfer from Previous Session
+
+### Work Already Completed
+- Created this worktree from main branch
+- No code written yet (fresh start)
+
+### Current State
+- Fresh worktree ready for development
+- All dependencies installed
+
+### Key Context
+<Important information the new agent needs to know>
+
+## Immediate Next Steps
+
+1. Read this handover file completely
+2. Initialize as ${AGENT_ROLE} agent
+3. <First specific task>
+4. <Second specific task>
+5. <Continue with...>
+
+## Resources and References
+
+- Related PRs: #<numbers>
+- Key files to review: <paths>
+- Documentation to consult: <paths>
+
+## Special Instructions
+
+<Any unique requirements or warnings>
+
+---
+*Handover created: $(date -u +%Y-%m-%dT%H:%M:%SZ)*
+EOF
+}
+
+# Create directories in both locations
+echo -e "${YELLOW}Creating handover directories...${NC}"
+mkdir -p "${MAIN_DIR}/apm/worktree-handovers/not-started"
+mkdir -p "${WORKTREE_DIR}/apm/worktree-handovers/not-started"
+
+# Create handover file in main directory
+MAIN_HANDOVER="${MAIN_DIR}/apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
+echo -e "${GREEN}Creating handover in main directory...${NC}"
+create_handover_content > "${MAIN_HANDOVER}"
+echo "✅ Created: ${MAIN_HANDOVER}"
+
+# Create handover file in worktree directory
+WORKTREE_HANDOVER="${WORKTREE_DIR}/apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
+echo -e "${GREEN}Creating handover in worktree directory...${NC}"
+create_handover_content > "${WORKTREE_HANDOVER}"
+echo "✅ Created: ${WORKTREE_HANDOVER}"
+
+# Create symlink for future reference (optional)
+echo -e "${YELLOW}Creating reference link...${NC}"
+ln -sf "${WORKTREE_HANDOVER}" "${MAIN_DIR}/apm/worktree-handovers/not-started/${HANDOVER_FILENAME}.worktree"
+
+echo
+echo -e "${GREEN}✅ Handover files created successfully!${NC}"
+echo
+echo "The handover file is available in both locations:"
+echo "1. Main directory: apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
+echo "2. Worktree directory: apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
+echo
+echo -e "${YELLOW}Next steps:${NC}"
+echo "1. Edit the handover file to add specific details"
+echo "2. Open VS Code with: tsx src/tools/worktree-manager/open-worktree-vscode.ts \"${WORKTREE_DIR}\""
+echo "3. The new agent will find the handover automatically"

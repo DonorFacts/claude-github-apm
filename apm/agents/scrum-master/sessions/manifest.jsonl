@@ -1,0 +1,20 @@
+{
+  "session_id": "20250619_210012",
+  "role": "scrum-master",
+  "started": "2025-06-19T21:00:47Z",
+  "ended": null,
+  "cc_log_path": "/Users/jakedetels/.claude/projects/-Users-jakedetels-www-claude-github-apm-worktrees-feature-8-test-bulk-issue-creation/442a977b-de22-48f0-ad19-a26552adacec.jsonl",
+  "topic": "session",
+  "milestones": [],
+  "commits": []
+}
+{
+  "session_id": "20250619_214944",
+  "role": "scrum-master",
+  "started": "2025-06-19T21:49:44Z",
+  "ended": null,
+  "cc_log_path": "/Users/jakedetels/.claude/projects/-Users-jakedetels-www-claude-github-apm-worktrees-feature-8-test-bulk-issue-creation/442a977b-de22-48f0-ad19-a26552adacec.jsonl",
+  "topic": "session",
+  "milestones": [],
+  "commits": []
+}

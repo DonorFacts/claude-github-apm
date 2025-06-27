@@ -99,26 +99,23 @@ git checkout main
 git worktree add "../worktrees/$BRANCH_NAME" "$BRANCH_NAME"
 
 # 6. Create handover file for the new Claude instance
-# CRITICAL: You MUST read src/prompts/git/worktrees/handover-template.md first
-# to understand role selection and handover structure
-echo "📖 Reading handover template for guidance..."
-# Read src/prompts/git/worktrees/handover-template.md
+# CRITICAL: The handover file MUST be created in BOTH locations to ensure the new agent can find it
+# Option A: Use the handover creation script (RECOMMENDED)
+echo "📖 Creating handover file in both locations..."
+./src/scripts/git-worktree/create-handover.sh "$BRANCH_NAME" "developer" "Brief purpose description"
+echo "✅ Handover created! Edit the file to add specific details."
 
-# Generate handover file with TODAY'S date prefix at apm/worktree-handovers/not-started/YYYY_MM_DD-<branch>.md
-# IMPORTANT: Use the CURRENT date when creating the file (not any date from examples)
+# Option B: Manual creation (if script not available)
+# Read template first: src/prompts/git/worktrees/handover-template.md
+# Then create in BOTH locations:
 mkdir -p apm/worktree-handovers/not-started
-HANDOVER_FILE="apm/worktree-handovers/not-started/$(date +%Y_%m_%d)-$BRANCH_NAME.md"
+mkdir -p "../worktrees/$BRANCH_NAME/apm/worktree-handovers/not-started"
+HANDOVER_FILE="$(date +%Y_%m_%d)-$BRANCH_NAME.md"
 echo "📅 Using current date: $(date +%Y_%m_%d)"
-
-# Create the handover file based on the template you just read
-# Key decisions:
-# - Choose appropriate agent role for the task type
-# - Include all relevant context from this session
-# - Include the GitHub issue number and link
-# - Specify clear next steps for the new agent
-echo "✍️  Creating handover file at $HANDOVER_FILE"
-# Generate content following the template structure
-# IMPORTANT: Include GitHub issue reference in the handover file
+# Create content in both:
+# - apm/worktree-handovers/not-started/$HANDOVER_FILE  
+# - ../worktrees/$BRANCH_NAME/apm/worktree-handovers/not-started/$HANDOVER_FILE
+# IMPORTANT: Include GitHub issue #$ISSUE_NUMBER reference in the handover file
 
 # 7. Open VS Code and install dependencies
 # This script works around Claude's cd limitation by using cwd option
@@ -288,9 +285,23 @@ git worktree prune                                   # Clean stale info
 
 1. **ALWAYS assess situation before acting**
 2. **NEVER move changes you didn't make**
-3. **ALWAYS create handover file before opening VS Code**
+3. **ALWAYS create handover file IN BOTH LOCATIONS before opening VS Code**
 4. **SEPARATE changes by authorship independently**
 5. **ENFORCE boundaries after handoff**
+6. **VERIFY handover exists in worktree directory**
+
+## Common Handover Issues & Solutions
+
+### Issue: "Handover file not found in worktree"
+**Cause**: File only created in main directory, not in worktree
+**Solution**: 
+```bash
+# Use the script that creates in both locations:
+./src/scripts/git-worktree/create-handover.sh "<branch>" "<role>" "<purpose>"
+
+# Or manually copy to worktree:
+cp apm/worktree-handovers/not-started/*.md ../worktrees/<branch>/apm/worktree-handovers/not-started/
+```
 
 ## Determining Change Authorship
 

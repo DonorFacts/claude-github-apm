@@ -141,13 +141,7 @@ perform_cleanup() {
     git worktree prune
     log_success "Worktree references cleaned"
     
-    # Remove handover files
-    log_info "Cleaning up handover files..."
-    if [ -d "apm/worktree-handovers" ]; then
-        find apm/worktree-handovers -name "*$BRANCH_NAME.md" -delete 2>/dev/null
-        find apm/worktree-handovers -type d -empty -delete 2>/dev/null
-        log_success "Handover files cleaned"
-    fi
+    # Note: Handover files are left unchanged for historical record
     
     # Handle GitHub issue (automatic closure)
     if command -v gh >/dev/null 2>&1 && [ -n "$ISSUE_NUMBER" ]; then
