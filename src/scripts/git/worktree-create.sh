@@ -2,7 +2,7 @@
 
 # Git Worktree Creation Script
 # Comprehensive worktree creation with automatic issue detection and handover
-# Usage: ./worktree-create.sh [branch-name] [agent-role] [purpose]
+# Usage: ./worktree-create.sh [branch-name] [agent-role] [purpose] [--docker]
 # Run from main project directory
 
 set -e  # Exit on any error
@@ -19,6 +19,47 @@ log_info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
 log_success() { echo -e "${GREEN}✅ $1${NC}"; }
 log_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 log_error() { echo -e "${RED}❌ $1${NC}"; }
+
+# Function to setup Docker environment
+setup_docker_environment() {
+    local worktree_path="$1"
+    local agent_role="$2"
+    
+    log_info "Setting up Docker environment for agent: $agent_role"
+    
+    # Check if Docker is available
+    if ! command -v docker >/dev/null 2>&1; then
+        log_error "Docker not found. Please install Docker or use worktree without --docker flag"
+        exit 1
+    fi
+    
+    # Check if claude-code-sandbox is installed
+    if ! command -v claude-sandbox >/dev/null 2>&1; then
+        log_error "claude-code-sandbox not found. Please install: pnpm add -g @textcortex/claude-code-sandbox"
+        exit 1
+    fi
+    
+    # Copy and configure the Docker config template
+    local config_source="src/config/apm-docker.config.json"
+    local config_target="$worktree_path/claude-sandbox.config.json"
+    
+    if [ ! -f "$config_source" ]; then
+        log_error "APM Docker config template not found: $config_source"
+        exit 1
+    fi
+    
+    # Copy template to worktree
+    cp "$config_source" "$config_target"
+    
+    # Replace template variables
+    sed -i.bak "s/\${AGENT_ROLE}/$agent_role/g" "$config_target"
+    sed -i.bak "s|\${WORKTREE_PATH}|$worktree_path|g" "$config_target"
+    rm "$config_target.bak"  # Remove backup file
+    
+    log_success "Docker configuration created: $config_target"
+    log_info "To start Docker environment, run: claude-sandbox"
+    log_info "Docker will provide secure isolated execution with dangerous permissions"
+}
 
 # Function to detect issue number from branch name
 detect_issue_from_branch() {
@@ -200,10 +241,23 @@ show_completion() {
     local branch_name="$1"
     local issue_number="$2"
     local worktree_path="$3"
+    local use_docker="$4"
     
     echo ""
     log_success "Worktree created and VS Code opened!"
     log_success "GitHub issue #$issue_number is being tracked"
+    
+    if [ "$use_docker" = true ]; then
+        echo ""
+        log_success "🐳 Docker environment configured!"
+        echo ""
+        echo "DOCKER SETUP COMPLETE:"
+        echo "• Configuration: claude-sandbox.config.json"
+        echo "• To start secure container: claude-sandbox"
+        echo "• Container will mount APM memory and provide isolated execution"
+        echo ""
+    fi
+    
     echo ""
     echo "Please switch to the new VS Code window and verify:"
     echo ""
@@ -213,18 +267,34 @@ show_completion() {
     echo "2. Run 'git branch --show-current' - you should see your feature branch"
     echo "   (should be: $branch_name)"
     echo ""
-    echo "3. Check that Claude is running in the terminal"
-    echo ""
-    echo "4. Read the handover file in apm/worktree-handovers/not-started/"
-    echo ""
-    echo "5. If everything looks correct, continue your work there."
+    if [ "$use_docker" = true ]; then
+        echo "3. Start Docker environment: claude-sandbox"
+        echo "   (This provides secure isolation with dangerous permissions)"
+        echo ""
+        echo "4. Read the handover file in apm/worktree-handovers/not-started/"
+        echo ""
+        echo "5. If everything looks correct, continue your work in the Docker container."
+    else
+        echo "3. Check that Claude is running in the terminal"
+        echo ""
+        echo "4. Read the handover file in apm/worktree-handovers/not-started/"
+        echo ""
+        echo "5. If everything looks correct, continue your work there."
+    fi
     echo ""
     echo "🎯 HANDOFF COMPLETE"
     echo ""
-    echo "┌─────────────────────────────────────────────┐"
-    echo "│  🚫 THIS WINDOW: Framework & project work   │"
-    echo "│  ✅ WORKTREE WINDOW: Feature development    │"
-    echo "└─────────────────────────────────────────────┘"
+    if [ "$use_docker" = true ]; then
+        echo "┌─────────────────────────────────────────────┐"
+        echo "│  🚫 THIS WINDOW: Framework & project work   │"
+        echo "│  🐳 WORKTREE WINDOW: Secure Docker dev      │"
+        echo "└─────────────────────────────────────────────┘"
+    else
+        echo "┌─────────────────────────────────────────────┐"
+        echo "│  🚫 THIS WINDOW: Framework & project work   │"
+        echo "│  ✅ WORKTREE WINDOW: Feature development    │"
+        echo "└─────────────────────────────────────────────┘"
+    fi
 }
 
 # Main execution
@@ -233,27 +303,44 @@ main() {
     local branch_name=""
     local agent_role="developer"
     local purpose="Feature development"
+    local use_docker=false
     
-    # Parse arguments
-    if [ $# -eq 0 ]; then
-        log_error "Usage: $0 <branch-name> [agent-role] [purpose]"
+    # Parse arguments for --docker flag
+    local args=()
+    for arg in "$@"; do
+        if [[ "$arg" == "--docker" ]]; then
+            use_docker=true
+        else
+            args+=("$arg")
+        fi
+    done
+    
+    # Parse remaining arguments
+    if [ ${#args[@]} -eq 0 ]; then
+        log_error "Usage: $0 <branch-name> [agent-role] [purpose] [--docker]"
         log_error "Example: $0 feature-123-auth developer 'Implement authentication'"
+        log_error "Example with Docker: $0 feature-123-auth developer 'Implement authentication' --docker"
         exit 1
     fi
     
-    branch_name="$1"
-    agent_role="${2:-developer}"
-    purpose="${3:-Feature development}"
+    branch_name="${args[0]}"
+    agent_role="${args[1]:-developer}"
+    purpose="${args[2]:-Feature development}"
     
     # Execute workflow
     assess_situation
     
-    local issue_number=$(get_issue_number "$branch_name" "$4")
+    local issue_number=$(get_issue_number "$branch_name" "${args[3]}")
     local worktree_path=$(create_worktree "$branch_name" "$issue_number")
     local handover_file=$(create_handover "$branch_name" "$issue_number" "$agent_role" "$purpose" "$worktree_path")
     
+    # Setup Docker environment if requested
+    if [ "$use_docker" = true ]; then
+        setup_docker_environment "$worktree_path" "$agent_role"
+    fi
+    
     open_vscode "$worktree_path"
-    show_completion "$branch_name" "$issue_number" "$worktree_path"
+    show_completion "$branch_name" "$issue_number" "$worktree_path" "$use_docker"
 }
 
 # Run main function with all arguments

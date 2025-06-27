@@ -1,0 +1,15 @@
+{
+  "autoPush": false,
+  "autoCreatePR": false,
+  "setupCommands": [
+    "npm install",
+    "source ./apm/setup/container-init.sh"
+  ],
+  "volumes": {
+    "apm_memory": "./apm:/apm"
+  },
+  "environment": {
+    "APM_AGENT_ROLE": "${AGENT_ROLE}",
+    "APM_WORKTREE": "${WORKTREE_PATH}"
+  }
+}
