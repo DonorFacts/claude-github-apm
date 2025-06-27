@@ -205,6 +205,16 @@ Role: prompt-engineer
 - Priority: Optimize frequently-used prompts that consume most context window
 - Balance: Maintain specificity while eliminating verbosity
 
+### Docker Integration Architecture Learnings
+
+- User experience is paramount - technical purity cannot compromise workflow simplicity
+- VS Code Dev Containers would break APM's worktree orchestration capabilities
+- claude-code-sandbox preserves APM framework while providing security isolation
+- Manager-Worker pattern may be needed to satisfy both security and UX requirements
+- Docker should be default behavior, not optional flag requiring user decisions
+- Mental model consistency (one window = one branch = one conversation) is critical
+- Workflow automation should be invisible to users - complexity belongs in implementation
+
 ### State Management Clarification
 
 - The `.claude/` directory approach was incorrect for agent state
