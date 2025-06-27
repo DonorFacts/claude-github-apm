@@ -17,11 +17,16 @@
     "dev": "echo 'Framework ready for linking'",
     "link": "pnpm link --global",
     "unlink": "pnpm unlink --global",
-    "build:prompts": "node lib/create-command-files.js",
+    "build:prompts": "tsx src/scripts/command-sync/index.ts",
     "build": "npm run build:prompts",
     "clean": "rm -rf dist",
     "ts-check": "tsc --noEmit",
-    "test": "jest",
+    "test": "tsc --noEmit && jest --silent",
+    "test:verbose": "tsc --noEmit && jest --verbose",
+    "test:prod": "tsc --noEmit && APM_TEST_PROD=true jest --silent --runInBand",
+    "test:prod:verbose": "tsc --noEmit && APM_TEST_PROD=true jest --verbose --runInBand",
+    "watch:commands": "tsx src/scripts/command-sync/index.ts --watch",
+    "sync:commands": "tsx src/scripts/command-sync/index.ts",
     "sync:main": "./src/scripts/git/sync-main.sh"
   },
   "keywords": [
