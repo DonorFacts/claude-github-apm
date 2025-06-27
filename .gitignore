@@ -57,3 +57,6 @@ _x_*
 
 # # Claude Commands
 # .claude/commands/
+# Slack configuration
+.slack-config.json
+.cc-slack-config.json

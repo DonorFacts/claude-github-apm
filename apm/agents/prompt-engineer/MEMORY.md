@@ -188,6 +188,15 @@ Role: prompt-engineer
 - Terminal status updates enable multi-window agent coordination
 - Emoji in terminal titles provide instant visual context switching
 
+### APM Slack Integration Learnings
+
+- **Setup Script Pattern**: Install dependencies before importing them to avoid module errors
+- **TDD for Infrastructure**: Always write tests for setup scripts, especially in clean environments
+- **Slack API Scopes**: Specific scopes required for each operation (users:read for user lookup, channels:write.invites for invitations)
+- **Bot Token vs App Token**: Need bot tokens (xoxb-) for channel operations, not app-level tokens (xapp-)
+- **Auto-Invitation Pattern**: Enhanced channel manager to automatically invite users to APM channels
+- **User Onboarding**: Slack channels don't appear in sidebar until user joins them - auto-invitation solves this
+
 ### CrewAI Integration Analysis
 
 - Comprehensive research conducted on CrewAI framework for APM Slack integration
