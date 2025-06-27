@@ -11,7 +11,8 @@ fi
 
 # 2. Get branch and look for handover
 BRANCH=$(git branch --show-current)
-HANDOVER=$(ls apm/worktree-handovers/not-started/*-${BRANCH}.md 2>/dev/null | head -1)
+BRANCH_SAFE=${BRANCH//\//-}  # Convert forward slashes to hyphens for file matching
+HANDOVER=$(ls apm/worktree-handovers/not-started/*-${BRANCH_SAFE}.md 2>/dev/null | head -1)
 
 # 3. Process if found
 if [ -n "$HANDOVER" ]; then

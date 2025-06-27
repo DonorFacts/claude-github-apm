@@ -1,0 +1,552 @@
+version: '1.0'
+generated: '2025-06-19'
+project:
+  name: Project
+  description: Transform the original APM framework into a GitHub-native, enterprise-ready system with CLI capabilities, full TypeScript implementation, and seamless scaling from solo developers to enterprise teams.
+  repository:
+    owner: DonorFacts
+    name: claude-github-apm
+issue_types:
+  phase: IT_kwDODIcSxM4BoTQQ
+  project: IT_kwDODIcSxM4BoTQm
+  epic: IT_kwDODIcSxM4BoSKl
+  feature: IT_kwDODIcSxM4Bl1xX
+  story: IT_kwDODIcSxM4Bofqc
+  task: IT_kwDODIcSxM4Bl1xV
+  bug: IT_kwDODIcSxM4Bl1xW
+  doc: IT_kwDODIcSxM4Bl1xV
+items:
+  - id: task-implement-post-install-script-
+    type: task
+    title: Implement post-install script system.
+    description: |-
+      - Create postinstall.js for consuming repos.
+      - Generate .claude/commands/apm/ structure.
+      - Copy transformed prompts to consumer's project.
+      - Handle cross-platform compatibility.
+    parent_id: epic-agent-typescript-lead-build-sy
+    children_ids: []
+  - id: task-set-up-cli-project-structure
+    type: task
+    title: Set up CLI project structure.
+    description: |-
+      - Initialize with Claude Code SDK.
+      - Create command routing system.
+      - Implement plugin architecture.
+      - Add configuration management.
+    parent_id: epic-agent-cli-developer-core-cli-a
+    children_ids: []
+  - id: story-implement-base-cli-commands
+    type: story
+    title: Implement base CLI commands.
+    description: |-
+      - Create `apm init` for project setup.
+      - Build `apm plan` for Implementation Plan management.
+      - Add `apm agent` for agent initialization.
+      - Implement `apm status` for project overview.
+    parent_id: epic-agent-cli-developer-core-cli-a
+    children_ids: []
+  - id: task-integrate-with-claude-code-sdk
+    type: task
+    title: Integrate with Claude Code SDK.
+    description: |-
+      - Implement SDK query interface.
+      - Add subprocess command execution.
+      - Create MCP server integration.
+      - Build context management system.
+    parent_id: epic-agent-cli-developer-core-cli-a
+    children_ids: []
+  - id: task-create-command-extension-syste
+    type: task
+    title: Create command extension system.
+    description: |-
+      - Design plugin interface.
+      - Build command discovery.
+      - Add dynamic command loading.
+      - Implement command aliasing.
+    parent_id: epic-agent-cli-developer-core-cli-a
+    children_ids: []
+  - id: story-design-command-interactions
+    type: story
+    title: Design command interactions.
+    description: |-
+      - Create prompt flows for setup.
+      - Design agent selection interfaces.
+      - Build task assignment wizards.
+      - Add progress visualization.
+    parent_id: epic-agent-cli-developer-agent-ux-d
+    children_ids: []
+    metadata:
+      agent: Agent_UX_Designer
+  - id: task-implement-interactive-prompts
+    type: task
+    title: Implement interactive prompts.
+    description: |-
+      - Use inquirer.js or similar for prompts.
+      - Build validation and error handling.
+      - Add context-aware suggestions.
+      - Implement command history.
+    parent_id: epic-agent-cli-developer-agent-ux-d
+    children_ids: []
+    metadata:
+      agent: Agent_CLI_Developer
+  - id: doc-create-help-system
+    type: doc
+    title: Create help system.
+    description: |-
+      - Design comprehensive help screens.
+      - Build command examples.
+      - Add troubleshooting guides.
+      - Create quick-start tutorials.
+    parent_id: epic-agent-cli-developer-agent-ux-d
+    children_ids: []
+    metadata:
+      agent: Agent_UX_Designer
+  - id: task-build-command-output-formattin
+    type: task
+    title: Build command output formatting.
+    description: |-
+      - Implement table layouts.
+      - Add color coding system.
+      - Create progress indicators.
+      - Build export capabilities.
+    parent_id: epic-agent-cli-developer-agent-ux-d
+    children_ids: []
+    metadata:
+      agent: Agent_CLI_Developer
+  - id: task-design-command-file-structure
+    type: task
+    title: Design command file structure.
+    description: |-
+      - Create command categorization.
+      - Build command naming conventions.
+      - Add metadata system.
+      - Implement versioning.
+    parent_id: epic-agent-cli-developer-claude-com
+    children_ids: []
+  - id: task-generate-claude-command-files
+    type: task
+    title: Generate Claude command files.
+    description: |-
+      - Transform CLI commands to .claude format.
+      - Add Claude-specific metadata.
+      - Implement parameter mapping.
+      - Create command chains.
+    parent_id: epic-agent-cli-developer-claude-com
+    children_ids: []
+  - id: task-build-command-synchronization
+    type: task
+    title: Build command synchronization.
+    description: |-
+      - Keep CLI and Claude commands in sync.
+      - Add bidirectional updates.
+      - Implement conflict resolution.
+      - Create validation system.
+    parent_id: epic-agent-cli-developer-claude-com
+    children_ids: []
+  - id: task-package-for-distribution
+    type: task
+    title: Package for distribution.
+    description: |-
+      - Create post-install generator.
+      - Build update mechanisms.
+      - Add customization options.
+      - Document integration patterns.
+    parent_id: epic-agent-cli-developer-claude-com
+    children_ids: []
+  - id: story-design-notification-strategy
+    type: story
+    title: Design notification strategy.
+    description: |-
+      - Define notification-worthy events (task completion, builds, PR reviews).
+      - Create notification priority levels (info, success, warning, error).
+      - Design notification templates and formatting.
+      - Plan user preference management.
+    parent_id: feature-agent-ux-designer-agent-cli-de
+    children_ids: []
+    metadata:
+      agent: Agent_UX_Designer
+  - id: task-research-and-integrate-notific
+    type: task
+    title: Research and integrate notification libraries.
+    description: |-
+      - Evaluate node-notifier for cross-platform support.
+      Guidance: Supports Windows, macOS, Linux with fallbacks
+      - Consider electron-notify for richer notifications.
+      - Assess notify-send compatibility on Linux.
+      - Choose library based on platform coverage.
+    parent_id: feature-agent-ux-designer-agent-cli-de
+    children_ids: []
+    metadata:
+      agent: Agent_CLI_Developer
+  - id: task-implement-notification-service
+    type: task
+    title: Implement notification service.
+    description: |-
+      - Create NotificationService class with queue management.
+      - Implement platform detection and fallbacks.
+      - Add notification history and logging.
+      - Build rate limiting to prevent spam.
+    parent_id: feature-agent-ux-designer-agent-cli-de
+    children_ids: []
+    metadata:
+      agent: Agent_CLI_Developer
+  - id: story-create-notification-preference
+    type: story
+    title: Create notification preferences system.
+    description: |-
+      - Build configuration for enabled/disabled events.
+      - Implement do-not-disturb scheduling.
+      - Add sound and visual customization.
+      - Create CLI commands for preference management.
+    parent_id: feature-agent-ux-designer-agent-cli-de
+    children_ids: []
+    metadata:
+      agent: Both
+  - id: task-design-session-monitoring-arch
+    type: task
+    title: Design session monitoring architecture.
+    description: |-
+      - Define event types and data structures.
+      - Plan file watcher implementation approach.
+      - Design terminal title update protocol.
+      - Create session correlation strategy.
+    parent_id: epic-agent-monitor-lead-core-sessio
+    children_ids: []
+  - id: task-implement-claude-log-file-watc
+    type: task
+    title: Implement Claude log file watcher.
+    description: |-
+      - Build TypeScript file watcher using chokidar.
+      - Parse JSONL log entries in real-time.
+      - Extract agent initialization and activity events.
+      - Handle log rotation and file cleanup.
+    parent_id: epic-agent-monitor-lead-core-sessio
+    children_ids: []
+  - id: task-create-event-processing-pipeli
+    type: task
+    title: Create event processing pipeline.
+    description: |-
+      - Parse conversation events for agent actions.
+      - Identify milestones, commits, and handoffs.
+      - Track task assignments and completions.
+      - Monitor for idle periods and blockers.
+    parent_id: epic-agent-monitor-lead-core-sessio
+    children_ids: []
+  - id: task-implement-terminal-title-contr
+    type: task
+    title: Implement terminal title controller.
+    description: |-
+      - Update terminal titles based on agent activity.
+      - Show current task/status in title.
+      - Handle multiple concurrent agents.
+      - Provide clear idle/active indicators.
+    parent_id: epic-agent-monitor-lead-core-sessio
+    children_ids: []
+  - id: task-build-real-time-conversation-s
+    type: task
+    title: Build real-time conversation summarizer.
+    description: |-
+      - Parse user and assistant messages from JSONL logs.
+      - Generate 1-2 sentence summaries for each exchange.
+      - Extract parentUuid for message reference links.
+      - Create timestamp-indexed summary log format.
+    parent_id: epic-agent-analytics-engineer-sessi
+    children_ids: []
+  - id: task-implement-summary-log-writer
+    type: task
+    title: Implement summary log writer.
+    description: |-
+      - Design summary log format (timestamp | agent | U/A | summary | commits | parentUuid).
+      - Write to `apm/agents/<role>/logs/summaries/YYYY-MM-DD.log`.
+      - Track commit IDs when agents make git commits.
+      - Include status updates from agent responses.
+    parent_id: epic-agent-analytics-engineer-sessi
+    children_ids: []
+  - id: task-create-summary-query-interface
+    type: task
+    title: Create summary query interface.
+    description: |-
+      - Build search functionality for summary logs.
+      - Enable date range filtering.
+      - Allow drill-down to full message via parentUuid.
+      - Support cross-agent summary aggregation.
+    parent_id: epic-agent-analytics-engineer-sessi
+    children_ids: []
+  - id: task-integrate-summaries-with-agent
+    type: task
+    title: Integrate summaries with agent initialization.
+    description: |-
+      - Load recent summaries during agent startup.
+      - Provide quick context recovery mechanism.
+      - Enable selective full-message loading.
+      - Optimize token usage for context building.
+    parent_id: epic-agent-analytics-engineer-sessi
+    children_ids: []
+  - id: story-build-session-analytics-from-s
+    type: story
+    title: Build session analytics from summaries.
+    description: |-
+      - Calculate time spent per task from summaries.
+      - Track commit frequency and patterns.
+      - Generate agent performance metrics.
+      - Create daily/weekly team reports.
+    parent_id: epic-agent-analytics-engineer-sessi
+    children_ids: []
+  - id: task-design-dashboard-architecture
+    type: task
+    title: Design dashboard architecture.
+    description: |-
+      - Plan real-time data flow.
+      - Design responsive UI layout.
+      - Create notification system.
+      - Plan for extensibility.
+    parent_id: epic-agent-frontend-dev-monitoring-
+    children_ids: []
+  - id: task-implement-basic-web-interface
+    type: task
+    title: Implement basic web interface.
+    description: |-
+      - Show active agents grid.
+      - Display current tasks.
+      - Visualize progress.
+      - Add notification center.
+    parent_id: epic-agent-frontend-dev-monitoring-
+    children_ids: []
+  - id: task-add-historical-views
+    type: task
+    title: Add historical views.
+    description: |-
+      - Session timeline visualization.
+      - Agent activity heatmaps.
+      - Performance trends.
+      - Issue correlation.
+    parent_id: epic-agent-frontend-dev-monitoring-
+    children_ids: []
+  - id: task-create-api-for-integrations
+    type: task
+    title: Create API for integrations.
+    description: |-
+      - RESTful endpoints for data.
+      - WebSocket for real-time updates.
+      - Authentication system.
+      - Rate limiting.
+    parent_id: epic-agent-frontend-dev-monitoring-
+    children_ids: []
+  - id: task-design-metadata-format-for-age
+    type: task
+    title: Design metadata format for agent responses.
+    description: |-
+      - Create unobtrusive HTML comment format for metadata.
+      - Define fields: summary, status, commits, parentUuid references.
+      - Design fallback for when agents forget metadata.
+      - Create examples for different response types.
+    parent_id: feature-agent-prompt-engineer-agent-mo
+    children_ids: []
+    metadata:
+      agent: Agent_Prompt_Engineer
+  - id: task-update-agent-prompts-with-meta
+    type: task
+    title: Update agent prompts with metadata instructions.
+    description: |-
+      - Add metadata generation to all agent init prompts.
+      - Create clear examples of proper formatting.
+      - Emphasize optional nature to prevent response degradation.
+      - Include in prompt engineering best practices.
+    parent_id: feature-agent-prompt-engineer-agent-mo
+    children_ids: []
+    metadata:
+      agent: Agent_Prompt_Engineer
+  - id: task-implement-metadata-parser
+    type: task
+    title: Implement metadata parser.
+    description: |-
+      - Parse HTML comments from JSONL assistant messages.
+      - Extract structured data with error handling.
+      - Fall back to auto-generation when missing.
+      - Validate commit IDs and parentUuid formats.
+    parent_id: feature-agent-prompt-engineer-agent-mo
+    children_ids: []
+    metadata:
+      agent: Agent_Monitor_Lead
+  - id: task-measure-metadata-quality-and-a
+    type: task
+    title: Measure metadata quality and adherence.
+    description: |-
+      - Track percentage of responses with metadata.
+      - Compare agent vs auto-generated summaries.
+      - Monitor metadata accuracy.
+      - Report on prompt adherence patterns.
+    parent_id: feature-agent-prompt-engineer-agent-mo
+    children_ids: []
+    metadata:
+      agent: Agent_Monitor_Lead
+  - id: story-implement-cross-agent-awarenes
+    type: story
+    title: Implement cross-agent awareness via summaries.
+    description: |-
+      - Agents read other agents' summary logs on init.
+      - Detect when multiple agents work on related tasks.
+      - Track task dependencies across agents.
+      - Enable informed handoffs.
+    parent_id: feature-agent-monitor-lead-agent-analy
+    children_ids: []
+  - id: task-create-work-distribution-insig
+    type: task
+    title: Create work distribution insights.
+    description: |-
+      - Analyze summary logs for workload patterns.
+      - Identify idle agents from status updates.
+      - Suggest optimal task assignments.
+      - Monitor agent specialization effectiveness.
+    parent_id: feature-agent-monitor-lead-agent-analy
+    children_ids: []
+  - id: task-build-coordination-health-metr
+    type: task
+    title: Build coordination health metrics.
+    description: |-
+      - Track handoff success rates via summaries.
+      - Measure duplicate work from commit analysis.
+      - Monitor blocker resolution times.
+      - Generate team efficiency scores.
+    parent_id: feature-agent-monitor-lead-agent-analy
+    children_ids: []
+  - id: story-develop-automated-team-standup
+    type: story
+    title: Develop automated team standup from summaries.
+    description: |-
+      - Aggregate previous day's summaries by agent.
+      - Group by features/tasks using commit IDs.
+      - Highlight blockers and dependencies.
+      - Generate markdown standup report.
+    parent_id: feature-agent-monitor-lead-agent-analy
+    children_ids: []
+  - id: task-set-up-journal-ai-cli-test-env
+    type: task
+    title: Set up journal-ai-cli test environment.
+    description: |-
+      - Clone journal-ai-cli repository.
+      - Install development version of APM.
+      - Configure for testing.
+      - Create test scenarios.
+    parent_id: epic-agent-qa-lead-end-to-end-testi
+    children_ids: []
+  - id: task-execute-full-apm-workflow-test
+    type: task
+    title: Execute full APM workflow testing.
+    description: |-
+      - Test project initialization.
+      - Validate Implementation Plan creation.
+      - Test GitHub issue generation.
+      - Verify agent workflows.
+    parent_id: epic-agent-qa-lead-end-to-end-testi
+    children_ids: []
+  - id: task-perform-integration-testing
+    type: task
+    title: Perform integration testing.
+    description: |-
+      - Test CLI commands end-to-end.
+      - Validate GitHub integrations.
+      - Test prompt transformations.
+      - Verify build system.
+    parent_id: epic-agent-qa-lead-end-to-end-testi
+    children_ids: []
+  - id: bug-create-test-report-and-fixes
+    type: bug
+    title: Create test report and fixes.
+    description: |-
+      - Document all issues found.
+      - Prioritize fixes by severity.
+      - Implement corrections.
+      - Re-test fixed issues.
+    parent_id: epic-agent-qa-lead-end-to-end-testi
+    children_ids: []
+  - id: doc-write-user-documentation
+    type: doc
+    title: Write user documentation.
+    description: |-
+      - Create getting started guide.
+      - Document all CLI commands.
+      - Write workflow tutorials.
+      - Add troubleshooting section.
+    parent_id: epic-agent-doc-writer-comprehensive
+    children_ids: []
+  - id: doc-create-developer-documentation
+    type: doc
+    title: Create developer documentation.
+    description: |-
+      - Document architecture decisions.
+      - Write plugin development guide.
+      - Add API references.
+      - Create contribution guidelines.
+    parent_id: epic-agent-doc-writer-comprehensive
+    children_ids: []
+  - id: doc-build-migration-documentation
+    type: doc
+    title: Build migration documentation.
+    description: |-
+      - Write migration guide from original APM.
+      - Document breaking changes.
+      - Create compatibility matrix.
+      - Add upgrade scripts.
+    parent_id: epic-agent-doc-writer-comprehensive
+    children_ids: []
+  - id: doc-generate-example-projects
+    type: doc
+    title: Generate example projects.
+    description: |-
+      - Create starter templates.
+      - Build showcase examples.
+      - Add video tutorials.
+      - Create interactive demos.
+    parent_id: epic-agent-doc-writer-comprehensive
+    children_ids: []
+  - id: task-finalize-package-configuration
+    type: task
+    title: Finalize package configuration.
+    description: |-
+      - Review and optimize package.json.
+      - Set up npm organization.
+      - Configure package access.
+      - Add security policies.
+    parent_id: epic-agent-devops-agent-typescript-
+    children_ids: []
+    metadata:
+      agent: Agent_DevOps
+  - id: task-optimize-build-output
+    type: task
+    title: Optimize build output.
+    description: |-
+      - Minimize bundle size.
+      - Optimize dependencies.
+      - Create production builds.
+      - Generate source maps.
+    parent_id: epic-agent-devops-agent-typescript-
+    children_ids: []
+    metadata:
+      agent: Agent_TypeScript_Lead
+  - id: task-set-up-publishing-pipeline
+    type: task
+    title: Set up publishing pipeline.
+    description: |-
+      - Create release workflow.
+      - Add version management.
+      - Implement changelog generation.
+      - Configure npm publishing.
+    parent_id: epic-agent-devops-agent-typescript-
+    children_ids: []
+    metadata:
+      agent: Agent_DevOps
+  - id: story-execute-initial-release
+    type: story
+    title: Execute initial release.
+    description: |-
+      - Run final test suite.
+      - Create release notes.
+      - Publish to npm.
+      - Monitor initial adoption.
+      ---
+    parent_id: epic-agent-devops-agent-typescript-
+    children_ids: []
+    metadata:
+      agent: Both
