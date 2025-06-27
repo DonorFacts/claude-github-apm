@@ -141,10 +141,10 @@ perform_cleanup() {
     git worktree prune
     log_success "Worktree references cleaned"
     
-    # Remove handover files
+    # Remove handover files (only from not-started, preserve completed records)
     log_info "Cleaning up handover files..."
-    if [ -d "apm/worktree-handovers" ]; then
-        find apm/worktree-handovers -name "*$BRANCH_NAME.md" -delete 2>/dev/null
+    if [ -d "apm/worktree-handovers/not-started" ]; then
+        find apm/worktree-handovers/not-started -name "*$BRANCH_NAME.md" -delete 2>/dev/null
         find apm/worktree-handovers -type d -empty -delete 2>/dev/null
         log_success "Handover files cleaned"
     fi
