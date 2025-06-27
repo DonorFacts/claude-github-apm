@@ -8,25 +8,40 @@ import {
   Repository 
 } from '../bulk-issue-creator/types';
 import { MarkdownHeader, MarkdownListItem, ParseContext } from './types';
+import { IssueTypeConfigManager } from '../issue-type-config/IssueTypeConfigManager';
 
 export class MarkdownToYamlConverter {
   private issueTypes: IssueTypes;
-  private idCounter: number = 0;
   private idMap: Map<string, string> = new Map();
+  private configManager: IssueTypeConfigManager;
   
-  constructor(issueTypes?: IssueTypes) {
+  constructor(issueTypes?: IssueTypes, configPath?: string) {
+    this.configManager = new IssueTypeConfigManager(
+      configPath || path.join(process.cwd(), 'apm', 'issue-types.json')
+    );
+    
+    // Use provided issue types or fall back to defaults
     this.issueTypes = issueTypes || {
-      phase: 'MDT_Phase',
-      project: 'MDT_Project',
-      epic: 'MDT_Epic',
-      feature: 'MDT_Feature',
-      story: 'MDT_Story',
-      task: 'MDT_Task',
-      bug: 'MDT_Bug',
-      doc: 'MDT_Doc'
+      phase: 'IT_kwDODIcSxM4BoTQQ',
+      project: 'IT_kwDODIcSxM4BoTQm',
+      epic: 'IT_kwDODIcSxM4BoSKl',
+      feature: 'IT_kwDODIcSxM4Bl1xX',
+      story: 'IT_kwDODIcSxM4Bofqc',
+      task: 'IT_kwDODIcSxM4Bl1xV',
+      bug: 'IT_kwDODIcSxM4Bl1xW',
+      doc: 'IT_kwDODIcSxM4Bl1xV'
     };
   }
   
+  async loadIssueTypesFromConfig(): Promise<void> {
+    if (this.configManager.configExists()) {
+      const configTypes = await this.configManager.loadConfig();
+      if (Object.keys(configTypes).length > 0) {
+        this.issueTypes = { ...this.issueTypes, ...configTypes };
+      }
+    }
+  }
+
   parseMarkdown(markdown: string, repository: Repository): ImplementationPlan {
     const lines = markdown.split('\n');
     const items: PlanItem[] = [];
@@ -182,7 +197,7 @@ export class MarkdownToYamlConverter {
     
     const item: PlanItem = {
       id,
-      type: listItem.type as keyof IssueTypes,
+      type: listItem.type as string,
       title: listItem.title,
       description: this.formatDescription(listItem.description),
       parent_id: parentId,
@@ -200,12 +215,12 @@ export class MarkdownToYamlConverter {
     return item;
   }
   
-  private detectTypeFromHeader(header: MarkdownHeader, context: ParseContext, fullText?: string): keyof IssueTypes | null {
+  private detectTypeFromHeader(header: MarkdownHeader, context: ParseContext, fullText?: string): string | null {
     const textToCheck = fullText || header.text;
     const level = header.level;
     
     // Check explicit type indicators in original text (case-insensitive)
-    const typePatterns: { pattern: RegExp, type: keyof IssueTypes }[] = [
+    const typePatterns: { pattern: RegExp, type: string }[] = [
       { pattern: /\bphase\b/i, type: 'phase' },
       { pattern: /\bproject\b/i, type: 'project' },
       { pattern: /\bepic\b/i, type: 'epic' },

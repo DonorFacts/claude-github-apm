@@ -6,6 +6,10 @@ export interface Repository {
 }
 
 export interface IssueTypes {
+  [key: string]: string;
+}
+
+export interface StandardIssueTypes {
   phase: string;
   project: string;
   epic: string;
@@ -16,9 +20,14 @@ export interface IssueTypes {
   doc?: string;
 }
 
+export interface IssueTemplate {
+  id: string;
+  name: string;
+}
+
 export interface PlanItem {
   id: string;
-  type: keyof IssueTypes;
+  type: string;
   title: string;
   description: string;
   parent_id: string | null;
@@ -45,7 +54,7 @@ export interface ImplementationPlan {
     description: string;
     repository: Repository;
   };
-  issue_types: IssueTypes;
+  issue_types?: IssueTypes;
   items: PlanItem[];
   execution?: ExecutionPlan;
 }

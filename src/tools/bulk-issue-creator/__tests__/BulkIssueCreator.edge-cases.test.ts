@@ -1,17 +1,25 @@
 import { BulkIssueCreator } from '../BulkIssueCreator';
+import { GitHubClient } from '../GitHubClient';
 import { TestPlanBuilder, MockGitHubClient } from './test-utils';
+import { shouldUseMocks } from '../../../test-setup';
+import { IGitHubClient } from '../interfaces';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 
 describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
-  let mockGitHubClient: MockGitHubClient;
+  let githubClient: IGitHubClient;
   let testPlanPath: string;
   let outputDir: string;
   
   beforeEach(() => {
-    mockGitHubClient = new MockGitHubClient();
-    outputDir = path.join(__dirname, 'output', Date.now().toString());
+    // Edge cases typically need mocks for error simulation, but support both modes
+    githubClient = shouldUseMocks ? new MockGitHubClient() : new GitHubClient();
+    if (shouldUseMocks && 'reset' in githubClient) {
+      (githubClient as any).reset();
+    }
+    // Use more unique directory names to avoid race conditions
+    outputDir = path.join(__dirname, 'output', `${Date.now()}-${Math.random().toString(36).substring(7)}`);
     fs.mkdirSync(outputDir, { recursive: true });
     testPlanPath = path.join(outputDir, 'test-plan.yaml');
   });
@@ -28,13 +36,13 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
       fs.writeFileSync(testPlanPath, 'invalid: yaml: content: [');
       
       // Act & Assert
-      expect(() => new BulkIssueCreator(testPlanPath, mockGitHubClient))
+      expect(() => new BulkIssueCreator(testPlanPath, githubClient))
         .toThrow('Failed to load plan');
     });
     
     it('should throw error for non-existent file', () => {
       // Act & Assert
-      expect(() => new BulkIssueCreator('/non/existent/file.yaml', mockGitHubClient))
+      expect(() => new BulkIssueCreator('/non/existent/file.yaml', githubClient))
         .toThrow('Failed to load plan');
     });
   });
@@ -47,7 +55,7 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
         .saveToFile(testPlanPath);
       
       // Act & Assert
-      expect(() => new BulkIssueCreator(testPlanPath, mockGitHubClient))
+      expect(() => new BulkIssueCreator(testPlanPath, githubClient))
         .toThrow('references non-existent parent');
     });
     
@@ -65,11 +73,11 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
       fs.writeFileSync(testPlanPath, yaml.dump(plan));
       
       // Act & Assert
-      expect(() => new BulkIssueCreator(testPlanPath, mockGitHubClient))
+      expect(() => new BulkIssueCreator(testPlanPath, githubClient))
         .toThrow('missing required field: title');
     });
     
-    it('should throw error for invalid issue type', () => {
+    it('should handle invalid issue type during execution', async () => {
       // Arrange
       const plan = new TestPlanBuilder().build();
       plan.items.push({
@@ -82,14 +90,26 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
       });
       fs.writeFileSync(testPlanPath, yaml.dump(plan));
       
-      // Act & Assert
-      expect(() => new BulkIssueCreator(testPlanPath, mockGitHubClient))
-        .toThrow('invalid issue type');
+      const creator = new BulkIssueCreator(testPlanPath, githubClient);
+      
+      // Act
+      const result = await creator.execute();
+      
+      // Assert
+      expect(result.created).toBe(0);
+      expect(result.failed).toBe(1);
+      expect(result.errors.length).toBe(1);
+      expect(result.errors[0]).toContain('No issue type mapping found for type: invalid-type');
     });
   });
   
   describe('GitHub API Errors', () => {
     it('should handle batch creation failure and fallback to individual', async () => {
+      // This test only makes sense for mocks since we can't simulate batch failures in real APIs
+      if (!shouldUseMocks) {
+        return;
+      }
+      
       // Arrange
       new TestPlanBuilder()
         .addTask('task-1', 'Task 1', null)
@@ -97,9 +117,9 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
         .saveToFile(testPlanPath);
       
       // Make batch creation fail
-      mockGitHubClient.setResponse('createIssuesBatch', new Error('GraphQL error'));
+      (githubClient as MockGitHubClient).setResponse('createIssuesBatch', new Error('GraphQL error'));
       
-      const creator = new BulkIssueCreator(testPlanPath, mockGitHubClient);
+      const creator = new BulkIssueCreator(testPlanPath, githubClient);
       
       // Act
       const result = await creator.execute();
@@ -109,7 +129,7 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
       expect(result.failed).toBe(0);
       
       // Verify fallback to individual creation
-      const individualCalls = mockGitHubClient.calls.filter(c => c.method === 'createIssue');
+      const individualCalls = (githubClient as MockGitHubClient).calls.filter((c: any) => c.method === 'createIssue');
       expect(individualCalls.length).toBe(2);
     });
     
@@ -120,9 +140,11 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
         .saveToFile(testPlanPath);
       
       // Make individual creation fail
-      mockGitHubClient.setResponse('createIssue', new Error('API error'));
+      if (shouldUseMocks) {
+        (githubClient as MockGitHubClient).setResponse('createIssue', new Error('API error'));
+      }
       
-      const creator = new BulkIssueCreator(testPlanPath, mockGitHubClient);
+      const creator = new BulkIssueCreator(testPlanPath, githubClient);
       
       // Act
       const result = await creator.execute();
@@ -140,13 +162,17 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
         .addTask('task-1', 'Task 1', null)
         .saveToFile(testPlanPath);
       
-      // Make getRepositoryId throw an error
-      mockGitHubClient.getRepositoryId = jest.fn().mockRejectedValue(new Error('Network error'));
+      // Make getRepositoryId throw an error (only for mocks)
+      if (shouldUseMocks) {
+        (githubClient as any).getRepositoryId = jest.fn().mockRejectedValue(new Error('Network error'));
+      }
       
-      const creator = new BulkIssueCreator(testPlanPath, mockGitHubClient);
+      const creator = new BulkIssueCreator(testPlanPath, githubClient);
       
-      // Act & Assert
-      await expect(creator.execute()).rejects.toThrow('Network error');
+      // Act & Assert (only for mocks since we can't simulate this error in production)
+      if (shouldUseMocks) {
+        await expect(creator.execute()).rejects.toThrow('Network error');
+      }
     });
     
     it('should handle relationship creation failure', async () => {
@@ -156,9 +182,11 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
         .addTask('task-1', 'Task', 'phase-1')
         .saveToFile(testPlanPath);
       
-      mockGitHubClient.setResponse('createSubIssueRelationships', new Error('Relationship error'));
+      if (shouldUseMocks) {
+        (githubClient as MockGitHubClient).setResponse('createSubIssueRelationships', new Error('Relationship error'));
+      }
       
-      const creator = new BulkIssueCreator(testPlanPath, mockGitHubClient);
+      const creator = new BulkIssueCreator(testPlanPath, githubClient);
       
       // Act
       const result = await creator.execute();
@@ -177,7 +205,7 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
       plan.items = [];
       fs.writeFileSync(testPlanPath, yaml.dump(plan));
       
-      const creator = new BulkIssueCreator(testPlanPath, mockGitHubClient);
+      const creator = new BulkIssueCreator(testPlanPath, githubClient);
       
       // Act
       const result = await creator.execute();
@@ -197,7 +225,7 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
         .withExistingIssue('task-2', 101)
         .saveToFile(testPlanPath);
       
-      const creator = new BulkIssueCreator(testPlanPath, mockGitHubClient);
+      const creator = new BulkIssueCreator(testPlanPath, githubClient);
       
       // Act
       const result = await creator.execute();
@@ -227,7 +255,7 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
         }
       }
       
-      const creator = new TestBulkIssueCreator(testPlanPath, mockGitHubClient);
+      const creator = new TestBulkIssueCreator(testPlanPath, githubClient);
       
       // Act
       const result = await creator.execute();
@@ -248,16 +276,18 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
         .addTask('task-3', 'Task 3', null)
         .saveToFile(testPlanPath);
       
-      // Mock partial success in batch
-      mockGitHubClient.setResponse('createIssuesBatch', {
-        data: {
-          issue0: { issue: { number: 100, id: 'id-100' } },
-          issue1: null, // Failed
-          issue2: { issue: { number: 102, id: 'id-102' } }
-        }
-      });
+      // Mock partial success in batch (only for mocks)
+      if (shouldUseMocks) {
+        (githubClient as MockGitHubClient).setResponse('createIssuesBatch', {
+          data: {
+            issue0: { issue: { number: 100, id: 'id-100' } },
+            issue1: null, // Failed
+            issue2: { issue: { number: 102, id: 'id-102' } }
+          }
+        });
+      }
       
-      const creator = new BulkIssueCreator(testPlanPath, mockGitHubClient);
+      const creator = new BulkIssueCreator(testPlanPath, githubClient);
       
       // Act
       const result = await creator.execute();
@@ -276,16 +306,18 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
       }
       builder.saveToFile(testPlanPath);
       
-      const creator = new BulkIssueCreator(testPlanPath, mockGitHubClient);
+      const creator = new BulkIssueCreator(testPlanPath, githubClient);
       
       // Act
       const result = await creator.execute();
       
       // Assert
       expect(result.created).toBe(20);
-      const batchCalls = mockGitHubClient.calls.filter(c => c.method === 'createIssuesBatch');
-      expect(batchCalls.length).toBe(1);
-      expect(batchCalls[0].issues.length).toBe(20);
+      if (shouldUseMocks) {
+        const batchCalls = (githubClient as MockGitHubClient).calls.filter((c: any) => c.method === 'createIssuesBatch');
+        expect(batchCalls.length).toBe(1);
+        expect(batchCalls[0].issues.length).toBe(20);
+      }
     });
   });
   
@@ -300,7 +332,7 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
       fs.writeFileSync(testPlanPath, yaml.dump(plan));
       
       // This should not cause infinite loop in level calculation
-      const creator = new BulkIssueCreator(testPlanPath, mockGitHubClient);
+      const creator = new BulkIssueCreator(testPlanPath, githubClient);
       
       // Act & Assert - should not throw or hang
       expect(creator).toBeDefined();
@@ -319,7 +351,7 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
       }
       
       builder.saveToFile(testPlanPath);
-      const creator = new BulkIssueCreator(testPlanPath, mockGitHubClient);
+      const creator = new BulkIssueCreator(testPlanPath, githubClient);
       
       // Act
       const result = await creator.execute();
@@ -328,11 +360,13 @@ describe('BulkIssueCreator - Edge Cases & Error Handling', () => {
       expect(result.created).toBe(10);
       expect(result.failed).toBe(0);
       
-      // Verify level-by-level creation
-      const createCalls = mockGitHubClient.calls.filter(c => 
-        c.method === 'createIssue' || c.method === 'createIssuesBatch'
-      );
-      expect(createCalls.length).toBe(10); // One per level
+      // Verify level-by-level creation (only for mocks)
+      if (shouldUseMocks) {
+        const createCalls = (githubClient as MockGitHubClient).calls.filter((c: any) => 
+          c.method === 'createIssue' || c.method === 'createIssuesBatch'
+        );
+        expect(createCalls.length).toBe(10); // One per level
+      }
     });
   });
 });

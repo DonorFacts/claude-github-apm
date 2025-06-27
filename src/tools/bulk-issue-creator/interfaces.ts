@@ -1,7 +1,8 @@
 import { 
   CreateIssueInput, 
   GitHubIssue, 
-  BatchCreateResult 
+  BatchCreateResult,
+  IssueTemplate
 } from './types';
 
 export interface IGitHubClient {
@@ -11,4 +12,5 @@ export interface IGitHubClient {
   findExistingIssue(title: string): Promise<number | null>;
   createSubIssueRelationships(parentId: string, childIds: string[]): Promise<void>;
   getIssueTypes(): Promise<Record<string, any>>;
+  discoverIssueTemplates(owner: string, repo: string): Promise<IssueTemplate[]>;
 }
