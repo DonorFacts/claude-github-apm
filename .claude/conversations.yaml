@@ -1,0 +1,14 @@
+- id: agent-prompt-engineer-init-20250627
+  started: 2025-06-27 15:00:00
+  updated: 2025-06-27 15:00:00
+  title: "Agent Prompt Engineer Init - Docker Security Research"
+  objective: "Initialize Prompt Engineer agent and research Docker with Claude Code for security sandboxing"
+  status: "active"
+  workflow_step_id: "research-docker-security"
+  context_summary: "User wants to explore Docker as secure sandbox for Claude Code dangerous permissions"
+  next_actions: ["Research Docker+Claude Code", "Create Docker security recommendations", "Explain Docker basics for beginner"]
+  branch: "feature-draft-git-worktree-docs"
+  turns: 1
+  agent_role: "Prompt Engineer"
+  session_id: "unknown" # will need script to detect
+  context_window_size: 8000 # estimated
