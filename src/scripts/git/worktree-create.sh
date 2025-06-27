@@ -140,10 +140,34 @@ get_issue_number() {
         return 0
     fi
     
-    # No issue found - use placeholder for testing  
-    log_info "No existing issue found - using placeholder"
-    echo "TBD"
-    return 0
+    # No issue found - create one automatically
+    log_info "No existing issue found - creating GitHub issue"
+    
+    # Check if gh CLI is available
+    if ! command -v gh >/dev/null 2>&1; then
+        log_error "GitHub CLI (gh) not found. Please install: brew install gh"
+        log_error "Or provide issue number manually: $0 $target_branch [issue-number]"
+        exit 1
+    fi
+    
+    # Create GitHub issue automatically
+    local issue_title="$2"  # Use the purpose as title
+    if [ -z "$issue_title" ]; then
+        issue_title="Feature development for $target_branch"
+    fi
+    
+    log_info "Creating GitHub issue: $issue_title"
+    local new_issue_number=$(gh issue create --title "$issue_title" --body "Automated issue creation for worktree: $target_branch" --assignee "@me" --json number --jq '.number')
+    
+    if [ $? -eq 0 ] && [ -n "$new_issue_number" ]; then
+        log_success "Created GitHub issue #$new_issue_number"
+        echo "$new_issue_number"
+        return 0
+    else
+        log_error "Failed to create GitHub issue"
+        log_error "Please create manually: gh issue create --title '$issue_title' --assignee '@me'"
+        exit 1
+    fi
 }
 
 # Function to create branch and worktree
@@ -360,7 +384,7 @@ main() {
     # Execute workflow
     assess_situation
     
-    local issue_number=$(get_issue_number "$branch_name" "${args[3]}")
+    local issue_number=$(get_issue_number "$branch_name" "$purpose")
     local worktree_path=$(create_worktree "$branch_name" "$issue_number")
     
     # Setup dev container environment by default (unless legacy mode)
