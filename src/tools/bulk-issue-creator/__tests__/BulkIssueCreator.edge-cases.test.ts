@@ -1,6 +1,6 @@
 import { BulkIssueCreator } from '../BulkIssueCreator';
 import { GitHubClient } from '../GitHubClient';
-import { TestPlanBuilder, MockGitHubClient } from './test-utils';
+import { TestPlanBuilder, MockGitHubClient } from '../utils/test-utils';
 import { shouldUseMocks } from '../../../test-setup';
 import { IGitHubClient } from '../interfaces';
 import * as fs from 'fs';
