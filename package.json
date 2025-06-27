@@ -47,6 +47,7 @@
   },
   "devDependencies": {
     "@jest/globals": "^30.0.3",
+    "@types/express": "^5.0.3",
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.0.4",
@@ -56,10 +57,13 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@slack/web-api": "^7.9.3",
     "chokidar": "^4.0.3",
+    "express": "^5.1.0",
     "fs-extra": "^11.2.0",
     "glob": "^10.3.10",
     "gray-matter": "^4.0.3",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "node-fetch": "^3.3.2"
   }
 }

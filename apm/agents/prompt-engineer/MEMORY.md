@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-06-25T12:59:46Z
+Last Updated: 2025-01-27T16:20:00Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -187,6 +187,24 @@ Role: prompt-engineer
 - Scripts should use ../../ navigation patterns, never absolute paths
 - Terminal status updates enable multi-window agent coordination
 - Emoji in terminal titles provide instant visual context switching
+
+### APM Slack Integration Learnings
+
+- **Setup Script Pattern**: Install dependencies before importing them to avoid module errors
+- **TDD for Infrastructure**: Always write tests for setup scripts, especially in clean environments
+- **Slack API Scopes**: Specific scopes required for each operation (users:read for user lookup, channels:write.invites for invitations)
+- **Bot Token vs App Token**: Need bot tokens (xoxb-) for channel operations, not app-level tokens (xapp-)
+- **Auto-Invitation Pattern**: Enhanced channel manager to automatically invite users to APM channels
+- **User Onboarding**: Slack channels don't appear in sidebar until user joins them - auto-invitation solves this
+
+### CrewAI Integration Analysis
+
+- Comprehensive research conducted on CrewAI framework for APM Slack integration
+- **Decision**: Rejected CrewAI adoption due to fundamental architecture misalignment
+- **Key conflicts**: Memory system incompatibility, token overhead, external dependencies
+- **APM philosophy**: Self-hosted, token-optimized, git-native workflows prioritized
+- **Alternative chosen**: APM-native Slack integration following existing agent patterns
+- **Lesson**: Always evaluate external tools against full framework context, not isolated features
 
 ### Prompt Optimization Insights
 
