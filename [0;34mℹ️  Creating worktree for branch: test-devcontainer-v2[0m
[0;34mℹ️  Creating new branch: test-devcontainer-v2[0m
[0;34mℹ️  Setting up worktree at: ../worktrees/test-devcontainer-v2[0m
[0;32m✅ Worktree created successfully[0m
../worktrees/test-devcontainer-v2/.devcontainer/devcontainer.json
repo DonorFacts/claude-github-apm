@@ -1,0 +1,44 @@
+{
+  "name": "APM Framework - developer",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-json",
+        "GitHub.copilot"
+      ],
+      "settings": {
+        "typescript.suggest.autoImports": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+    }
+  },
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/apm,target=/workspace/apm,type=bind,consistency=cached"
+  ],
+
+  "containerEnv": {
+    "APM_CONTAINERIZED": "true",
+    "APM_AGENT_ROLE": "developer",
+    "APM_MEMORY_PATH": "/workspace/apm/agents/developer",
+    "APM_PROJECT_ROOT": "/workspace"
+  },
+
+  "postCreateCommand": "npm install && chmod +x ./apm/setup/container-init.sh && ./apm/setup/container-init.sh",
+
+  "forwardPorts": [3000, 8000],
+
+  "remoteUser": "node",
+
+  "shutdownAction": "stopContainer"
+}
