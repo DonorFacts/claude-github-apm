@@ -1,62 +1,59 @@
-# Docker Security Usage for APM Framework
+# VS Code Dev Container Security for APM Framework
 
-**Security Enhancement**: Run Claude Code agents in isolated Docker containers with dangerous permissions safely contained.
+**Security Enhancement**: Run Claude Code agents in isolated VS Code dev containers with dangerous permissions safely contained while maintaining familiar terminal UX.
 
 ## Quick Start
 
 ### Prerequisites
-- Docker Desktop or Podman installed
-- claude-code-sandbox: `pnpm add -g @textcortex/claude-code-sandbox`
+- Docker Desktop (macOS/Windows) or Docker CE (Linux)
+- VS Code with Dev Containers extension
 
 ### Create Secure Worktree
 ```bash
-# Standard worktree creation
+# Standard worktree creation with dev container security (default)
 ./src/scripts/git/worktree-create.sh feature-123-auth developer "Implement authentication"
 
-# Enhanced with Docker security
-./src/scripts/git/worktree-create.sh feature-123-auth developer "Implement authentication" --docker
+# Legacy mode without containers (if needed)
+./src/scripts/git/worktree-create.sh feature-123-auth developer "Implement authentication" --no-container
 ```
 
 ### Start Containerized Development
-```bash
-# In the worktree directory
-claude-sandbox
-```
-
-This opens a web terminal at `http://localhost:3456` with Claude Code running in an isolated container.
+1. VS Code opens worktree automatically
+2. VS Code detects `.devcontainer/` and prompts: **"Reopen in Container?"**
+3. Click **"Reopen in Container"**
+4. Container builds and starts (1-2 minutes first time)
+5. Run `claude` in VS Code terminal (same UX as before)
 
 ## Benefits
 
 ### Security Isolation
-- **Host Protection**: Claude cannot access your personal files, SSH keys, or system settings
+- **Host Protection**: Claude cannot access personal files, SSH keys, or system settings
 - **Dangerous Permissions**: `--dangerously-skip-permissions` runs safely in container
-- **Network Isolation**: Controlled external access (optional)
+- **Network Isolation**: Controlled external access
 - **Resource Limits**: Prevent system resource exhaustion
 
-### APM Integration
+### Developer Experience
+- **Same VS Code Terminal**: Familiar interface, same keyboard shortcuts
+- **Single Claude Instance**: One conversation per worktree window
+- **Seamless Integration**: No workflow changes required
 - **Agent Memory Persists**: Memory system works identically in containers
-- **Seamless Handovers**: Context transfers between host and container environments  
-- **GitHub Integration**: Full workflow automation preserved
-- **Multi-Agent Coordination**: Container and host agents can collaborate
 
 ## How It Works
 
 ### Architecture
 ```
-Host System (APM Framework)
-├── Worktree management and GitHub integration
-├── Agent coordination and memory persistence
-└── Docker Container (Secure execution)
-    ├── Claude Code with dangerous permissions
-    ├── Isolated file system
-    ├── Mounted APM memory (/apm)
-    └── Mounted project files (/workspace)
+VS Code (Host)                    Dev Container
+├── Terminal UI                   ├── Claude Code instance
+├── File explorer                 ├── Project files (mounted)
+├── Extensions                    ├── APM memory (mounted)
+└── Git integration               └── Isolated execution environment
 ```
 
 ### File Structure
 ```
 worktree/
-├── claude-sandbox.config.json    # Generated Docker config
+├── .devcontainer/
+│   └── devcontainer.json         # VS Code dev container config
 ├── apm/                          # Memory system (mounted)
 │   ├── agents/                   # Agent memory persists
 │   └── setup/
@@ -66,24 +63,30 @@ worktree/
 
 ## Configuration
 
-### APM Docker Config Template
-The framework automatically generates `claude-sandbox.config.json`:
+### Dev Container Template
+The framework automatically generates `.devcontainer/devcontainer.json`:
 
 ```json
 {
-  "autoPush": false,
-  "autoCreatePR": false,
-  "setupCommands": [
-    "npm install",
-    "source ./apm/setup/container-init.sh"
-  ],
-  "volumes": {
-    "apm_memory": "./apm:/apm"
+  "name": "APM Framework - developer",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
   },
-  "environment": {
+  
+  "mounts": [
+    "source=${localWorkspaceFolder}/apm,target=/workspace/apm,type=bind"
+  ],
+  
+  "containerEnv": {
+    "APM_CONTAINERIZED": "true",
     "APM_AGENT_ROLE": "developer",
-    "APM_WORKTREE": "/path/to/worktree"
-  }
+    "APM_MEMORY_PATH": "/workspace/apm/agents/developer"
+  },
+  
+  "postCreateCommand": "./apm/setup/container-init.sh"
 }
 ```
 
@@ -93,13 +96,30 @@ Automatically set in containers:
 - `APM_AGENT_ROLE` - Agent role (developer, qa, etc.)
 - `APM_MEMORY_PATH` - Path to agent memory
 - `APM_PROJECT_ROOT` - Project workspace path
+- `REMOTE_CONTAINERS` - VS Code dev container indicator
+
+## UX Flow
+
+### Development Workflow
+1. **Create worktree**: `./src/scripts/git/worktree-create.sh feature-branch developer "Description"`
+2. **VS Code opens**: Automatically opens worktree in new window
+3. **Container prompt**: "Folder contains a Dev Container configuration file. Reopen in Container?"
+4. **Click "Reopen in Container"**: VS Code builds and starts container
+5. **Same terminal**: VS Code terminal now runs inside container
+6. **Start Claude**: Run `claude` command (same as before)
+7. **Develop securely**: Full dangerous permissions within container isolation
+
+### Mental Model
+- **One VS Code window** = One worktree = One container = One Claude conversation
+- **No doubling** of instances or applications
+- **Same UX** with container security underneath
 
 ## Agent Behavior
 
 ### Container Detection
 Agents automatically detect containerized environments:
 - Terminal titles show 🐳 container indicator
-- Memory paths adapt to container mount points
+- Memory paths adapt to container mount points (`/workspace/apm/agents/`)
 - Initialization confirms container vs. host environment
 
 ### Memory System
@@ -108,54 +128,39 @@ Identical behavior in containers and host:
 - Context saves work seamlessly
 - Handover protocols function identically
 
-## Workflows
+## Performance
 
-### Development Workflow
-1. **Create worktree with Docker**: `./src/scripts/git/worktree-create.sh feature-branch developer "Description" --docker`
-2. **Start container**: `claude-sandbox` in worktree directory
-3. **Initialize agent**: Agent detects container and adapts automatically
-4. **Develop securely**: Full dangerous permissions within container isolation
-5. **Commit and push**: Git operations work normally (mounted volumes)
-
-### Agent Handover
-Container-aware handovers work seamlessly:
-- Memory transfers between host and container agents
-- Context files preserved across environments
-- GitHub integration functions from both environments
-
-## Limitations
-
-### Performance
-- **Startup time**: Additional 10-30 seconds for container initialization
+### First-Time Setup
+- **Initial build**: 1-2 minutes for container image download and setup
+- **Subsequent starts**: 10-30 seconds for container initialization
 - **Resource overhead**: ~100-200MB RAM per container
-- **File I/O**: Slight performance impact from volume mounting
 
-### Features
-- **VS Code integration**: Limited to web terminal interface
-- **Host file access**: Only mounted directories accessible
-- **Network access**: Configurable but isolated by default
+### Ongoing Performance
+- **File I/O**: Minimal performance impact from volume mounting
+- **Terminal responsiveness**: Identical to native VS Code terminal
+- **Claude Code performance**: No noticeable difference
 
 ## Troubleshooting
 
-### Container Won't Start
+### Container Won't Build
 ```bash
 # Check Docker is running
 docker ps
 
-# Verify claude-sandbox installation
-claude-sandbox --version
+# Verify VS Code Dev Containers extension is installed
+code --list-extensions | grep ms-vscode-remote.remote-containers
 
-# Check configuration
-cat claude-sandbox.config.json
+# Rebuild container
+Cmd+Shift+P → "Dev Containers: Rebuild Container"
 ```
 
 ### Memory Not Persisting
 ```bash
-# Verify volume mounting
-docker inspect $(docker ps -q) | grep -A 5 "Mounts"
+# Verify volume mounting in container
+ls -la /workspace/apm/agents/
 
-# Check APM memory path
-ls -la apm/agents/
+# Check container logs
+Cmd+Shift+P → "Dev Containers: Show Container Log"
 ```
 
 ### Performance Issues
@@ -163,67 +168,83 @@ ls -la apm/agents/
 # Monitor container resources
 docker stats
 
-# Check container logs
-claude-sandbox logs
+# Check VS Code performance
+Cmd+Shift+P → "Developer: Reload Window"
 ```
-
-## Advanced Usage
-
-### Custom Security Profiles
-Modify `src/config/apm-docker.config.json` for different security levels:
-
-```json
-{
-  "security": {
-    "networkAccess": "none",           // No external network
-    "resourceLimits": {
-      "cpus": "1",
-      "memory": "2g"
-    }
-  }
-}
-```
-
-### Multi-Container Coordination
-Different agents can run in separate containers:
-- Manager agent (host) - GitHub integration
-- Developer agent (container) - Secure code execution  
-- QA agent (container) - Testing isolation
 
 ## Migration
 
-### From Non-Docker to Docker
-No migration needed - add `--docker` flag to any new worktree:
+### From Non-Container to Container
+No migration needed - containers are now the default:
 ```bash
-# Existing workflow (unchanged)
+# This now creates containers by default
 ./src/scripts/git/worktree-create.sh feature-branch
 
-# Enhanced with security
-./src/scripts/git/worktree-create.sh feature-branch --docker
+# Add --no-container only if you need legacy mode
+./src/scripts/git/worktree-create.sh feature-branch --no-container
 ```
 
-### Disable Docker
-Simply omit `--docker` flag - all existing workflows continue unchanged.
+### Containerize Existing Worktree
+To add dev container support to an existing worktree:
+
+```bash
+# From main project directory - script handles existing worktrees
+./src/scripts/git/worktree-create.sh existing-branch-name developer "Description"
+```
+
+This will:
+1. Detect the existing worktree
+2. Add `.devcontainer/devcontainer.json` with proper agent role
+3. You can then reopen VS Code and select "Reopen in Container"
+
+### From Legacy Docker to Dev Containers
+Existing worktrees with `claude-sandbox.config.json` can be updated:
+1. Delete `claude-sandbox.config.json`
+2. Re-run the worktree script to generate `.devcontainer/`
+3. Reopen in VS Code and select "Reopen in Container"
 
 ## Security Notes
 
-### What Docker Protects
-- Host file system isolation
+### What Dev Containers Protect
+- Host file system isolation (only project files accessible)
 - SSH key and credential protection
 - System configuration isolation
 - Resource consumption limits
+- Network access controls
 
-### What Docker Doesn't Protect
-- Network-based attacks (configurable)
-- Container escape vulnerabilities (rare)
+### What Dev Containers Don't Protect
+- Network-based attacks (configurable via dev container features)
+- Container escape vulnerabilities (rare with VS Code dev containers)
 - Shared kernel exploits (theoretical)
 
 ### Best Practices
 - Keep Docker updated for security patches
-- Review generated configurations before use
+- Review generated dev container configurations
 - Monitor container resource usage
-- Use specific security profiles for sensitive work
+- Use VS Code's built-in security features
+
+## Comparison: Before vs. After
+
+### Before (claude-code-sandbox)
+```
+1. Run worktree script with --docker flag
+2. Manually run claude-sandbox command
+3. Switch to web browser at localhost:3456
+4. Use web terminal interface
+5. Lose VS Code integrations
+```
+
+### After (VS Code Dev Containers)
+```
+1. Run worktree script (containers by default)
+2. VS Code prompts "Reopen in Container?"
+3. Click "Reopen in Container"
+4. Same VS Code terminal interface
+5. Run claude command as usual
+```
+
+**Result**: Enterprise-grade security isolation with zero UX compromise - same familiar VS Code terminal experience with container protection underneath.
 
 ---
 
-**Result**: APM Framework gains enterprise-grade security isolation while maintaining all existing functionality and workflows.
+**Key Insight**: The best security is invisible security. Users get protection without changing their workflow.
