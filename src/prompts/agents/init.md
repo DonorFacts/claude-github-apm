@@ -14,12 +14,12 @@ This project uses a three-tier agent memory system:
 
 ## Initialization Steps
 
-### 1. Docker Environment Detection (REQUIRED FIRST)
+### 1. Container Environment Detection (REQUIRED FIRST)
 
 **IMMEDIATELY** check if running in a containerized environment:
 
 ```bash
-if [ -f /.dockerenv ] || [ -n "$APM_CONTAINERIZED" ]; then
+if [ -f /.dockerenv ] || [ -n "$APM_CONTAINERIZED" ] || [ -n "$REMOTE_CONTAINERS" ]; then
     echo "🐳 Container environment detected"
     export APM_CONTAINERIZED=true
 else
@@ -33,11 +33,13 @@ fi
 **IMMEDIATELY** set the terminal tab title to identify yourself:
 
 **For Host Environment:**
+
 ```bash
 echo -e "\033]0;[Your Role Name]\007"
 ```
 
 **For Container Environment:**
+
 ```bash
 echo -e "\033]0;🐳 [Your Role Name]\007"
 ```
@@ -72,7 +74,7 @@ This MUST be done first so users can identify which agent is in which terminal a
 
 ```bash
 if [ "$APM_CONTAINERIZED" = "true" ]; then
-    APM_MEMORY_BASE="/apm/agents"
+    APM_MEMORY_BASE="/workspace/apm/agents"
     echo "🐳 Using container memory path: $APM_MEMORY_BASE"
 else
     APM_MEMORY_BASE="apm/agents"
@@ -87,9 +89,11 @@ Check if you have existing memory files at `$APM_MEMORY_BASE/<role-id>/`:
 - If neither exists: This is your first activation - create `MEMORY.md` with the standard structure
 
 **Container Environment Benefits:**
-- Memory persists across container restarts via volume mounting
+
+- Memory persists across container restarts via VS Code dev container mounting
 - Agent context seamlessly transfers between host and container environments
 - Same memory system works identically in both environments
+- VS Code terminal UX maintained while gaining container security
 
 ### 5. Memory File Creation (First Time Only)
 
@@ -284,14 +288,16 @@ Don't wait for the user to ask about context health - alert them as soon as you 
 ### Link Sharing Requirement
 
 **ALWAYS provide clickable links** when referencing:
+
 - GitHub issues, PRs, or commits
 - Documentation URLs
 - File paths (when applicable)
 - Any external resources
 
 Example format:
+
 - "Created [GitHub issue #382](https://github.com/owner/repo/issues/382)"
-- "See [PR #383](https://github.com/owner/repo/pull/383)" 
+- "See [PR #383](https://github.com/owner/repo/pull/383)"
 - "Updated `src/prompts/agents/init.md:245`"
 
 This ensures users can quickly navigate to referenced content without manual searching.
@@ -299,6 +305,7 @@ This ensures users can quickly navigate to referenced content without manual sea
 ### Relative Path Requirement
 
 **ALWAYS use relative paths** when referencing files in:
+
 - User output and communications
 - Bash commands and scripts
 - Prompt import/include statements
@@ -306,12 +313,14 @@ This ensures users can quickly navigate to referenced content without manual sea
 - Any file references
 
 **Examples:**
-- ✅ `src/prompts/agents/init.md` 
+
+- ✅ `src/prompts/agents/init.md`
 - ✅ `./src/scripts/git/pr-create.sh`
 - ✅ `import { foo } from '../utils/bar'`
 - ❌ `/Users/jake/project/src/prompts/agents/init.md`
 
 **Benefits:**
+
 - Makes file paths clickable in terminal interfaces
 - Improves greppability across the codebase
 - Enables better build options and portability
@@ -319,19 +328,7 @@ This ensures users can quickly navigate to referenced content without manual sea
 
 ### Constructive Criticism Requirement
 
-**DO NOT simply affirm user statements or assume their conclusions are correct.** Be an intellectual sparring partner, not an agreeable assistant.
-
-For every user idea, you must:
-
-1. **Analyze assumptions**: What are they taking for granted that might not be true?
-2. **Provide counterpoints**: What would an intelligent, well-informed skeptic say?
-3. **Test reasoning**: Does their logic hold up under scrutiny? Are there flaws or gaps?
-4. **Offer alternatives**: How else might this be framed, interpreted, or challenged?
-5. **Prioritize truth over agreement**: If the user is wrong or logic is weak, correct them clearly
-
-**Maintain constructive but rigorous approach.** Push toward greater clarity, accuracy, and intellectual honesty. Call out confirmation bias and unchecked assumptions directly.
-
-**Goal**: Refine not just conclusions, but how we arrive at them.
+@src/prompts/wip/constructive-criticism-guidelines.md
 
 ### Context Handover Instructions
 

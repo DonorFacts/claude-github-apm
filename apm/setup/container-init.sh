@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# APM Container Initialization Script
-# This script is run inside Docker containers to set up the APM environment
-# It's called by the claude-sandbox.config.json setupCommands
+# APM Dev Container Initialization Script
+# This script is run inside VS Code dev containers to set up the APM environment
+# It's called by the devcontainer.json postCreateCommand
 
 set -e  # Exit on any error
 
@@ -17,24 +17,27 @@ log_success() { echo -e "${GREEN}✅ $1${NC}"; }
 log_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
 
 # Container environment detection
-log_info "APM Container Initialization Starting..."
-
-# Verify we're in a container
-if [ ! -f /.dockerenv ]; then
-    log_warning "Not running in Docker container - initialization may not work as expected"
-fi
+log_info "APM Dev Container Initialization Starting..."
 
 # Set container-aware environment variables
 export APM_CONTAINERIZED=true
-export APM_MEMORY_PATH="/apm/agents/${APM_AGENT_ROLE:-unknown}"
+export APM_MEMORY_PATH="/workspace/apm/agents/${APM_AGENT_ROLE:-unknown}"
 export APM_PROJECT_ROOT="/workspace"
-export APM_SHARED_PATH="/shared"
 
 log_info "Environment configured:"
 log_info "  Agent Role: ${APM_AGENT_ROLE:-unknown}"
 log_info "  Memory Path: $APM_MEMORY_PATH"
 log_info "  Project Root: $APM_PROJECT_ROOT"
-log_info "  Worktree: ${APM_WORKTREE:-unknown}"
+
+# Install Claude Code if not already installed
+log_info "Checking Claude Code installation..."
+if ! command -v claude >/dev/null 2>&1; then
+    log_info "Installing Claude Code..."
+    npm install -g @anthropic/claude-code
+    log_success "Claude Code installed"
+else
+    log_success "Claude Code already available"
+fi
 
 # Restore agent memory context if available
 if [ -n "$APM_AGENT_ROLE" ] && [ -f "$APM_MEMORY_PATH/context/latest.md" ]; then
@@ -46,10 +49,10 @@ else
 fi
 
 # Verify mounted volumes
-if [ -d "/apm" ]; then
+if [ -d "/workspace/apm" ]; then
     log_success "APM memory volume mounted successfully"
 else
-    log_warning "APM memory volume not found at /apm"
+    log_warning "APM memory volume not found at /workspace/apm"
 fi
 
 if [ -d "/workspace" ]; then
@@ -58,41 +61,30 @@ else
     log_warning "Project workspace not found at /workspace"
 fi
 
-# Set up container-specific environment
-log_info "Configuring container environment..."
-
-# Create shared communication directory if it doesn't exist
-mkdir -p "$APM_SHARED_PATH" 2>/dev/null || true
-
 # Set working directory to project root
 cd "$APM_PROJECT_ROOT" || {
     log_warning "Could not change to project root: $APM_PROJECT_ROOT"
-    cd /workspace || log_warning "Could not change to /workspace either"
 }
 
 # Verify npm/node environment
 if command -v npm >/dev/null 2>&1; then
     log_success "npm available in container"
 else
-    log_warning "npm not found in container - may need to install dependencies"
+    log_warning "npm not found in container"
 fi
 
-# Check for package.json and install dependencies if needed
-if [ -f "package.json" ]; then
-    log_info "package.json found - dependencies should be installed by setupCommands"
-else
-    log_warning "No package.json found in project root"
+# Configure git if needed (inherit from host via dev container)
+if [ -z "$(git config --global user.name)" ]; then
+    log_info "Git configuration will be inherited from host via dev container"
 fi
 
 # Container is ready
-log_success "APM container environment ready!"
-log_info "Agent can now initialize with containerized execution"
+log_success "APM dev container environment ready!"
+log_info "VS Code terminal maintains familiar UX with container security"
 log_info "Container provides secure isolation with dangerous permissions"
 
-# Terminal title to indicate container mode
-echo -e "\033]0;🐳 ${APM_AGENT_ROLE:-Container}\007"
-
 echo ""
-echo "Container Ready - Start Claude Code with dangerous permissions enabled"
-echo "APM Framework will detect containerized environment automatically"
+echo "🎯 Dev Container Ready!"
+echo "💡 Run 'claude' in the VS Code terminal to start your agent"
+echo "🔒 Secure execution with familiar VS Code UX"
 echo ""
