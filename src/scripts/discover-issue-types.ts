@@ -1,9 +1,9 @@
 #!/usr/bin/env tsx
 
 import * as path from 'path';
-import { GitHubClient } from '../src/tools/bulk-issue-creator/GitHubClient';
-import { IssueTypeDiscoveryService } from '../src/tools/issue-type-config/IssueTypeDiscoveryService';
-import { IssueTypeConfigManager } from '../src/tools/issue-type-config/IssueTypeConfigManager';
+import { GitHubClient } from '../tools/bulk-issue-creator/GitHubClient';
+import { IssueTypeDiscoveryService } from '../tools/issue-type-config/IssueTypeDiscoveryService';
+import { IssueTypeConfigManager } from '../tools/issue-type-config/IssueTypeConfigManager';
 
 async function main() {
   try {

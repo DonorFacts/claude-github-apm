@@ -3,7 +3,7 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import { execSync } from 'child_process';
-import { ImplementationPlan, PlanItem } from '../src/tools/bulk-issue-creator/types';
+import { ImplementationPlan, PlanItem } from '../tools/bulk-issue-creator/types';
 
 async function syncYamlWithGitHub(yamlPath: string) {
   console.log('🔄 Syncing YAML with GitHub issues...');
@@ -61,7 +61,7 @@ async function syncYamlWithGitHub(yamlPath: string) {
   
   // Report statistics
   const totalItems = plan.items.length;
-  const itemsWithIssues = plan.items.filter(item => item.issue_number).length;
+  const itemsWithIssues = plan.items.filter((item: PlanItem) => item.issue_number).length;
   const itemsWithoutIssues = totalItems - itemsWithIssues;
   
   console.log('\n📊 Statistics:');

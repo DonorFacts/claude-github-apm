@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { BulkIssueCreator } from '../src/tools/bulk-issue-creator/BulkIssueCreator';
-import { GitHubClient } from '../src/tools/bulk-issue-creator/GitHubClient';
+import { BulkIssueCreator } from '../tools/bulk-issue-creator/BulkIssueCreator';
+import { GitHubClient } from '../tools/bulk-issue-creator/GitHubClient';
 import * as path from 'path';
 
 async function main() {
@@ -29,8 +29,8 @@ async function main() {
     }
     
     process.exit(result.failed > 0 ? 1 : 0);
-  } catch (error: any) {
-    console.error('\n❌ Fatal error:', error.message || error);
+  } catch (error: unknown) {
+    console.error('\n❌ Fatal error:', error instanceof Error ? error.message : String(error));
     process.exit(1);
   }
 }
