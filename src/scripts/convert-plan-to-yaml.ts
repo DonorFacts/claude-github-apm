@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { MarkdownToYamlConverter } from '../src/tools/markdown-to-yaml/MarkdownToYamlConverter';
+import { MarkdownToYamlConverter } from '../tools/markdown-to-yaml/MarkdownToYamlConverter';
 import * as path from 'path';
 import * as fs from 'fs';
 
@@ -39,7 +39,7 @@ Examples:
   let outputPath: string | undefined;
   let owner: string | undefined;
   let repoName: string | undefined;
-  let customTypes: any;
+  let customTypes: Record<string, string> | undefined;
   
   for (let i = 1; i < args.length; i++) {
     const arg = args[i];
@@ -97,7 +97,7 @@ Examples:
     
     // Count by type
     const typeCounts: Record<string, number> = {};
-    plan.items.forEach((item: any) => {
+    plan.items.forEach((item: Record<string, any>) => {
       typeCounts[item.type] = (typeCounts[item.type] || 0) + 1;
     });
     
@@ -106,8 +106,8 @@ Examples:
       console.log(`     • ${type}: ${count}`);
     });
     
-  } catch (error: any) {
-    console.error(`\n❌ Conversion failed: ${error.message}`);
+  } catch (error: unknown) {
+    console.error(`\n❌ Conversion failed: ${error instanceof Error ? error.message : String(error)}`);
     process.exit(1);
   }
 }

@@ -1,13 +1,13 @@
 import { BulkIssueCreator } from '../BulkIssueCreator';
 import { GitHubClient } from '../GitHubClient';
-import { TestPlanBuilder, MockGitHubClient, expectIssueCreated, loadPlanFromFile } from './test-utils';
+import { TestPlanBuilder, MockGitHubClient, expectIssueCreated, loadPlanFromFile } from '../utils/test-utils';
 import { shouldUseMocks, TEST_REPOSITORY } from '../../../test-setup';
 import { IGitHubClient } from '../interfaces';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 import { execSync } from 'child_process';
-import { IssueNumberTracker } from './issue-number-tracker';
+import { IssueNumberTracker } from '../utils/issue-number-tracker';
 
 describe('BulkIssueCreator - Happy Path', () => {
   let githubClient: IGitHubClient;
