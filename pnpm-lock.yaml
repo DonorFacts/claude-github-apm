@@ -8,9 +8,6 @@ importers:
 
   .:
     dependencies:
-      chokidar:
-        specifier: ^4.0.3
-        version: 4.0.3
       fs-extra:
         specifier: ^11.2.0
         version: 11.3.0
@@ -21,12 +18,12 @@ importers:
         specifier: ^4.0.3
         version: 4.0.3
     devDependencies:
+<<<<<<< Updated upstream
+=======
       '@jest/globals':
         specifier: ^30.0.3
         version: 30.0.3
-      '@types/chokidar':
-        specifier: ^2.1.7
-        version: 2.1.7
+>>>>>>> Stashed changes
       '@types/jest':
         specifier: ^30.0.0
         version: 30.0.0
@@ -38,10 +35,14 @@ importers:
         version: 30.0.0(@types/node@24.0.4)
       ts-jest:
         specifier: ^29.4.0
+<<<<<<< Updated upstream
+        version: 29.4.0(@babel/core@7.27.4)(@jest/transform@30.0.0)(@jest/types@30.0.0)(babel-jest@30.0.0(@babel/core@7.27.4))(jest-util@30.0.0)(jest@30.0.0(@types/node@24.0.4))(typescript@5.8.3)
+=======
         version: 29.4.0(@babel/core@7.27.4)(@jest/transform@30.0.2)(@jest/types@30.0.1)(babel-jest@30.0.0(@babel/core@7.27.4))(jest-util@30.0.2)(jest@30.0.0(@types/node@24.0.4))(typescript@5.8.3)
       tsx:
         specifier: ^4.20.3
         version: 4.20.3
+>>>>>>> Stashed changes
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -567,10 +568,6 @@ packages:
   '@types/babel__traverse@7.20.7':
     resolution: {integrity: sha512-dkO5fhS7+/oos4ciWxyEyjWe48zmG6wbCheo/G2ZnHx4fs3EU6YC6UM8rk56gAjNJ9P3MTH2jo5jb92/K6wbng==}
 
-  '@types/chokidar@2.1.7':
-    resolution: {integrity: sha512-A7/MFHf6KF7peCzjEC1BBTF8jpmZTokb3vr/A0NxRGfwRLK3Ws+Hq6ugVn6cJIMfM6wkCak/aplWrxbTcu8oig==}
-    deprecated: This is a stub types definition. chokidar provides its own type definitions, so you do not need this installed.
-
   '@types/istanbul-lib-coverage@2.0.6':
     resolution: {integrity: sha512-2QF/t/auWm0lsy8XtKVPG19v3sSOQlJe/YHZgfjb/KBBHOGSV+J2q/S671rcq9uTBrLAXmZpqJiaQbMT+zNU1w==}
 
@@ -802,10 +799,6 @@ packages:
   char-regex@1.0.2:
     resolution: {integrity: sha512-kWWXztvZ5SBQV+eRgKFeh8q5sLuZY2+8WUIzlxWVTg+oGwY14qylx1KbKzHd8P6ZYkAg0xyIDU9JMHhyJMZ1jw==}
     engines: {node: '>=10'}
-
-  chokidar@4.0.3:
-    resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
-    engines: {node: '>= 14.16.0'}
 
   ci-info@4.2.0:
     resolution: {integrity: sha512-cYY9mypksY8NRqgDB1XD1RiJL338v/551niynFTGkZOO2LHuB2OmOYxDIe/ttN9AHwrqdum1360G3ald0W9kCg==}
@@ -1431,10 +1424,6 @@ packages:
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
-
-  readdirp@4.1.2:
-    resolution: {integrity: sha512-GDhwkLfywWL2s6vEjyhri+eXmfH6j1L7JE27WhqLeYzoh/A3DBaYGEj2H/HFZCn/kMfim73FXxEJTw06WtxQwg==}
-    engines: {node: '>= 14.18.0'}
 
   require-directory@2.1.1:
     resolution: {integrity: sha512-fGxEI7+wsG9xrvdjsrlmL22OMTTiHRwAMroiEeMgq8gzoLC/PQr7RsRDSTLUg/bZAZtF+TVIkHc6/4RIKrui+Q==}
@@ -2226,6 +2215,8 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
       '@types/node': 24.0.4
+<<<<<<< Updated upstream
+=======
       '@types/yargs': 17.0.33
       chalk: 4.1.2
 
@@ -2236,6 +2227,7 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       '@types/istanbul-reports': 3.0.4
       '@types/node': 24.0.4
+>>>>>>> Stashed changes
       '@types/yargs': 17.0.33
       chalk: 4.1.2
 
@@ -2303,10 +2295,6 @@ snapshots:
   '@types/babel__traverse@7.20.7':
     dependencies:
       '@babel/types': 7.27.6
-
-  '@types/chokidar@2.1.7':
-    dependencies:
-      chokidar: 4.0.3
 
   '@types/istanbul-lib-coverage@2.0.6': {}
 
@@ -2523,10 +2511,6 @@ snapshots:
       supports-color: 7.2.0
 
   char-regex@1.0.2: {}
-
-  chokidar@4.0.3:
-    dependencies:
-      readdirp: 4.1.2
 
   ci-info@4.2.0: {}
 
@@ -3150,6 +3134,8 @@ snapshots:
     dependencies:
       '@jest/types': 30.0.0
       '@types/node': 24.0.4
+<<<<<<< Updated upstream
+=======
       chalk: 4.1.2
       ci-info: 4.2.0
       graceful-fs: 4.2.11
@@ -3159,6 +3145,7 @@ snapshots:
     dependencies:
       '@jest/types': 30.0.1
       '@types/node': 24.0.4
+>>>>>>> Stashed changes
       chalk: 4.1.2
       ci-info: 4.2.0
       graceful-fs: 4.2.11
@@ -3192,6 +3179,8 @@ snapshots:
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
+<<<<<<< Updated upstream
+=======
   jest-worker@30.0.2:
     dependencies:
       '@types/node': 24.0.4
@@ -3200,6 +3189,7 @@ snapshots:
       merge-stream: 2.0.0
       supports-color: 8.1.1
 
+>>>>>>> Stashed changes
   jest@30.0.0(@types/node@24.0.4):
     dependencies:
       '@jest/core': 30.0.0
@@ -3369,8 +3359,6 @@ snapshots:
 
   react-is@18.3.1: {}
 
-  readdirp@4.1.2: {}
-
   require-directory@2.1.1: {}
 
   resolve-cwd@3.0.0:
@@ -3472,7 +3460,11 @@ snapshots:
     dependencies:
       is-number: 7.0.0
 
+<<<<<<< Updated upstream
+  ts-jest@29.4.0(@babel/core@7.27.4)(@jest/transform@30.0.0)(@jest/types@30.0.0)(babel-jest@30.0.0(@babel/core@7.27.4))(jest-util@30.0.0)(jest@30.0.0(@types/node@24.0.4))(typescript@5.8.3):
+=======
   ts-jest@29.4.0(@babel/core@7.27.4)(@jest/transform@30.0.2)(@jest/types@30.0.1)(babel-jest@30.0.0(@babel/core@7.27.4))(jest-util@30.0.2)(jest@30.0.0(@types/node@24.0.4))(typescript@5.8.3):
+>>>>>>> Stashed changes
     dependencies:
       bs-logger: 0.2.6
       ejs: 3.1.10
@@ -3487,10 +3479,17 @@ snapshots:
       yargs-parser: 21.1.1
     optionalDependencies:
       '@babel/core': 7.27.4
+<<<<<<< Updated upstream
+      '@jest/transform': 30.0.0
+      '@jest/types': 30.0.0
+      babel-jest: 30.0.0(@babel/core@7.27.4)
+      jest-util: 30.0.0
+=======
       '@jest/transform': 30.0.2
       '@jest/types': 30.0.1
       babel-jest: 30.0.0(@babel/core@7.27.4)
       jest-util: 30.0.2
+>>>>>>> Stashed changes
 
   tslib@2.8.1:
     optional: true
