@@ -14,47 +14,86 @@ This project uses a three-tier agent memory system:
 
 ## Initialization Steps
 
-### 1. Set Terminal Tab Title (REQUIRED)
+### 1. Docker Environment Detection (REQUIRED FIRST)
+
+**IMMEDIATELY** check if running in a containerized environment:
+
+```bash
+if [ -f /.dockerenv ] || [ -n "$APM_CONTAINERIZED" ]; then
+    echo "🐳 Container environment detected"
+    export APM_CONTAINERIZED=true
+else
+    echo "💻 Host environment detected"
+    export APM_CONTAINERIZED=false
+fi
+```
+
+### 2. Set Terminal Tab Title (REQUIRED)
 
 **IMMEDIATELY** set the terminal tab title to identify yourself:
 
+**For Host Environment:**
 ```bash
 echo -e "\033]0;[Your Role Name]\007"
 ```
 
+**For Container Environment:**
+```bash
+echo -e "\033]0;🐳 [Your Role Name]\007"
+```
+
 Examples:
 
-- Prompt Engineer: `echo -e "\033]0;Prompt Engineer\007"`
-- Scrum Master: `echo -e "\033]0;Scrum Master\007"`
-- Developer: `echo -e "\033]0;Developer\007"`
+- Prompt Engineer (Host): `echo -e "\033]0;Prompt Engineer\007"`
+- Prompt Engineer (Container): `echo -e "\033]0;🐳 Prompt Engineer\007"`
+- Developer (Host): `echo -e "\033]0;Developer\007"`
+- Developer (Container): `echo -e "\033]0;🐳 Developer\007"`
 
-This MUST be done first so users can identify which agent is in which terminal.
+This MUST be done first so users can identify which agent is in which terminal and whether it's containerized.
 
 **Terminal Title Protocol**:
 
-- When actively working: `echo -e "\033]0;[Abbreviation]: [Brief Status]\007"`
+- When actively working: `echo -e "\033]0;[Container Icon][Abbreviation]: [Brief Status]\007"`
   - PE: Prompt Engineer
   - SM: Scrum Master
   - Dev: Developer
   - QA: QA Engineer
-- When idle/ready: Return to full role name
+  - Container icon: 🐳 for Docker, none for host
+- When idle/ready: Return to full role name with container indicator
 - Update frequently during complex tasks to show progress
 
-### 2. Git Workspace Preparation
+### 3. Git Workspace Preparation
 
 **IMPORTANT**: When you are ready to commit changes, first read `src/prompts/commit.md` for detailed instructions.
 
-### 3. Check for Existing Memory
+### 4. Check for Existing Memory
 
-Check if you have existing memory files at `apm/agents/<role-id>/`:
+**Container-Aware Memory Path Detection:**
+
+```bash
+if [ "$APM_CONTAINERIZED" = "true" ]; then
+    APM_MEMORY_BASE="/apm/agents"
+    echo "🐳 Using container memory path: $APM_MEMORY_BASE"
+else
+    APM_MEMORY_BASE="apm/agents"
+    echo "💻 Using host memory path: $APM_MEMORY_BASE"
+fi
+```
+
+Check if you have existing memory files at `$APM_MEMORY_BASE/<role-id>/`:
 
 - If `MEMORY.md` exists: Read it thoroughly to understand accumulated learnings, user preferences, and role-specific patterns
 - If `context/latest.md` exists: Read it to understand current work state and continue where previous instance left off
 - If neither exists: This is your first activation - create `MEMORY.md` with the standard structure
 
-### 4. Memory File Creation (First Time Only)
+**Container Environment Benefits:**
+- Memory persists across container restarts via volume mounting
+- Agent context seamlessly transfers between host and container environments
+- Same memory system works identically in both environments
 
-If no `MEMORY.md` exists, create it at `apm/agents/<role-id>/MEMORY.md`:
+### 5. Memory File Creation (First Time Only)
+
+If no `MEMORY.md` exists, create it at `$APM_MEMORY_BASE/<role-id>/MEMORY.md`:
 
 ```markdown
 # Long-Term Memory - [Role Name]
@@ -102,7 +141,7 @@ _To be discovered through collaboration_
 _To be discovered through usage_
 ```
 
-### 5. Context Continuity
+### 6. Context Continuity
 
 If `context/latest.md` exists:
 
@@ -124,14 +163,15 @@ Do NOT read any other files mentioned in the context. After initialization, you 
 
 <!-- ### 7. Initialize Event System -->
 
-### 6. Confirm Initialization
+### 7. Confirm Initialization
 
 After completing these steps, confirm to the user:
 
 ```
 ✅ Agent initialized successfully
 - Role: [your role]
-- Terminal: [confirm terminal title was set]
+- Environment: [🐳 Container / 💻 Host]
+- Terminal: [confirm terminal title was set with container indicator]
 - Git workspace: [branch name]
 - Memory loaded: [Yes/No - if yes, last updated timestamp]
 - Context loaded: [Yes/No - if yes, current task]
