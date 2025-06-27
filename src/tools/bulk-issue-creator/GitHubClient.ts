@@ -2,7 +2,8 @@ import { execSync } from 'child_process';
 import { 
   CreateIssueInput, 
   GitHubIssue, 
-  BatchCreateResult 
+  BatchCreateResult,
+  IssueTemplate
 } from './types';
 import { IGitHubClient } from './interfaces';
 
@@ -11,6 +12,10 @@ export class GitHubClient implements IGitHubClient {
   private repoName: string;
   
   constructor(repo?: string) {
+    console.log('=== GitHubClient Constructor Called ===');
+    console.log('APM_TEST_PROD in GitHubClient:', process.env.APM_TEST_PROD);
+    console.log('This is the REAL GitHub client!');
+    
     if (repo) {
       const [owner, name] = repo.split('/');
       this.repoOwner = owner;
@@ -25,9 +30,11 @@ export class GitHubClient implements IGitHubClient {
       this.repoOwner = match[1];
       this.repoName = match[2];
     }
+    console.log(`GitHubClient initialized for: ${this.repoOwner}/${this.repoName}`);
   }
   
   async getRepositoryId(): Promise<string> {
+    console.log(`GitHubClient.getRepositoryId called for: ${this.repoOwner}/${this.repoName}`);
     try {
       const query = `
         query {
@@ -43,7 +50,9 @@ export class GitHubClient implements IGitHubClient {
       );
       
       const data = JSON.parse(result);
-      return data.data.repository.id;
+      const repoId = data.data.repository.id;
+      console.log(`Repository ID for ${this.repoOwner}/${this.repoName}: ${repoId}`);
+      return repoId;
     } catch (error) {
       throw new Error(`Failed to get repository ID: ${error}`);
     }
@@ -83,6 +92,10 @@ export class GitHubClient implements IGitHubClient {
   }
   
   async createIssue(input: CreateIssueInput): Promise<GitHubIssue> {
+    console.log('=== GitHubClient.createIssue Called ===');
+    console.log('Title:', input.title);
+    console.log('About to make REAL GitHub API call!');
+    
     const query = `
       mutation CreateIssue {
         createIssue(input: {
@@ -102,14 +115,41 @@ export class GitHubClient implements IGitHubClient {
     `;
     
     try {
+      console.log('Executing gh api graphql command...');
+      
+      // Add a timestamp to verify this is a real network call
+      const timestamp = new Date().toISOString();
+      console.log('Request timestamp:', timestamp);
+      
       const result = execSync(
         `gh api graphql -H "GraphQL-Features: issue_types" -f query='${query}'`,
         { encoding: 'utf-8' }
       );
       
+      console.log('API call succeeded, parsing result...');
       const data = JSON.parse(result);
+      console.log('Created issue number:', data.data.createIssue.issue.number);
+      console.log('Issue URL:', data.data.createIssue.issue.url || 'No URL in response');
       return data.data.createIssue.issue;
-    } catch (error) {
+    } catch (error: any) {
+      console.log('\n>>> GitHubClient.createIssue FAILED');
+      console.log('>>> API call FAILED with error:', error.message);
+      console.log('>>> Error type:', error.constructor.name);
+      console.log('>>> Error code:', error.code);
+      console.log('>>> Error status:', error.status);
+      
+      if (error.stderr) {
+        console.log('>>> Error stderr:', error.stderr.toString());
+      }
+      
+      // Critical: Check if this is a network error
+      if (error.message.includes('fetch failed') || 
+          error.message.includes('ENOTFOUND') || 
+          error.message.includes('ETIMEDOUT') ||
+          error.message.includes('connect')) {
+        console.log('>>> This appears to be a NETWORK ERROR - likely offline!');
+      }
+      
       throw new Error(`Failed to create issue: ${error}`);
     }
   }
@@ -139,7 +179,7 @@ export class GitHubClient implements IGitHubClient {
     for (const childId of childIds) {
       try {
         execSync(
-          `${__dirname}/../../create-sub-issue.sh "${childId}" "${parentId}"`,
+          `./create-sub-issue.sh "${childId}" "${parentId}"`,
           { stdio: 'pipe' }
         );
       } catch (error) {
@@ -180,6 +220,45 @@ export class GitHubClient implements IGitHubClient {
       return types;
     } catch (error) {
       throw new Error(`Failed to get issue types: ${error}`);
+    }
+  }
+
+  async discoverIssueTemplates(owner: string, repo: string): Promise<IssueTemplate[]> {
+    try {
+      const query = `
+        query {
+          repository(owner: "${owner}", name: "${repo}") {
+            issueTypes(first: 20) {
+              nodes {
+                id
+                name
+                description
+              }
+            }
+          }
+        }
+      `;
+      
+      const result = execSync(
+        `gh api graphql -f query='${query}'`,
+        { encoding: 'utf-8' }
+      );
+      
+      const data = JSON.parse(result);
+      const templates: IssueTemplate[] = [];
+      
+      if (data.data.repository.issueTypes && data.data.repository.issueTypes.nodes) {
+        for (const type of data.data.repository.issueTypes.nodes) {
+          templates.push({
+            id: type.id,
+            name: type.name
+          });
+        }
+      }
+      
+      return templates;
+    } catch (error) {
+      throw new Error(`Failed to discover issue templates: ${error}`);
     }
   }
   

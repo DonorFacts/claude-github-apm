@@ -1,5 +1,7 @@
 import { ImplementationPlan, PlanItem } from '../types';
 import { IGitHubClient } from '../interfaces';
+import { shouldUseMocks, TEST_REPOSITORY } from '../../../test-setup';
+import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
@@ -9,28 +11,44 @@ export class TestPlanBuilder {
   private plan: ImplementationPlan;
   
   constructor() {
+    // Get repository info based on environment
+    const repoInfo = this.getRepositoryInfo();
+    
     this.plan = {
       version: '1.0',
       generated: new Date().toISOString().split('T')[0],
       project: {
         name: 'Test Project',
         description: 'Test project for bulk issue creator',
-        repository: {
-          owner: 'test-owner',
-          name: 'test-repo'
+        repository: repoInfo
+      },
+      // Only include fake issue_types for mocks, let production discover them
+      ...(shouldUseMocks ? {
+        issue_types: {
+          phase: 'IT_phase',
+          project: 'IT_project',
+          epic: 'IT_epic',
+          feature: 'IT_feature',
+          story: 'IT_story',
+          task: 'IT_task',
+          bug: 'IT_bug'
         }
-      },
-      issue_types: {
-        phase: 'IT_phase',
-        project: 'IT_project',
-        epic: 'IT_epic',
-        feature: 'IT_feature',
-        story: 'IT_story',
-        task: 'IT_task',
-        bug: 'IT_bug'
-      },
+      } : {}),
       items: []
     };
+  }
+  
+  private getRepositoryInfo(): { owner: string; name: string } {
+    if (shouldUseMocks) {
+      return {
+        owner: 'test-owner',
+        name: 'test-repo'
+      };
+    }
+    
+    // For production, use the test repository
+    const [owner, name] = TEST_REPOSITORY.split('/');
+    return { owner, name };
   }
   
   addItem(item: Partial<PlanItem> & { id: string; type: string; title: string }): this {
@@ -94,6 +112,10 @@ export class TestPlanBuilder {
       fs.mkdirSync(dir, { recursive: true });
     }
     fs.writeFileSync(filePath, this.toYaml());
+    // Ensure file is written synchronously
+    if (!fs.existsSync(filePath)) {
+      throw new Error(`Failed to create test plan file: ${filePath}`);
+    }
     return filePath;
   }
 }
@@ -102,6 +124,16 @@ export class TestPlanBuilder {
 export class MockGitHubClient implements IGitHubClient {
   public calls: any[] = [];
   private responses: Map<string, any> = new Map();
+  
+  constructor() {
+    console.log('=== MockGitHubClient Constructor Called ===');
+    console.log('This is the MOCK client - no real API calls will be made');
+  }
+  
+  reset(): void {
+    this.calls = [];
+    this.responses.clear();
+  }
   
   setResponse(method: string, response: any): void {
     this.responses.set(method, response);
@@ -132,13 +164,21 @@ export class MockGitHubClient implements IGitHubClient {
   }
   
   async createIssue(input: any): Promise<any> {
+    console.log('\n>>> MockGitHubClient.createIssue called!');
+    console.log('>>> This should NEVER happen in production mode!');
+    console.log('>>> Input:', input);
+    
     this.calls.push({ method: 'createIssue', issue: input });
     const response = this.responses.get('createIssue');
     if (response instanceof Error) throw response;
     
+    // Simulate incrementing issue numbers even in mock
+    const mockNumber = 200 + this.calls.filter(c => c.method === 'createIssue').length - 1;
+    console.log('>>> Returning mock issue number:', mockNumber);
+    
     return response || {
-      number: 200,
-      id: 'issue-id-200'
+      number: mockNumber,
+      id: `issue-id-${mockNumber}`
     };
   }
   
@@ -156,6 +196,11 @@ export class MockGitHubClient implements IGitHubClient {
   async getIssueTypes(): Promise<Record<string, any>> {
     this.calls.push({ method: 'getIssueTypes' });
     return this.responses.get('getIssueTypes') || {};
+  }
+
+  async discoverIssueTemplates(owner: string, repo: string): Promise<any[]> {
+    this.calls.push({ method: 'discoverIssueTemplates', owner, repo });
+    return this.responses.get('discoverIssueTemplates') || [];
   }
 }
 

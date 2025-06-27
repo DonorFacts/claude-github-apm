@@ -1,0 +1,44 @@
+version: '1.0'
+generated: '2025-06-19'
+project:
+  name: Test Subset
+  description: Small test subset to validate bulk issue creation
+  repository:
+    owner: DonorFacts
+    name: claude-github-apm
+issue_types:
+  phase: IT_kwDODIcSxM4BoTQQ
+  epic: IT_kwDODIcSxM4BoSKl
+  task: IT_kwDODIcSxM4Bl1xV
+items:
+  - id: phase-test-subset
+    type: phase
+    title: Test Phase for Bulk Creation Validation
+    description: This is a test phase to validate the bulk issue creation process
+    parent_id: null
+    children_ids:
+      - epic-test-epic-1
+    issue_number: null
+  - id: epic-test-epic-1
+    type: epic
+    title: Test Epic Under Phase
+    description: This epic tests parent-child relationships
+    parent_id: phase-test-subset
+    children_ids:
+      - task-test-task-1
+      - task-test-task-2
+    issue_number: null
+  - id: task-test-task-1
+    type: task
+    title: First Test Task
+    description: Validates basic task creation
+    parent_id: epic-test-epic-1
+    children_ids: []
+    issue_number: null
+  - id: task-test-task-2
+    type: task
+    title: Second Test Task
+    description: Ensures multiple children work correctly
+    parent_id: epic-test-epic-1
+    children_ids: []
+    issue_number: null

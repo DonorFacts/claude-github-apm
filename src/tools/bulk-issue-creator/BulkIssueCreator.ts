@@ -3,10 +3,12 @@ import * as yaml from 'js-yaml';
 import { 
   ImplementationPlan, 
   PlanItem, 
-  CreationResult
+  CreationResult,
+  IssueTypes
 } from './types';
 import { GitHubClient } from './GitHubClient';
 import { IGitHubClient } from './interfaces';
+import { IssueTypeDiscoveryService } from '../issue-type-config/IssueTypeDiscoveryService';
 
 export class BulkIssueCreator {
   private plan: ImplementationPlan;
@@ -14,6 +16,7 @@ export class BulkIssueCreator {
   private itemMap: Map<string, PlanItem>;
   private githubClient: IGitHubClient;
   private result: CreationResult;
+  private discoveredIssueTypes: IssueTypes | null = null;
   
   constructor(planPath: string, githubClient?: IGitHubClient) {
     this.planPath = planPath;
@@ -34,7 +37,15 @@ export class BulkIssueCreator {
   private loadPlan(): ImplementationPlan {
     try {
       const content = fs.readFileSync(this.planPath, 'utf-8');
-      return yaml.load(content) as ImplementationPlan;
+      console.log('>>> Loading plan from:', this.planPath);
+      const plan = yaml.load(content) as ImplementationPlan;
+      console.log('>>> Loaded plan has', plan.items.length, 'items');
+      plan.items.forEach(item => {
+        if (item.issue_number) {
+          console.log(`>>> WARNING: Item ${item.id} already has issue_number: ${item.issue_number}`);
+        }
+      });
+      return plan;
     } catch (error) {
       throw new Error(`Failed to load plan: ${error}`);
     }
@@ -63,10 +74,6 @@ export class BulkIssueCreator {
         throw new Error(`Item ${item.id} is missing required field: type`);
       }
       
-      // Validate issue type
-      if (!this.plan.issue_types[item.type]) {
-        throw new Error(`Item ${item.id} has invalid issue type: ${item.type}`);
-      }
     }
   }
   
@@ -75,6 +82,9 @@ export class BulkIssueCreator {
     
     // Create backup
     this.createBackup();
+    
+    // Discover real issue types from repository
+    await this.discoverIssueTypes();
     
     // Get repository ID
     const repoId = await this.githubClient.getRepositoryId();
@@ -99,7 +109,40 @@ export class BulkIssueCreator {
     return this.result;
   }
   
+  private async discoverIssueTypes(): Promise<void> {
+    try {
+      console.log('Discovering issue types from repository...');
+      const discoveryService = new IssueTypeDiscoveryService(this.githubClient);
+      
+      // Extract owner/repo from plan or detect from git remote
+      const { owner, name } = this.plan.project.repository;
+      this.discoveredIssueTypes = await discoveryService.discoverIssueTypes(owner, name);
+      
+      console.log(`Discovered ${Object.keys(this.discoveredIssueTypes).length} issue types:`, Object.keys(this.discoveredIssueTypes));
+    } catch (error) {
+      console.warn('Failed to discover issue types, falling back to plan defaults:', error);
+      this.discoveredIssueTypes = null;
+    }
+  }
+  
+  private getIssueTypeId(itemType: string): string {
+    // Try discovered types first
+    if (this.discoveredIssueTypes && this.discoveredIssueTypes[itemType]) {
+      return this.discoveredIssueTypes[itemType];
+    }
+    
+    // Fall back to plan issue_types
+    if (this.plan.issue_types && this.plan.issue_types[itemType]) {
+      return this.plan.issue_types[itemType];
+    }
+    
+    throw new Error(`No issue type mapping found for type: ${itemType}`);
+  }
+  
   private createBackup(): void {
+    if (!fs.existsSync(this.planPath)) {
+      throw new Error(`Plan file does not exist: ${this.planPath}`);
+    }
     const backupPath = this.planPath.replace('.yaml', '.backup.yaml');
     fs.copyFileSync(this.planPath, backupPath);
     console.log(`Created backup at ${backupPath}`);
@@ -131,7 +174,14 @@ export class BulkIssueCreator {
   
   private async createIssues(items: PlanItem[], repoId: string): Promise<void> {
     // Filter out items that already have issue numbers
+    console.log(`>>> createIssues called with ${items.length} items`);
+    items.forEach(item => {
+      console.log(`>>>   Item ${item.id}: issue_number=${item.issue_number}, title=${item.title}`);
+    });
+    
     const itemsToCreate = items.filter(item => !item.issue_number);
+    
+    console.log(`>>> After filtering, ${itemsToCreate.length} items need creation`);
     
     if (itemsToCreate.length === 0) {
       console.log('All items at this level already have issue numbers');
@@ -160,10 +210,7 @@ export class BulkIssueCreator {
       } else {
         // Multiple issues, use batch creation
         const issues = items.map(item => {
-          const issueType = this.plan.issue_types[item.type];
-          if (!issueType) {
-            throw new Error(`No issue type mapping for type: ${item.type}`);
-          }
+          const issueType = this.getIssueTypeId(item.type);
           return {
             title: item.title,
             body: this.formatIssueBody(item),
@@ -202,10 +249,7 @@ export class BulkIssueCreator {
   
   private async createIssueSingle(item: PlanItem, repoId: string): Promise<void> {
     try {
-      const issueType = this.plan.issue_types[item.type];
-      if (!issueType) {
-        throw new Error(`No issue type mapping for type: ${item.type}`);
-      }
+      const issueType = this.getIssueTypeId(item.type);
       const issue = await this.githubClient.createIssue({
         title: item.title,
         body: this.formatIssueBody(item),
@@ -217,10 +261,26 @@ export class BulkIssueCreator {
       item.github_id = issue.id;
       this.result.created++;
       console.log(`Created #${issue.number}: ${item.title}`);
-    } catch (error) {
+      console.log(`>>> Issue details: id=${issue.id}, url=${issue.url || 'no-url'}`);
+      
+      // Add delay to avoid rate limiting (only for real GitHub API)
+      if (this.githubClient.constructor.name !== 'MockGitHubClient') {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+      }
+    } catch (error: any) {
+      console.log('\n>>> ERROR in createIssueSingle:');
+      console.log('>>>   Error type:', error.constructor.name);
+      console.log('>>>   Error message:', error.message);
+      console.log('>>>   Error code:', error.code);
+      console.log('>>>   Full error:', error);
+      
       this.result.failed++;
       this.result.errors.push(`Failed to create issue "${item.title}": ${error}`);
       console.error(`Failed to create issue: ${item.title}`, error);
+      
+      // Critical: Do NOT set issue_number when creation fails!
+      console.log('>>>   Setting issue_number to undefined due to failure');
+      item.issue_number = undefined;
     }
   }
   
