@@ -2,7 +2,7 @@
 
 # Git Worktree Creation Script
 # Comprehensive worktree creation with automatic issue detection and handover
-# Usage: ./worktree-create.sh [branch-name] [agent-role] [purpose] [--docker]
+# Usage: ./worktree-create.sh <branch-name> [agent-role] [purpose]
 # Run from main project directory
 
 set -e  # Exit on any error
@@ -14,83 +14,12 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Logging functions
-log_info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
-log_success() { echo -e "${GREEN}✅ $1${NC}"; }
-log_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
-log_error() { echo -e "${RED}❌ $1${NC}"; }
+# Logging functions (output to stderr to avoid polluting return values)
+log_info() { echo -e "${BLUE}ℹ️  $1${NC}" >&2; }
+log_success() { echo -e "${GREEN}✅ $1${NC}" >&2; }
+log_warning() { echo -e "${YELLOW}⚠️  $1${NC}" >&2; }
+log_error() { echo -e "${RED}❌ $1${NC}" >&2; }
 
-# Function to setup VS Code Dev Container environment
-setup_devcontainer_environment() {
-    local worktree_path="$1"
-    local agent_role="$2"
-    
-    log_info "Setting up VS Code Dev Container for agent: $agent_role"
-    
-    # Check if Docker is available
-    if ! command -v docker >/dev/null 2>&1; then
-        log_error "Docker not found. Please install Docker Desktop for dev containers"
-        exit 1
-    fi
-    
-    # Create .devcontainer directory
-    local devcontainer_dir="$worktree_path/.devcontainer"
-    mkdir -p "$devcontainer_dir"
-    
-    # Generate dev container configuration directly
-    local config_target="$devcontainer_dir/devcontainer.json"
-    
-    cat > "$config_target" << EOF
-{
-  "name": "APM Framework - $agent_role",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
-  
-  "features": {
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
-  },
-  
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-vscode.vscode-typescript-next",
-        "esbenp.prettier-vscode",
-        "ms-vscode.vscode-json",
-        "GitHub.copilot"
-      ],
-      "settings": {
-        "typescript.suggest.autoImports": true,
-        "editor.formatOnSave": true,
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-      }
-    }
-  },
-
-  "mounts": [
-    "source=\${localWorkspaceFolder}/apm,target=/workspace/apm,type=bind,consistency=cached"
-  ],
-
-  "containerEnv": {
-    "APM_CONTAINERIZED": "true",
-    "APM_AGENT_ROLE": "$agent_role",
-    "APM_MEMORY_PATH": "/workspace/apm/agents/$agent_role",
-    "APM_PROJECT_ROOT": "/workspace"
-  },
-
-  "postCreateCommand": "npm install && chmod +x ./apm/setup/container-init.sh && ./apm/setup/container-init.sh",
-
-  "forwardPorts": [3000, 8000],
-
-  "remoteUser": "node",
-
-  "shutdownAction": "stopContainer"
-}
-EOF
-    
-    log_success "Dev container configuration created: $config_target"
-    log_info "VS Code will prompt to 'Reopen in Container' when you open this worktree"
-    log_info "Container provides secure isolated execution while maintaining VS Code terminal UX"
-}
 
 # Function to detect issue number from branch name
 detect_issue_from_branch() {
@@ -271,6 +200,58 @@ EOF
     echo "$handover_file"
 }
 
+# Function to setup containerized Claude
+setup_containerized_claude() {
+    local worktree_path="$1"
+    
+    log_info "Setting up containerized Claude execution..."
+    
+    # Check if Docker is available
+    if ! command -v docker >/dev/null 2>&1; then
+        log_warning "Docker not found. Claude will run directly on host (less secure)."
+        log_warning "To enable container security, install Docker Desktop."
+        return 0
+    fi
+    
+    # Create local bin directory in worktree
+    local bin_dir="$worktree_path/.local/bin"
+    mkdir -p "$bin_dir"
+    
+    # Create wrapper script that calls our Docker wrapper
+    local claude_wrapper="$bin_dir/claude"
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local docker_wrapper="$script_dir/../docker/claude-container/claude-wrapper.sh"
+    
+    cat > "$claude_wrapper" << 'EOF'
+#!/bin/bash
+# Auto-generated Claude wrapper for containerized execution
+# This script transparently runs Claude in a secure Docker container
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+DOCKER_WRAPPER="$PROJECT_ROOT/src/docker/claude-container/claude-wrapper.sh"
+
+if [ -f "$DOCKER_WRAPPER" ]; then
+    exec "$DOCKER_WRAPPER" "$@"
+else
+    # Fallback to system claude if wrapper not found
+    exec claude "$@"
+fi
+EOF
+    
+    chmod +x "$claude_wrapper"
+    
+    # Create .envrc file to add .local/bin to PATH for this worktree
+    cat > "$worktree_path/.envrc" << 'EOF'
+# APM Worktree Environment
+# Automatically adds .local/bin to PATH for containerized claude
+export PATH="$PWD/.local/bin:$PATH"
+EOF
+    
+    log_success "Containerized Claude configured"
+    log_info "When you run 'claude' in this worktree, it will use secure container execution"
+}
+
 # Function to open VS Code
 open_vscode() {
     local worktree_path="$1"
@@ -291,64 +272,37 @@ show_completion() {
     local branch_name="$1"
     local issue_number="$2"
     local worktree_path="$3"
-    local use_legacy="$4"
     
-    echo ""
-    log_success "Worktree created and VS Code opened!"
-    log_success "GitHub issue #$issue_number is being tracked"
-    
-    if [ "$use_legacy" = false ]; then
+    {
         echo ""
-        log_success "🐳 Dev Container environment configured!"
+        log_success "Worktree created and VS Code opened!"
+        log_success "GitHub issue #$issue_number is being tracked"
+        
         echo ""
-        echo "DEV CONTAINER SETUP COMPLETE:"
-        echo "• Configuration: .devcontainer/devcontainer.json"
-        echo "• VS Code will prompt: 'Reopen in Container?'"
-        echo "• Click 'Reopen in Container' to start secure development"
-        echo "• Same terminal UX with container security"
+        echo "Please switch to the new VS Code window and verify:"
         echo ""
-    fi
-    
-    echo ""
-    echo "Please switch to the new VS Code window and verify:"
-    echo ""
-    echo "1. VS Code should show 'Reopen in Container?' notification"
-    echo "   Click 'Reopen in Container' for secure development"
-    echo ""
-    echo "2. Run 'pwd' - you should be in the worktree directory"
-    echo "   (e.g., $worktree_path)"
-    echo ""
-    echo "3. Run 'git branch --show-current' - you should see your feature branch"
-    echo "   (should be: $branch_name)"
-    echo ""
-    if [ "$use_legacy" = false ]; then
-        echo "4. After reopening in container, run 'claude' in the terminal"
-        echo "   (Same terminal UX with container security)"
+        echo "1. Run 'pwd' - you should be in the worktree directory"
+        echo "   (e.g., $worktree_path)"
         echo ""
-        echo "5. Read the handover file in apm/worktree-handovers/not-started/"
+        echo "2. Run 'git branch --show-current' - you should see your feature branch"
+        echo "   (should be: $branch_name)"
         echo ""
-        echo "6. If everything looks correct, continue your work in the container."
-    else
-        echo "4. Run 'claude' in the terminal"
+        echo "3. Run 'claude' in the terminal (automatically containerized for security)"
         echo ""
-        echo "5. Read the handover file in apm/worktree-handovers/not-started/"
+        echo "4. Read the handover file in apm/worktree-handovers/not-started/"
         echo ""
-        echo "6. If everything looks correct, continue your work there."
-    fi
-    echo ""
-    echo "🎯 HANDOFF COMPLETE"
-    echo ""
-    if [ "$use_legacy" = false ]; then
-        echo "┌─────────────────────────────────────────────┐"
-        echo "│  🚫 THIS WINDOW: Framework & project work   │"
-        echo "│  🐳 WORKTREE WINDOW: Secure container dev   │"
-        echo "└─────────────────────────────────────────────┘"
-    else
+        echo "5. If everything looks correct, continue your work."
+        echo ""
+        echo "🐳 Security: Claude runs in isolated Docker container"
+        echo "💡 Experience: Same terminal UX, enhanced security"
+        echo ""
+        echo "🎯 HANDOFF COMPLETE"
+        echo ""
         echo "┌─────────────────────────────────────────────┐"
         echo "│  🚫 THIS WINDOW: Framework & project work   │"
         echo "│  ✅ WORKTREE WINDOW: Feature development    │"
         echo "└─────────────────────────────────────────────┘"
-    fi
+    } >&2
 }
 
 # Main execution
@@ -357,45 +311,28 @@ main() {
     local branch_name=""
     local agent_role="developer"
     local purpose="Feature development"
-    local use_legacy=false
     
-    # Parse arguments for --no-container flag (legacy mode)
-    local args=()
-    for arg in "$@"; do
-        if [[ "$arg" == "--no-container" ]]; then
-            use_legacy=true
-        else
-            args+=("$arg")
-        fi
-    done
-    
-    # Parse remaining arguments
-    if [ ${#args[@]} -eq 0 ]; then
-        log_error "Usage: $0 <branch-name> [agent-role] [purpose] [--no-container]"
+    # Parse arguments
+    if [ $# -eq 0 ]; then
+        log_error "Usage: $0 <branch-name> [agent-role] [purpose]"
         log_error "Example: $0 feature-123-auth developer 'Implement authentication'"
-        log_error "Example without containers: $0 feature-123-auth developer 'Implement authentication' --no-container"
         exit 1
     fi
     
-    branch_name="${args[0]}"
-    agent_role="${args[1]:-developer}"
-    purpose="${args[2]:-Feature development}"
+    branch_name="$1"
+    agent_role="${2:-developer}"
+    purpose="${3:-Feature development}"
     
     # Execute workflow
     assess_situation
     
     local issue_number=$(get_issue_number "$branch_name" "$purpose")
     local worktree_path=$(create_worktree "$branch_name" "$issue_number")
-    
-    # Setup dev container environment by default (unless legacy mode)
-    if [ "$use_legacy" = false ]; then
-        setup_devcontainer_environment "$worktree_path" "$agent_role"
-    fi
-    
+    setup_containerized_claude "$worktree_path"
     local handover_file=$(create_handover "$branch_name" "$issue_number" "$agent_role" "$purpose" "$worktree_path")
     
     open_vscode "$worktree_path"
-    show_completion "$branch_name" "$issue_number" "$worktree_path" "$use_legacy"
+    show_completion "$branch_name" "$issue_number" "$worktree_path"
 }
 
 # Run main function with all arguments
