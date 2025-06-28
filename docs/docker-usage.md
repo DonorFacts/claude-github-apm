@@ -1,6 +1,6 @@
 # Docker Container Security for APM Framework
 
-**Security Enhancement**: Run Claude Code agents in isolated Docker containers with dangerous permissions safely contained while maintaining familiar terminal UX.
+**Enterprise Security**: Run Claude Code agents in isolated Docker containers with `--dangerously-skip-permissions` safely contained, enabling autonomous multi-agent collaboration while maintaining enterprise-grade security boundaries.
 
 ## Quick Start
 
@@ -20,15 +20,43 @@
 3. Run `claude` in VS Code terminal (automatically containerized)
 4. Same terminal UX with enhanced security underneath
 
-## Benefits
+## Security Architecture
 
-### Security Isolation
-- **Host Protection**: Claude cannot access personal files, SSH keys, or system settings
-- **Dangerous Permissions**: Commands run safely within container boundaries
-- **Network Isolation**: Controlled external access
-- **Resource Limits**: Prevent system resource exhaustion
+### Three-Tier Security Model
 
-### Developer Experience
+**Tier 1: Container Isolation**
+- Host filesystem separation (only project files accessible)
+- Process isolation from host system
+- Resource consumption limits (CPU, memory, processes)
+- Credential and SSH key protection
+
+**Tier 2: Network Security**
+- Configurable network policies (none/restricted/standard)
+- Domain whitelist firewall for restricted mode
+- Default-deny outbound traffic with approved exceptions
+- DNS resolution limited to whitelisted domains
+
+**Tier 3: Multi-Agent Collaboration**
+- Cross-worktree file access for team coordination
+- Shared APM memory system across all agents
+- Main branch visibility for architectural decisions
+- Secure inter-agent communication through filesystem
+
+### Benefits
+
+#### Enterprise Security
+- **`--dangerously-skip-permissions` Safely**: Anthropic's dangerous flag contained within security boundaries
+- **Zero Trust Architecture**: Each agent runs in isolated container with minimal required access
+- **Audit Trail**: All container operations logged and traceable
+- **Configurable Security Levels**: From maximum isolation to standard compatibility
+
+#### Multi-Agent Collaboration
+- **Cross-Team Access**: Agents can review and coordinate across different worktrees
+- **Shared Memory**: APM agent memory system enables handoffs and knowledge transfer
+- **Architectural Visibility**: All agents can see main branch for architectural context
+- **Concurrent Development**: Multiple agents working safely in parallel
+
+#### Developer Experience
 - **Same VS Code Terminal**: Familiar interface, same keyboard shortcuts
 - **Transparent Execution**: Container runs invisibly behind `claude` command
 - **Seamless Integration**: No workflow changes required
@@ -58,39 +86,134 @@ worktree/
 └── project files                 # Mounted read-write
 ```
 
-## Configuration
+## Security Configuration
+
+### Security Levels
+
+Configure security level via environment variable:
+
+```bash
+# Maximum Security - No network access
+export APM_SECURITY_LEVEL=maximum
+
+# Restricted Security - Firewall enabled (default for production)
+export APM_SECURITY_LEVEL=restricted  
+
+# Standard Security - Host network for development
+export APM_SECURITY_LEVEL=standard
+```
+
+#### Maximum Security (`maximum`)
+- **Network**: Completely isolated (no internet access)
+- **Resources**: 2GB RAM, 1 CPU, 100 processes max
+- **Filesystem**: Read-only root, temporary mounts only
+- **Use Case**: Highly sensitive environments, offline development
+
+```bash
+# Container configuration for maximum security
+--network none
+--memory=2g --cpus=1.0 --pids-limit=100
+--read-only --tmpfs /tmp:rw,size=500m
+```
+
+#### Restricted Security (`restricted`) 
+- **Network**: Firewall with domain whitelist
+- **Resources**: 4GB RAM, 2 CPUs, 200 processes max
+- **Filesystem**: Writable workspace, temporary mounts
+- **Use Case**: Production environments, CI/CD
+
+```bash
+# Container configuration for restricted security
+--network bridge  # Custom network with firewall
+--memory=4g --cpus=2.0 --pids-limit=200
+--tmpfs /tmp:rw,size=1g
+```
+
+#### Standard Security (`standard`)
+- **Network**: Host network (full compatibility)
+- **Resources**: 8GB RAM, 4 CPUs, unlimited processes
+- **Filesystem**: Full workspace access
+- **Use Case**: Development, debugging, maximum compatibility
+
+```bash
+# Container configuration for standard security
+--network host
+--memory=8g --cpus=4.0
+```
+
+### Network Whitelist Configuration
+
+For `restricted` security level, configure allowed domains:
+
+```bash
+# Environment variable (comma-separated)
+export ALLOWED_DOMAINS="api.anthropic.com,github.com,registry.npmjs.org,your-domain.com"
+
+# Or disable firewall entirely
+export APM_SKIP_FIREWALL=true
+```
+
+**Default Whitelist**:
+- `api.anthropic.com` - Claude API access
+- `github.com` - Git operations, issue management
+- `registry.npmjs.org` - NPM package installations
+- `githubusercontent.com` - GitHub raw content
+- `objects.githubusercontent.com` - GitHub LFS objects
+
+### Multi-Agent Collaboration Mounts
+
+The container automatically detects project structure and mounts:
+
+```bash
+# Current worktree (read-write)
+-v "${PWD}:/workspace"
+
+# Main branch access (read-write for coordination)
+-v "${PROJECT_ROOT}/main:/workspace-main:rw"
+
+# All worktrees (read-write for multi-agent collaboration)  
+-v "${PROJECT_ROOT}/worktrees:/workspace-worktrees:rw"
+
+# Shared APM memory system (read-write)
+-v "${PROJECT_ROOT}/apm:/workspace/apm"
+
+# Claude configuration (read-write)
+-v "${HOME}/.claude:/home/claude/.claude"
+```
 
 ### Container Template
-The framework automatically configures a transparent Docker wrapper:
+
+The framework automatically configures a transparent Docker wrapper with full security stack:
 
 ```bash
 # Generated claude wrapper in .local/bin/claude
-docker run -it --rm \
+docker run --rm -it \
+  --name "claude-$(basename "$PWD")-$$" \
+  --workdir /workspace \
+  $NETWORK_CONFIG \           # Based on security level
+  $RESOURCE_LIMITS \          # Based on security level  
+  $SECURITY_OPTS \            # Based on security level
   -v "${PWD}:/workspace" \
+  -v "${PROJECT_ROOT}/main:/workspace-main:rw" \
+  -v "${PROJECT_ROOT}/worktrees:/workspace-worktrees:rw" \
+  -v "${PROJECT_ROOT}/apm:/workspace/apm" \
   -v "${HOME}/.claude:/home/claude/.claude" \
-  -w /workspace \
-  apm-claude-container:latest claude "$@"
-```
-
-### Container Image
-Built from `src/docker/claude-container/Dockerfile`:
-
-```dockerfile
-FROM node:20-slim
-RUN apt-get update && apt-get install -y git curl bash ca-certificates
-RUN npm install -g @anthropic-ai/claude-code
-RUN useradd -m -s /bin/bash claude
-WORKDIR /workspace
-USER claude
-CMD ["claude"]
+  -e APM_CONTAINERIZED=true \
+  -e APM_SECURITY_LEVEL="$SECURITY_LEVEL" \
+  apm-claude-container:latest \
+  claude --dangerously-skip-permissions "$@"
 ```
 
 ### Environment Variables
-Automatically set in containers:
-- `APM_CONTAINERIZED=true`
-- `APM_AGENT_ROLE` - Agent role (developer, qa, etc.)
-- `APM_MEMORY_PATH` - Path to agent memory
-- `APM_PROJECT_ROOT` - Project workspace path (/workspace)
+
+Automatically set in containers for agent coordination:
+
+- `APM_CONTAINERIZED=true` - Container detection flag
+- `APM_PROJECT_ROOT=/workspace` - Current worktree path
+- `APM_MAIN_BRANCH_PATH=/workspace-main` - Main branch access path
+- `APM_WORKTREES_PATH=/workspace-worktrees` - All worktrees access path
+- `APM_SECURITY_LEVEL` - Current security configuration
+- `ALLOWED_DOMAINS` - Whitelisted domains for network access
 
 ## UX Flow
 
