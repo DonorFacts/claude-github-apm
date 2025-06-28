@@ -71,36 +71,122 @@ if [ "$IMAGE_NEEDS_REBUILD" = true ]; then
     log_debug "Claude container image built successfully"
 fi
 
-# Set up volume mounts
+# Detect project root and set up multi-agent collaboration mounts
+PROJECT_ROOT=""
+MAIN_BRANCH_PATH=""
+WORKTREES_PATH=""
+
+# Try to find project root by looking for .git or worktrees structure
+if [ -d "${PWD}/.git" ]; then
+    # We're in main branch
+    PROJECT_ROOT="$PWD"
+    MAIN_BRANCH_PATH="$PWD"
+    WORKTREES_PATH="$PWD"
+elif [ -d "${PWD}/../main" ]; then
+    # We're in a worktree, find project root
+    PROJECT_ROOT=$(dirname "$PWD")
+    MAIN_BRANCH_PATH="${PROJECT_ROOT}/main"
+    WORKTREES_PATH="$PROJECT_ROOT"
+elif [ -d "${PWD}/../../main" ]; then
+    # We're in a nested worktree structure
+    PROJECT_ROOT=$(dirname "$(dirname "$PWD")")
+    MAIN_BRANCH_PATH="${PROJECT_ROOT}/main"
+    WORKTREES_PATH="$(dirname "$PWD")"
+else
+    # Fallback: assume current directory
+    PROJECT_ROOT="$PWD"
+    MAIN_BRANCH_PATH="$PWD"
+    WORKTREES_PATH="$PWD"
+fi
+
+log_debug "Project structure detected:"
+log_debug "  Project root: $PROJECT_ROOT"
+log_debug "  Main branch: $MAIN_BRANCH_PATH"
+log_debug "  Worktrees: $WORKTREES_PATH"
+
+# Set up volume mounts for multi-agent collaboration
 WORKSPACE_MOUNT="${PWD}:/workspace"
+MAIN_MOUNT=""
+WORKTREES_MOUNT=""
 CLAUDE_CONFIG_MOUNT=""
+APM_MOUNT=""
+
+# Mount main branch for cross-team coordination
+if [ -d "$MAIN_BRANCH_PATH" ] && [ "$MAIN_BRANCH_PATH" != "$PWD" ]; then
+    MAIN_MOUNT="-v ${MAIN_BRANCH_PATH}:/workspace-main:rw"
+    log_debug "Mounted main branch for cross-team access"
+fi
+
+# Mount all worktrees for multi-agent collaboration
+if [ -d "$WORKTREES_PATH" ] && [ "$WORKTREES_PATH" != "$PWD" ]; then
+    WORKTREES_MOUNT="-v ${WORKTREES_PATH}:/workspace-worktrees:rw"
+    log_debug "Mounted worktrees directory for multi-agent collaboration"
+fi
 
 # Mount Claude config if it exists
 if [ -d "${HOME}/.claude" ]; then
     CLAUDE_CONFIG_MOUNT="-v ${HOME}/.claude:/home/claude/.claude"
+    log_debug "Mounted Claude configuration"
 fi
 
-# Mount APM directory if we're in a worktree
-APM_MOUNT=""
-if [ -d "apm" ]; then
+# Mount APM memory system (essential for agent coordination)
+if [ -d "${PROJECT_ROOT}/apm" ]; then
+    APM_MOUNT="-v ${PROJECT_ROOT}/apm:/workspace/apm"
+    log_debug "Mounted APM memory system from project root"
+elif [ -d "apm" ]; then
     APM_MOUNT="-v ${PWD}/apm:/workspace/apm"
+    log_debug "Mounted local APM directory"
 fi
 
-log_debug "Running Claude in secure container..."
+# Security configuration
+SECURITY_LEVEL="${APM_SECURITY_LEVEL:-standard}"
+NETWORK_CONFIG=""
+RESOURCE_LIMITS=""
+SECURITY_OPTS=""
 
-# Run Claude in container with "allow dangerously" permissions
+case "$SECURITY_LEVEL" in
+    "maximum")
+        # Maximum security: no network, strict limits
+        NETWORK_CONFIG="--network none"
+        RESOURCE_LIMITS="--memory=2g --cpus=1.0 --pids-limit=100"
+        SECURITY_OPTS="--read-only --tmpfs /tmp:rw,size=500m --tmpfs /workspace-tmp:rw,size=1g"
+        log_debug "Security level: MAXIMUM (no network, strict limits)"
+        ;;
+    "restricted")
+        # Restricted security: firewall enabled, moderate limits
+        NETWORK_CONFIG="--network bridge"
+        RESOURCE_LIMITS="--memory=4g --cpus=2.0 --pids-limit=200"
+        SECURITY_OPTS="--tmpfs /tmp:rw,size=1g"
+        log_debug "Security level: RESTRICTED (firewall enabled, moderate limits)"
+        ;;
+    "standard"|*)
+        # Standard security: host network for compatibility, basic limits
+        NETWORK_CONFIG="--network host"
+        RESOURCE_LIMITS="--memory=8g --cpus=4.0"
+        SECURITY_OPTS=""
+        log_debug "Security level: STANDARD (host network, basic limits)"
+        ;;
+esac
+
+log_debug "Running Claude in secure container with multi-agent collaboration..."
+
+# Run Claude in container with full security stack
 exec docker run \
     --rm \
     --interactive \
     --tty \
     --name "$CONTAINER_NAME" \
     --workdir /workspace \
-    --user claude \
-    --network host \
+    $NETWORK_CONFIG \
+    $RESOURCE_LIMITS \
+    $SECURITY_OPTS \
     -v "$WORKSPACE_MOUNT" \
-    -v "${PWD}/../main:/workspace-main:rw" \
+    $MAIN_MOUNT \
+    $WORKTREES_MOUNT \
     $CLAUDE_CONFIG_MOUNT \
     $APM_MOUNT \
     -e APM_CONTAINERIZED=true \
+    -e APM_SECURITY_LEVEL="$SECURITY_LEVEL" \
+    -e APM_DEBUG="$APM_DEBUG" \
     "$CONTAINER_IMAGE" \
-    claude --dangerously-skip-permissions "$@"
+    "$@"
