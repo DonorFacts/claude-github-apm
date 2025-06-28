@@ -26,10 +26,9 @@ WORKDIR /workspace
 # Switch to claude user
 USER claude
 
-# Set environment variables for dangerous mode
+# Set environment variables for container detection
 ENV APM_CONTAINERIZED=true
 ENV APM_PROJECT_ROOT=/workspace
-ENV CLAUDE_ALLOW_DANGEROUSLY=true
 
-# Default command with dangerous mode enabled
-CMD ["claude", "--allow-dangerously"]
+# Default command with permissions skipped (designed for containers)
+CMD ["claude", "--dangerously-skip-permissions"]
