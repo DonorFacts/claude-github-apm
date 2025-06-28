@@ -39,10 +39,30 @@ if ! docker info >/dev/null 2>&1; then
     exec claude "$@"
 fi
 
-# Build container image if it doesn't exist
+# Build container image if it doesn't exist or if Dockerfile is newer
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+DOCKERFILE_PATH="$SCRIPT_DIR/Dockerfile"
+IMAGE_NEEDS_REBUILD=false
+
 if ! docker image inspect "$CONTAINER_IMAGE" >/dev/null 2>&1; then
-    log_debug "Building Claude container image..."
-    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    IMAGE_NEEDS_REBUILD=true
+    log_debug "Container image not found - building..."
+else
+    # Check if Dockerfile is newer than the image
+    if [ -f "$DOCKERFILE_PATH" ]; then
+        IMAGE_DATE=$(docker image inspect "$CONTAINER_IMAGE" --format='{{.Created}}' 2>/dev/null)
+        if [ -n "$IMAGE_DATE" ]; then
+            IMAGE_TIMESTAMP=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${IMAGE_DATE%.*}" "+%s" 2>/dev/null || echo "0")
+            DOCKERFILE_TIMESTAMP=$(stat -f "%m" "$DOCKERFILE_PATH" 2>/dev/null || echo "0")
+            if [ "$DOCKERFILE_TIMESTAMP" -gt "$IMAGE_TIMESTAMP" ]; then
+                IMAGE_NEEDS_REBUILD=true
+                log_debug "Dockerfile updated - rebuilding container image..."
+            fi
+        fi
+    fi
+fi
+
+if [ "$IMAGE_NEEDS_REBUILD" = true ]; then
     if ! docker build -t "$CONTAINER_IMAGE" "$SCRIPT_DIR" >/dev/null 2>&1; then
         log_error "Failed to build Claude container image."
         log_error "Falling back to direct claude execution..."
