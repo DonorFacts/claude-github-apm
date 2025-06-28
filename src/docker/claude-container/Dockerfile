@@ -1,10 +1,11 @@
 FROM node:20-slim
 
-# Install system dependencies including GitHub CLI and security tools
+# Install system dependencies including GitHub CLI, security tools, and shell utilities
 RUN apt-get update && apt-get install -y \
     git \
     curl \
     bash \
+    zsh \
     ca-certificates \
     wget \
     gnupg \
@@ -12,6 +13,8 @@ RUN apt-get update && apt-get install -y \
     netbase \
     dnsutils \
     jq \
+    sox \
+    alsa-utils \
     && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor > /usr/share/keyrings/githubcli-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
     && apt-get update \
@@ -24,7 +27,24 @@ RUN npm install -g @anthropic-ai/claude-code
 # Create secure workspace structure for multi-agent collaboration
 RUN mkdir -p /workspace /workspace-main /workspace-worktrees /tmp/claude-workspace \
     && useradd -m -s /bin/bash claude \
-    && chown claude:claude /workspace /workspace-main /workspace-worktrees /tmp/claude-workspace
+    && chown claude:claude /workspace /workspace-main /workspace-worktrees /tmp/claude-workspace \
+    && mkdir -p /home/claude \
+    && chown claude:claude /home/claude
+
+# Install direnv for automatic environment loading
+RUN curl -sfL https://direnv.net/install.sh | bash
+
+# Set up shell configuration for claude user
+RUN echo '# Container shell configuration (mirroring Jake'\''s ~/.zshrc)' > /home/claude/.bashrc \
+    && echo 'export HISTSIZE=100000' >> /home/claude/.bashrc \
+    && echo 'export PS1="%~ > "' >> /home/claude/.bashrc \
+    && echo 'alias code="echo \"VS Code not available in container\""' >> /home/claude/.bashrc \
+    && echo 'alias python=python3' >> /home/claude/.bashrc \
+    && echo 'alias pip=pip3' >> /home/claude/.bashrc \
+    && echo 'alias e="pnpm tsx"' >> /home/claude/.bashrc \
+    && echo 'alias pn=pnpm' >> /home/claude/.bashrc \
+    && echo 'eval "$(direnv hook bash)"' >> /home/claude/.bashrc \
+    && chown claude:claude /home/claude/.bashrc
 
 # Copy and configure firewall script
 COPY init-firewall.sh /usr/local/bin/init-firewall.sh
