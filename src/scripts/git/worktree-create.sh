@@ -95,14 +95,24 @@ get_issue_number() {
         return 0
     fi
     
-    # Create issue with timeout protection
+    # Create issue with timeout protection and better error handling
     local new_issue_number
-    if new_issue_number=$(timeout 15 gh issue create --title "$issue_title" --body "Automated worktree creation" --assignee "@me" 2>/dev/null | grep -o '#[0-9]*' | cut -c2-); then
-        log_success "Created GitHub issue #$new_issue_number"
-        echo "$new_issue_number"
+    local temp_output=$(mktemp)
+    if timeout 20 gh issue create --title "$issue_title" --body "Automated worktree creation for branch: $1" --assignee "@me" --json number > "$temp_output" 2>&1; then
+        new_issue_number=$(jq -r '.number' < "$temp_output" 2>/dev/null)
+        if [ -n "$new_issue_number" ] && [ "$new_issue_number" != "null" ]; then
+            log_success "Created GitHub issue #$new_issue_number"
+            rm -f "$temp_output"
+            echo "$new_issue_number"
+        else
+            log_warning "GitHub issue created but failed to parse issue number"
+            rm -f "$temp_output"
+            echo "manual"
+        fi
     else
-        log_warning "GitHub issue creation failed/timed out"
+        log_warning "GitHub issue creation failed/timed out (20s timeout)"
         log_info "Create manually: gh issue create --title '$issue_title' --assignee '@me'"
+        rm -f "$temp_output"
         echo "manual"
     fi
 }
