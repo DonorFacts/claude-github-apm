@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-06-25T12:59:46Z
+Last Updated: 2025-06-28T20:19:00Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -231,13 +231,15 @@ Role: prompt-engineer
 - Meta-scripts pattern proven effective for token reduction
 - Milestone-only updates for terminal status saves significant tokens
 
-### Docker Integration Failure Analysis
+### Docker Integration Failure Analysis - DOUBLE FAILURE
 
-- **CRITICAL FAILURE**: VS Code dev containers implementation completely broken
-- **Root Cause**: Never properly diagnosed why "An error occurred setting up the container"
-- **Failed Approach**: Band-aid fixes without understanding fundamental problems
-- **Key Learning**: Don't commit "fixes" that don't actually work - wasted significant time
-- **User Feedback**: "I expect more from your next self" - clear signal of inadequate performance
-- **Technical Debt**: Created broken script, configs, docs that need complete rework
-- **Missing Skill**: Proper debugging methodology for VS Code dev container failures
-- **Pattern**: Generated configurations without validating they actually work in VS Code
+- **CRITICAL FAILURE**: Both VS Code dev containers AND transparent Docker approaches completely broken
+- **Root Cause**: **WRONG PROBLEM FOCUS** - Issue isn't containers, it's basic worktree file visibility in VS Code
+- **Failed Approach 1**: VS Code dev containers (incompatible with git worktrees)
+- **Failed Approach 2**: Transparent Docker (doesn't solve core issue of missing files/folders)
+- **Key Learning**: **SYSTEMATIC DEBUGGING REQUIRED** - Must verify basic functionality before complex solutions
+- **User Feedback**: "files/folders are missing from within the newly popped up VS Code window" - the real problem
+- **Technical Debt**: Created elaborate Docker solutions that solve wrong problem
+- **Missing Skill**: **FUNDAMENTAL MISDIAGNOSIS** - Assumed containers were the issue when it's worktree creation
+- **Pattern**: **SOLUTION BEFORE PROBLEM** - Built complex implementations without understanding core issue
+- **Critical Insight**: ALWAYS test basic functionality manually before implementing complex solutions
