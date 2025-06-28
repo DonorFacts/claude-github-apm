@@ -68,7 +68,7 @@ fi
 
 log_debug "Running Claude in secure container..."
 
-# Run Claude in container with transparent passthrough
+# Run Claude in container with "allow dangerously" permissions
 exec docker run \
     --rm \
     --interactive \
@@ -76,8 +76,12 @@ exec docker run \
     --name "$CONTAINER_NAME" \
     --workdir /workspace \
     --user claude \
+    --network host \
     -v "$WORKSPACE_MOUNT" \
+    -v "${PWD}/../main:/workspace-main:rw" \
     $CLAUDE_CONFIG_MOUNT \
     $APM_MOUNT \
+    -e CLAUDE_ALLOW_DANGEROUSLY=true \
+    -e APM_CONTAINERIZED=true \
     "$CONTAINER_IMAGE" \
     claude "$@"
