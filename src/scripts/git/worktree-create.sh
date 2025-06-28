@@ -85,9 +85,26 @@ get_issue_number() {
         issue_title="Feature development for $target_branch"
     fi
     
-    log_warning "Skipping GitHub issue creation to prevent hangs"
-    log_info "Create manually: gh issue create --title '$issue_title' --assignee '@me'"
-    echo "manual"
+    log_info "Creating GitHub issue: $issue_title"
+    
+    # Quick check if gh is authenticated
+    if ! gh auth status >/dev/null 2>&1; then
+        log_warning "GitHub CLI not authenticated - skipping issue creation"
+        log_info "Run: gh auth login"
+        echo "manual"
+        return 0
+    fi
+    
+    # Create issue with timeout protection
+    local new_issue_number
+    if new_issue_number=$(timeout 15 gh issue create --title "$issue_title" --body "Automated worktree creation" --assignee "@me" 2>/dev/null | grep -o '#[0-9]*' | cut -c2-); then
+        log_success "Created GitHub issue #$new_issue_number"
+        echo "$new_issue_number"
+    else
+        log_warning "GitHub issue creation failed/timed out"
+        log_info "Create manually: gh issue create --title '$issue_title' --assignee '@me'"
+        echo "manual"
+    fi
 }
 
 # Function to create branch and worktree
