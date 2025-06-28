@@ -86,7 +86,11 @@ get_issue_number() {
     fi
     
     log_info "Creating GitHub issue: $issue_title"
-    local new_issue_number=$(gh issue create --title "$issue_title" --body "Automated issue creation for worktree: $target_branch" --assignee "@me" --format json --jq '.number')
+    if gh issue create --title "$issue_title" --body "Automated issue creation for worktree: $target_branch" --assignee "@me" >/dev/null 2>&1; then
+        local new_issue_number=$(gh issue list --assignee "@me" --state open --limit 1 --json number --jq '.[0].number')
+    else
+        local new_issue_number=""
+    fi
     
     if [ $? -eq 0 ] && [ -n "$new_issue_number" ]; then
         log_success "Created GitHub issue #$new_issue_number"
@@ -225,7 +229,7 @@ setup_containerized_claude() {
     # Create wrapper script that calls our Docker wrapper
     local claude_wrapper="$bin_dir/claude"
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-    local docker_wrapper="$script_dir/../docker/claude-container/claude-wrapper.sh"
+    local docker_wrapper="$script_dir/../../docker/claude-container/claude-wrapper.sh"
     
     # Verify Docker wrapper exists
     if [ ! -f "$docker_wrapper" ]; then
@@ -234,20 +238,19 @@ setup_containerized_claude() {
         return 1
     fi
     
-    cat > "$claude_wrapper" << 'EOF'
+    cat > "$claude_wrapper" << EOF
 #!/bin/bash
 # Auto-generated Claude wrapper for containerized execution
 # This script transparently runs Claude in a secure Docker container
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-DOCKER_WRAPPER="$PROJECT_ROOT/src/docker/claude-container/claude-wrapper.sh"
+# Use absolute path to Docker wrapper (determined at creation time)
+DOCKER_WRAPPER="$docker_wrapper"
 
-if [ -f "$DOCKER_WRAPPER" ]; then
-    exec "$DOCKER_WRAPPER" "$@"
+if [ -f "\$DOCKER_WRAPPER" ]; then
+    exec "\$DOCKER_WRAPPER" "\$@"
 else
     # Fallback to system claude if wrapper not found
-    exec claude "$@"
+    exec claude "\$@"
 fi
 EOF
     
