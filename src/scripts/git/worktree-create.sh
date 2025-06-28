@@ -86,11 +86,7 @@ get_issue_number() {
     fi
     
     log_info "Creating GitHub issue: $issue_title"
-    if gh issue create --title "$issue_title" --body "Automated issue creation for worktree: $target_branch" --assignee "@me" >/dev/null 2>&1; then
-        local new_issue_number=$(gh issue list --assignee "@me" --state open --limit 1 --json number --jq '.[0].number')
-    else
-        local new_issue_number=""
-    fi
+    local new_issue_number=$(gh issue create --title "$issue_title" --body "Automated issue creation for worktree: $target_branch" --assignee "@me" --json number --jq '.number')
     
     if [ $? -eq 0 ] && [ -n "$new_issue_number" ]; then
         log_success "Created GitHub issue #$new_issue_number"
@@ -115,8 +111,8 @@ create_worktree() {
         log_info "Branch $branch_name already exists, using existing branch"
     else
         log_info "Creating new branch: $branch_name"
-        git checkout -b "$branch_name"
-        git checkout main  # Switch back to main
+        git checkout -b "$branch_name" >/dev/null 2>&1
+        git checkout main >/dev/null 2>&1  # Switch back to main
     fi
     
     # Create worktree
@@ -126,7 +122,7 @@ create_worktree() {
     if [ -d "$worktree_path" ]; then
         log_info "Worktree directory already exists - updating configuration"
     else
-        if git worktree add "$worktree_path" "$branch_name"; then
+        if git worktree add "$worktree_path" "$branch_name" >/dev/null 2>&1; then
             log_success "Worktree created successfully"
         else
             log_error "Failed to create git worktree"
