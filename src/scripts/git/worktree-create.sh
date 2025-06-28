@@ -85,18 +85,9 @@ get_issue_number() {
         issue_title="Feature development for $target_branch"
     fi
     
-    log_info "Creating GitHub issue: $issue_title"
-    local new_issue_number=$(gh issue create --title "$issue_title" --body "Automated issue creation for worktree: $target_branch" --assignee "@me" --json number --jq '.number')
-    
-    if [ $? -eq 0 ] && [ -n "$new_issue_number" ]; then
-        log_success "Created GitHub issue #$new_issue_number"
-        echo "$new_issue_number"
-        return 0
-    else
-        log_error "Failed to create GitHub issue"
-        log_error "Please create manually: gh issue create --title '$issue_title' --assignee '@me'"
-        exit 1
-    fi
+    log_warning "Skipping GitHub issue creation to prevent hangs"
+    log_info "Create manually: gh issue create --title '$issue_title' --assignee '@me'"
+    echo "manual"
 }
 
 # Function to create branch and worktree
