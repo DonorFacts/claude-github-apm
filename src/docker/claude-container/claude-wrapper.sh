@@ -101,7 +101,6 @@ exec docker run \
     -v "${PWD}/../main:/workspace-main:rw" \
     $CLAUDE_CONFIG_MOUNT \
     $APM_MOUNT \
-    -e CLAUDE_ALLOW_DANGEROUSLY=true \
     -e APM_CONTAINERIZED=true \
     "$CONTAINER_IMAGE" \
-    claude "$@"
+    claude --dangerously-skip-permissions "$@"
