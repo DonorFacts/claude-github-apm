@@ -86,7 +86,7 @@ get_issue_number() {
     fi
     
     log_info "Creating GitHub issue: $issue_title"
-    local new_issue_number=$(gh issue create --title "$issue_title" --body "Automated issue creation for worktree: $target_branch" --assignee "@me" --json number --jq '.number')
+    local new_issue_number=$(gh issue create --title "$issue_title" --body "Automated issue creation for worktree: $target_branch" --assignee "@me" --format json --jq '.number')
     
     if [ $? -eq 0 ] && [ -n "$new_issue_number" ]; then
         log_success "Created GitHub issue #$new_issue_number"
@@ -122,8 +122,13 @@ create_worktree() {
     if [ -d "$worktree_path" ]; then
         log_info "Worktree directory already exists - updating configuration"
     else
-        git worktree add "$worktree_path" "$branch_name"
-        log_success "Worktree created successfully"
+        if git worktree add "$worktree_path" "$branch_name"; then
+            log_success "Worktree created successfully"
+        else
+            log_error "Failed to create git worktree"
+            log_error "Command failed: git worktree add $worktree_path $branch_name"
+            exit 1
+        fi
     fi
     
     echo "$worktree_path"
@@ -221,6 +226,13 @@ setup_containerized_claude() {
     local claude_wrapper="$bin_dir/claude"
     local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     local docker_wrapper="$script_dir/../docker/claude-container/claude-wrapper.sh"
+    
+    # Verify Docker wrapper exists
+    if [ ! -f "$docker_wrapper" ]; then
+        log_error "Docker wrapper not found at: $docker_wrapper"
+        log_error "Docker containerization setup failed"
+        return 1
+    fi
     
     cat > "$claude_wrapper" << 'EOF'
 #!/bin/bash
@@ -328,7 +340,11 @@ main() {
     
     local issue_number=$(get_issue_number "$branch_name" "$purpose")
     local worktree_path=$(create_worktree "$branch_name" "$issue_number")
-    setup_containerized_claude "$worktree_path"
+    
+    if ! setup_containerized_claude "$worktree_path"; then
+        log_error "Docker setup failed - continuing with host execution"
+    fi
+    
     local handover_file=$(create_handover "$branch_name" "$issue_number" "$agent_role" "$purpose" "$worktree_path")
     
     open_vscode "$worktree_path"
