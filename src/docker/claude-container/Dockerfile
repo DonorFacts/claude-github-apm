@@ -67,15 +67,22 @@ fi\n\
 \n\
 # Fix git worktree paths for container environment\n\
 if [ -f "/workspace/.git" ] && [ -d "/workspace-main" ]; then\n\
-    # Check if .git file points to host path\n\
-    if grep -q "/Users/" "/workspace/.git" 2>/dev/null; then\n\
+    # Save original .git file if not already saved\n\
+    if [ ! -f "/workspace/.git.host" ]; then\n\
+        cp /workspace/.git /workspace/.git.host\n\
+    fi\n\
+    # Check if .git file needs container path\n\
+    if ! grep -q "/workspace-main/" "/workspace/.git" 2>/dev/null; then\n\
         # Extract worktree name from current path or environment\n\
         WORKTREE_NAME="${APM_WORKTREE_NAME:-$(basename "/workspace")}" \n\
-        # Update .git file to point to container path\n\
-        echo "gitdir: /workspace-main/.git/worktrees/$WORKTREE_NAME" > /workspace/.git\n\
+        # Create container version\n\
+        echo "gitdir: /workspace-main/.git/worktrees/$WORKTREE_NAME" > /workspace/.git.container\n\
+        cp /workspace/.git.container /workspace/.git\n\
         echo "Fixed git worktree path for container environment: $WORKTREE_NAME" >&2\n\
     fi\n\
 fi\n\
+# Restore host git on exit\n\
+trap 'if [ -f "/workspace/.git.host" ]; then cp /workspace/.git.host /workspace/.git; fi' EXIT\n\
 \n\
 # Switch to claude user if running as root\n\
 if [ "$EUID" -eq 0 ]; then\n\
