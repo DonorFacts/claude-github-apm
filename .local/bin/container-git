@@ -1,0 +1,19 @@
+#!/bin/bash
+# Safe git wrapper for containers
+# Temporarily switches git paths for operations then restores
+
+# Save current .git
+cp .git .git.tmp
+
+# Set container path
+echo "gitdir: /workspace-main/.git/worktrees/feature-draft-git-worktree-docs" > .git
+
+# Run git command
+git "$@"
+EXIT_CODE=$?
+
+# Restore host path
+cp .git.tmp .git
+rm .git.tmp
+
+exit $EXIT_CODE
