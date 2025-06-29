@@ -1,5 +1,27 @@
 #!/usr/bin/env tsx
 
+/**
+ * APM Container Development Tool
+ * 
+ * This tool provides advanced container management and debugging capabilities
+ * beyond the simple bash wrapper used for daily development.
+ * 
+ * USAGE:
+ *   npm run container:status  # Check container health and status
+ *   npm run container:start   # Start container manually
+ *   npm run container:stop    # Stop container
+ *   npm run container:bash    # Open interactive shell in container
+ *   
+ * DEBUGGING:
+ *   tsx src/scripts/docker/apm-container.dev.ts status  # Detailed status
+ *   tsx src/scripts/docker/apm-container.dev.ts logs    # Container logs
+ *   tsx src/scripts/docker/apm-container.dev.ts ensure  # Force health check
+ * 
+ * Note: For normal development, use `pnpm claude` which uses the simpler
+ * bash wrapper (.local/bin/claude-container) for better performance.
+ * This tool is for when you need advanced container management.
+ */
+
 import { execSync, spawn } from 'child_process';
 import * as path from 'path';
 import * as fs from 'fs';

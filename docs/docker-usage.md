@@ -256,6 +256,25 @@ Identical behavior in containers and host:
 - **Terminal responsiveness**: Identical to native VS Code terminal
 - **Claude Code performance**: No noticeable difference
 
+## Container Management (Development Tools)
+
+For debugging and advanced container management, use these npm scripts:
+
+```bash
+# Container health and debugging
+npm run container:status    # Detailed container status and health
+npm run container:logs      # View container logs
+npm run container:start     # Manually start container
+npm run container:stop      # Stop container
+npm run container:bash      # Interactive shell in container
+
+# Direct tool usage (advanced)
+tsx src/scripts/docker/apm-container.dev.ts status
+tsx src/scripts/docker/apm-container.dev.ts ensure  # Force health check
+```
+
+**Note**: For normal development, use `pnpm claude` which automatically manages the container.
+
 ## Troubleshooting
 
 ### Container Won't Build

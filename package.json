@@ -31,11 +31,11 @@
     "container:shell": "./.local/bin/claude-shell",
     "shell": "npm run container:shell",
     "start": "./src/scripts/watch-all.sh",
-    "container:start": "tsx src/scripts/docker/apm-container.ts start",
-    "container:stop": "tsx src/scripts/docker/apm-container.ts stop",
-    "container:status": "tsx src/scripts/docker/apm-container.ts status",
-    "container:logs": "docker logs -f apm-workspace",
-    "container:bash": "tsx src/scripts/docker/apm-container.ts shell",
+    "container:start": "tsx src/scripts/docker/apm-container.dev.ts start",
+    "container:stop": "tsx src/scripts/docker/apm-container.dev.ts stop",
+    "container:status": "tsx src/scripts/docker/apm-container.dev.ts status",
+    "container:logs": "tsx src/scripts/docker/apm-container.dev.ts logs",
+    "container:bash": "tsx src/scripts/docker/apm-container.dev.ts shell",
     "claude": "./.local/bin/claude-container"
   },
   "keywords": [
