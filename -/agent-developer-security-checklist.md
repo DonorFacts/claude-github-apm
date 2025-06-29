@@ -313,7 +313,7 @@ logger.error('Payment failed', {
 - [ ] Disable verbose error messages
 - [ ] Update all dependencies
 - [ ] Run security scans
-- [ ] Configure firewall rules
+- [ ] Verify container network isolation
 - [ ] Enable monitoring and alerting
 - [ ] Implement backup procedures
 - [ ] Document incident response plan

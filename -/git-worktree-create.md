@@ -15,15 +15,15 @@ Before creating any worktree, ensure you have a GitHub issue to track the work:
 echo "Are you working on an existing GitHub issue? (If yes, note the issue number)"
 echo "If no existing issue, create one now:"
 
-# Create GitHub issue for the work
-gh issue create \
+# Create GitHub issue and capture the number directly
+ISSUE_URL=$(gh issue create \
     --title "Brief description of the work" \
     --body "Detailed description of what needs to be done" \
     --label "enhancement" \
-    --assignee "@me"
+    --assignee "@me")
 
-# Capture the issue number for branch naming
-ISSUE_NUMBER=$(gh issue list --assignee "@me" --state open --limit 1 --json number --jq '.[0].number')
+# Extract issue number from the returned URL
+ISSUE_NUMBER=$(echo "$ISSUE_URL" | grep -o '[0-9]\+$')
 echo "Issue created: #$ISSUE_NUMBER"
 ```
 
@@ -135,7 +135,7 @@ echo ""
 echo "2. Run 'git branch --show-current' - you should see your feature branch"
 echo "   (should be: $BRANCH_NAME)"
 echo ""
-echo "3. Check that Claude is running in the terminal"
+echo "3. Check that Claude is running in the terminal (container auto-starts)"
 echo ""
 echo "4. If everything looks correct, continue your work there."
 echo "   If something seems wrong, let me know what you're seeing."

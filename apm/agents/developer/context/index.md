@@ -3,18 +3,56 @@
 ## Latest Context
 
 **File**: latest.md  
-**Updated**: 2025-01-25T15:40:00Z  
-**Summary**: Completed command sync system implementation with simplified underscore-based classification and flattened naming convention. Discovered "-" folder for enhanced autocomplete UX.
+**Updated**: 2025-06-29T19:45:00Z  
+**Summary**: Documentation work completion from previous session that hit context limits - framework ready for new tasks
 
 ## Context History
 
-### 20250125_154000_context.md
+### 20250629_194500_context.md
+- **Saved**: 2025-06-29T19:45:00Z
+- **Agent State**: Documentation completion verification
+- **Primary Focus**: Verified debugging-tools.md, README updates, package.json organization from previous session
+- **Key Decisions**: Framework documentation patterns established, `.dev.ext` convention documented
+- **Handover**: No - session continuation/verification
 
-- **Saved**: 2025-01-25T15:40:00Z
-- **Agent State**: Feature complete, preparing for handover
-- **Primary Focus**: Command sync system with simplified rules
-- **Key Decisions**: 
-  - Simplified to underscore-only exclusion
-  - Flattened naming with hyphens
-  - Discovered "-" folder autocomplete enhancement
-- **Handover**: Yes - for continuation of "-" folder integration
+### 20250629_195100_context.md
+- **Saved**: 2025-06-29T19:51:00Z
+- **Agent State**: GitHub bot integration completed
+- **Primary Focus**: Bot account setup with fallback system, container token handling, worktree security
+- **Key Decisions**: Recommended vs required bot setup, script-based config, warning messages
+- **Handover**: No - session checkpoint
+
+### 20250629_114356_context.md
+- **Saved**: 2025-06-29T18:43:56Z
+- **Agent State**: Container security improvements and cleanup completed
+- **Primary Focus**: Fixed Notify_Jake container issues, removed dead code, validated security approach
+- **Key Decisions**: Keep full network access, remove firewall theater, use bash wrapper for reliability
+- **Handover**: No - session checkpoint
+
+### 20250629_030000_context.md
+- **Saved**: 2025-06-29T03:00:00Z
+- **Agent State**: Docker merge completed, all features integrated
+- **Primary Focus**: Merged test-docker-setup branch, resolved conflicts, prepared for main PR
+- **Key Decisions**: Full merge approach, runtime files gitignored, pnpm reminders
+- **Handover**: No - work complete
+
+### 20250629_005100_context.md
+- **Saved**: 2025-06-29T00:51:00Z
+- **Agent State**: Docker audio/speech implementation complete
+- **Primary Focus**: Container notifications, git worktree fixes, cleanup
+- **Key Decisions**: File-based IPC, container-git wrapper, mount path fixes
+- **Handover**: Yes - to continue Docker work
+
+### 20250628_163246_context.md
+- **Saved**: 2025-06-28T16:32:46Z
+- **Agent State**: Working on Docker container audio/speech
+- **Primary Focus**: Implementing Notify_Jake and say-from-container.sh
+- **Key Decisions**: Host daemons for audio, queue-based communication
+- **Handover**: Yes - mid-implementation
+
+### 20250625_155453_context.md
+- **Saved**: 2025-06-25T15:54:53Z
+- **Agent State**: Initial developer setup
+- **Primary Focus**: Setting up development environment
+- **Key Decisions**: Project structure understanding
+- **Handover**: No - initial exploration

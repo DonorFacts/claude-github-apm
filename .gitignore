@@ -57,3 +57,13 @@ _x_*
 
 # # Claude Commands
 # .claude/commands/
+
+# Runtime files
+.local/sound-queue
+.local/speech-queue
+
+# Local settings
+.claude/settings.local.json
+
+# pnpm store (should use global store, not local)
+.pnpm-store/
