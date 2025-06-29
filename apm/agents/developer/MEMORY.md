@@ -70,6 +70,19 @@ Last Updated: 2025-06-29T19:45:00Z
 
 ## Recent Insights
 
+### Worktree System Architecture
+- Container-first approach eliminates host/container path translation complexity
+- Requiring consistent environment (container mode) simplifies all scripts and handoff logic
+- Agent-specific directory structure (`apm/agents/<role>/`) improves organization over shared directories
+- Single source of truth for handover files reduces confusion and maintenance overhead
+- Test-driven validation with multiple worktrees ensures robustness
+
+### Container Integration Patterns
+- Validation early in workflows prevents confusing errors later
+- Clear error messages with specific paths help users understand requirements
+- Consistent `/workspace/` paths throughout system enable predictable behavior
+- Container mode requirement can be enforced at script level for safety
+
 ### GitHub Bot Integration
 - Fallback systems (bot token → personal token) improve adoption while maintaining security awareness
 - Warning messages during setup provide education without blocking workflow

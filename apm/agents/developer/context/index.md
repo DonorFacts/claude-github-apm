@@ -3,10 +3,17 @@
 ## Latest Context
 
 **File**: latest.md  
-**Updated**: 2025-06-29T19:45:00Z  
-**Summary**: Documentation work completion from previous session that hit context limits - framework ready for new tasks
+**Updated**: 2025-06-29T16:39:41Z  
+**Summary**: Worktree workflow improvements complete - container requirement implemented, agent-specific directories, path handling simplified
 
 ## Context History
+
+### 20250629_163941_context.md
+- **Saved**: 2025-06-29T16:39:41Z
+- **Agent State**: Worktree system improvements completed
+- **Primary Focus**: Container-required workflows, agent-specific handover directories, simplified path handling
+- **Key Decisions**: Require container mode for worktrees, single handover location, remove host detection
+- **Handover**: No - system improvements complete
 
 ### 20250629_194500_context.md
 - **Saved**: 2025-06-29T19:45:00Z
