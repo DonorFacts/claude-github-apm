@@ -1,6 +1,6 @@
 # Long-Term Memory - Master Developer
 
-Last Updated: 2025-06-29T18:43:56Z
+Last Updated: 2025-06-29T19:51:00Z
 
 ## User Preferences & Patterns
 
@@ -20,6 +20,9 @@ Last Updated: 2025-06-29T18:43:56Z
 - Appreciates speech notifications for detailed feedback
 - Prefers single shared resources over distributed complexity
 - Values dynamic configuration over hardcoded values (e.g., UIDs)
+- Prefers concise prompts over verbose instructions
+- Prefers script-based configuration over prompt-embedded setup
+- Values fallback systems that improve UX while maintaining security awareness
 
 ### Project-Specific Patterns
 - Git worktrees for feature branches
@@ -66,6 +69,12 @@ Last Updated: 2025-06-29T18:43:56Z
 - Future: may want to track command changes in issues
 
 ## Recent Insights
+
+### GitHub Bot Integration
+- Fallback systems (bot token → personal token) improve adoption while maintaining security awareness
+- Warning messages during setup provide education without blocking workflow
+- Script-based configuration preferred over verbose prompt instructions
+- "Recommended" vs "Required" language reduces friction while encouraging best practices
 
 ### Command System Design
 - Simple exclusion rules (underscore prefix) are more maintainable than complex import analysis

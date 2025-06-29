@@ -96,6 +96,33 @@ echo -e "${GREEN}Creating handover in worktree directory...${NC}"
 create_handover_content > "${WORKTREE_HANDOVER}"
 echo "✅ Created: ${WORKTREE_HANDOVER}"
 
+# Configure git credentials in worktree
+echo -e "${YELLOW}Configuring git credentials in worktree...${NC}"
+cd "${WORKTREE_DIR}"
+
+# Check if bot token is available
+if [ -n "${GITHUB_BOT_TOKEN:-}" ]; then
+    git config --local user.name "Bot"
+    git config --local user.email "jake.detels+bot@gmail.com"
+    echo "✅ Bot git config set (using GITHUB_BOT_TOKEN)"
+else
+    # Fallback to personal credentials with warning
+    echo -e "${RED}⚠️  WARNING: No GITHUB_BOT_TOKEN found!${NC}"
+    echo -e "${YELLOW}   Commits will be attributed to your personal account${NC}"
+    echo -e "${YELLOW}   For security, set up bot account: see README.md 'GitHub Bot Account Setup'${NC}"
+    echo ""
+    
+    # Use global config values as fallback
+    GLOBAL_NAME=$(git config --global user.name || echo "Your Name")
+    GLOBAL_EMAIL=$(git config --global user.email || echo "your.email@example.com")
+    
+    git config --local user.name "$GLOBAL_NAME"
+    git config --local user.email "$GLOBAL_EMAIL"
+    echo "✅ Personal git config set (fallback)"
+fi
+
+cd - > /dev/null
+
 # Create symlink for future reference (optional)
 echo -e "${YELLOW}Creating reference link...${NC}"
 ln -sf "${WORKTREE_HANDOVER}" "${MAIN_DIR}/apm/worktree-handovers/not-started/${HANDOVER_FILENAME}.worktree"

@@ -44,6 +44,8 @@ if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         -v "$HOME/.claude:/home/user/.claude" \
         -e "HOME=/home/user" \
         -e "APM_CONTAINERIZED=true" \
+        -e "GH_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
+        -e "GITHUB_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
         -e "PATH=/workspace/.local/bin:/workspace/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
         "$CONTAINER_IMAGE"
     

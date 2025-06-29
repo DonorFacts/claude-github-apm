@@ -160,7 +160,8 @@ else
         -e APM_CONTAINERIZED=true \
         -e APM_SECURITY_LEVEL="$SECURITY_LEVEL" \
         -e APM_DEBUG="$APM_DEBUG" \
-        -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+        -e GITHUB_TOKEN="${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
+        -e GH_TOKEN="${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
         -e APM_WORKTREE_NAME="$(basename "$PWD")" \
         "$CONTAINER_IMAGE" \
         bash

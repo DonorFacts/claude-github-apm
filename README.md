@@ -119,6 +119,23 @@ This enables **organic agent development** where expertise emerges through real 
   - Enables multi-agent collaboration with enterprise security
   - Container auto-starts when you run `pnpm claude`
 
+### GitHub Bot Account Setup (Recommended)
+
+For enhanced security, Claude agents can use a dedicated bot account that prevents unauthorized access to your main branch. The system gracefully falls back to your personal credentials with appropriate warnings if no bot account is configured.
+
+**Quick Setup:**
+1. Create bot account with email alias: `your-email+bot@gmail.com`
+2. Generate Personal Access Token with `repo` and `workflow` scopes
+3. Set environment variable: `export GITHUB_BOT_TOKEN="<token>"`
+
+**What this achieves:**
+- ✅ Your commits in main: `your-email@gmail.com`
+- ✅ Bot commits in worktrees: `your-email+bot@gmail.com`  
+- ✅ Bot cannot push to main (blocked by branch rulesets)
+- ✅ Clear audit trail of human vs automated changes
+
+**Complete Guide:** See [GitHub Bot Account Setup](docs/github-bot-account.md) for detailed instructions, security model, and troubleshooting.
+
 ### Installation
 
 TBD
