@@ -25,8 +25,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - YOU MUST output your design plan before implementing any code changes, considering at least 2 different approaches and their trade-offs.
 - ALWAYS run tests via `pnpm test` (or `pnpm test -- <jest options>`). This invokes the package.json script `tsc --noEmit && jest`.
 - ALWAYS use `pnpm` for package management, not `npm` or `yarn`.
-- Run the Bash command `Notify_Jake` at the end of every completed response to notify Jake (the User) of your completion.
-- Use `/workspace/.local/bin/say-from-container.sh "message"` to speak important updates or explanations to Jake. Use this for:
+- Run the Bash command `./.local/bin/Notify_Jake` at the end of every completed response to notify Jake (the User) of your completion.
+- Use `./.local/bin/say-from-container.sh "message"` to speak important updates or explanations to Jake. Use this for:
   - Explaining complex errors or debugging findings
   - Providing progress updates on long-running tasks  
   - Delivering warnings that need attention

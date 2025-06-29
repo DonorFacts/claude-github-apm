@@ -93,7 +93,13 @@
       "Bash(/opt/homebrew/bin/gh --help)",
       "Bash(pnpm container:stop:*)",
       "Bash(pnpm:*)",
-      "Bash(/opt/homebrew/bin/gh help)"
+      "Bash(/opt/homebrew/bin/gh help)",
+      "Bash(/Users/jakedetels/www/claude-github-apm/worktrees/feature-draft-git-worktree-docs/.local/bin/Notify_Jake)",
+      "Bash(command Notify_Jake)",
+      "Bash(./.local/bin/claude-container:*)",
+      "Bash(/workspace/.local/bin/Notify_Jake:*)",
+      "Bash(/workspace/.local/bin/Notify_Jake:*)",
+      "Bash(./.local/bin/Notify_Jake:*)"
     ],
     "deny": []
   }

@@ -39,4 +39,4 @@ export APM_PROJECT_ROOT="$PROJECT_ROOT"
 # Note: This assumes pnpm/npm is available on host
 cd "$PROJECT_ROOT"
 exec pnpm tsx src/scripts/docker/apm-container.ts exec \
-  claude --dangerously-skip-permissions "$@"
+  /usr/local/bin/claude --dangerously-skip-permissions "$@"

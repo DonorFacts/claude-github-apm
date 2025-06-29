@@ -242,6 +242,7 @@ class ApmContainer {
       '-w', workDir,
       '-e', `APM_AGENT_ROLE=${process.env.APM_AGENT_ROLE || 'developer'}`,
       '-e', `APM_WORKTREE_NAME=${path.basename(process.cwd())}`,
+      '-e', 'PATH=/workspace/.local/bin:/workspace/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
       this.CONTAINER_NAME,
       ...command
     ];

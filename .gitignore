@@ -64,3 +64,6 @@ _x_*
 
 # Local settings
 .claude/settings.local.json
+
+# pnpm store (should use global store, not local)
+.pnpm-store/

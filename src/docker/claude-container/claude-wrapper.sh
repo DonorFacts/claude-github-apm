@@ -178,11 +178,11 @@ case "$SECURITY_LEVEL" in
         log_debug "Security level: MAXIMUM (no network, strict limits)"
         ;;
     "restricted")
-        # Restricted security: firewall enabled, moderate limits
+        # Restricted security: isolated network, moderate limits
         NETWORK_CONFIG="--network bridge"
         RESOURCE_LIMITS="--memory=4g --cpus=2.0 --pids-limit=200"
         SECURITY_OPTS="--tmpfs /tmp:rw,size=1g"
-        log_debug "Security level: RESTRICTED (firewall enabled, moderate limits)"
+        log_debug "Security level: RESTRICTED (isolated network, moderate limits)"
         ;;
     "standard"|*)
         # Standard security: host network for compatibility, basic limits
