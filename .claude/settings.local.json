@@ -77,7 +77,8 @@
       "Bash(claude --version)",
       "Bash(rg:*)",
       "Bash(docker run:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "WebFetch(domain:support.anthropic.com)"
     ],
     "deny": []
   }
