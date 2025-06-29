@@ -64,7 +64,7 @@ if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         --restart unless-stopped \
         --user "$(id -u):$(id -g)" \
         -v "$PROJECT_ROOT:/workspace" \
-        -v "$HOME/.claude.json:/home/user/.claude.json:ro" \
+        -v "$HOME/.claude.json:/home/user/.claude.json" \
         -v "$HOME/.claude:/home/user/.claude" \
         -e "HOME=/home/user" \
         -e "APM_CONTAINERIZED=true" \
