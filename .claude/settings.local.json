@@ -80,7 +80,8 @@
       "Bash(source:*)",
       "WebFetch(domain:support.anthropic.com)",
       "Bash(./workspace/.local/bin/say-from-container.sh:*)",
-      "Bash(/workspace/.local/bin/say-from-container.sh:*)"
+      "Bash(/workspace/.local/bin/say-from-container.sh:*)",
+      "Bash(git restore:*)"
     ],
     "deny": []
   }

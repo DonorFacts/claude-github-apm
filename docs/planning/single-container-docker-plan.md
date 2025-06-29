@@ -46,11 +46,15 @@ Shutdown:       Container persists until explicitly stopped
 
 ### Phase 1: Core Scripts (Day 1)
 
-#### 1.1 Container Management Script
+#### 1.1 Container Management Script (Complete Implementation)
 **File**: `src/scripts/docker/apm-container.ts`
 
 ```typescript
 #!/usr/bin/env tsx
+
+import { execSync, spawn } from 'child_process';
+import * as path from 'path';
+import * as fs from 'fs';
 
 interface ContainerConfig {
   name: string;
@@ -62,51 +66,178 @@ interface ContainerConfig {
 class ApmContainer {
   private readonly CONTAINER_NAME = 'apm-workspace';
   private readonly IMAGE_NAME = 'apm-claude-container:latest';
+  private readonly DOCKERFILE_PATH = path.join(__dirname, '../../docker/claude-container/Dockerfile');
   private readonly HEALTH_CHECK_INTERVAL = 30; // seconds
   private readonly RESTART_DELAY = 5; // seconds
   
+  async main(): Promise<void> {
+    const command = process.argv[2];
+    const args = process.argv.slice(3);
+    
+    switch (command) {
+      case 'ensure':
+        await this.ensure();
+        break;
+      case 'exec':
+        await this.exec(args);
+        break;
+      case 'start':
+        await this.start();
+        break;
+      case 'stop':
+        await this.stop();
+        break;
+      case 'status':
+        await this.printStatus();
+        break;
+      case 'logs':
+        await this.logs();
+        break;
+      case 'shell':
+        await this.exec(['bash']);
+        break;
+      default:
+        console.error(`Unknown command: ${command}`);
+        console.log('Usage: apm-container.ts [ensure|exec|start|stop|status|logs|shell]');
+        process.exit(1);
+    }
+  }
+  
   async ensure(): Promise<void> {
+    // Check Docker availability first
+    if (!this.isDockerAvailable()) {
+      console.error('❌ Docker not found or not running');
+      console.error('Please install Docker Desktop and ensure it\'s running');
+      process.exit(1);
+    }
+    
+    // Build image if needed
+    await this.ensureImage();
+    
+    // Check container status
     const status = await this.getStatus();
     
     if (status === 'not-found') {
       await this.create();
-    } else if (status === 'stopped' || status === 'unhealthy') {
+    } else if (status === 'stopped') {
+      await this.start();
+    } else if (status === 'unhealthy') {
       await this.restart();
     }
     
     // Verify container is healthy
     await this.waitForHealthy();
-    await this.setupEnvironment();
+  }
+  
+  private async ensureImage(): Promise<void> {
+    // Check if image exists
+    try {
+      execSync(`docker image inspect ${this.IMAGE_NAME}`, { stdio: 'ignore' });
+    } catch {
+      console.log('🔨 Building container image...');
+      execSync(`docker build -t ${this.IMAGE_NAME} ${path.dirname(this.DOCKERFILE_PATH)}`, {
+        stdio: 'inherit'
+      });
+    }
+  }
+  
+  private isDockerAvailable(): boolean {
+    try {
+      execSync('docker info', { stdio: 'ignore' });
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  
+  private findProjectRoot(): string {
+    let current = process.cwd();
+    while (current !== '/') {
+      if (fs.existsSync(path.join(current, 'package.json')) &&
+          fs.existsSync(path.join(current, 'apm'))) {
+        return current;
+      }
+      // Check if we're in a worktree
+      const parent = path.dirname(current);
+      if (path.basename(parent) === 'worktrees') {
+        return path.dirname(parent);
+      }
+      current = parent;
+    }
+    throw new Error('Could not find APM project root');
   }
   
   async create(): Promise<void> {
     const projectRoot = this.findProjectRoot();
+    console.log(`🐳 Creating container with project root: ${projectRoot}`);
     
-    // Create with health check configuration
     const args = [
       'run', '-d',
       '--name', this.CONTAINER_NAME,
-      '--restart', 'unless-stopped',  // Auto-restart policy
+      '--restart', 'unless-stopped',
       '-v', `${projectRoot}:/workspace`,
-      '-v', `${process.env.HOME}/.claude:/root/.claude`,  // Simplified: map to root user
-      '-v', `${process.env.HOME}/.zshrc:/root/.zshrc:ro`,  // Read-only host shell config
+      '-v', `${process.env.HOME}/.claude:/root/.claude`,
+      '-v', `${process.env.HOME}/.zshrc:/root/.zshrc:ro`,
       '--health-cmd', 'pgrep -x bash || exit 1',
       '--health-interval', `${this.HEALTH_CHECK_INTERVAL}s`,
       '--health-timeout', '5s',
       '--health-retries', '3',
       '--health-start-period', '10s',
+      '-e', 'APM_CONTAINERIZED=true',
+      '-e', 'APM_PROJECT_ROOT=/workspace',
       this.IMAGE_NAME,
       'tail', '-f', '/dev/null'  // Keep container running
     ];
     
-    await this.docker(args);
+    execSync(`docker ${args.join(' ')}`, { stdio: 'inherit' });
+    console.log('✅ Container created successfully');
+  }
+  
+  async start(): Promise<void> {
+    console.log('🚀 Starting container...');
+    execSync(`docker start ${this.CONTAINER_NAME}`, { stdio: 'inherit' });
+  }
+  
+  async stop(): Promise<void> {
+    console.log('🛑 Stopping container...');
+    execSync(`docker stop ${this.CONTAINER_NAME}`, { stdio: 'inherit' });
   }
   
   async restart(): Promise<void> {
-    console.log('🔄 Restarting unhealthy container...');
-    await this.docker(['stop', this.CONTAINER_NAME]);
+    console.log('🔄 Restarting container...');
+    await this.stop();
     await this.sleep(this.RESTART_DELAY);
-    await this.docker(['start', this.CONTAINER_NAME]);
+    await this.start();
+  }
+  
+  async getStatus(): Promise<string> {
+    try {
+      const output = execSync(
+        `docker inspect -f '{{.State.Status}}' ${this.CONTAINER_NAME}`,
+        { encoding: 'utf-8' }
+      ).trim();
+      
+      if (output === 'running') {
+        // Check health
+        const health = await this.getHealth();
+        return health === 'healthy' ? 'running' : 'unhealthy';
+      }
+      return output as any;
+    } catch {
+      return 'not-found';
+    }
+  }
+  
+  async getHealth(): Promise<string> {
+    try {
+      const output = execSync(
+        `docker inspect -f '{{.State.Health.Status}}' ${this.CONTAINER_NAME}`,
+        { encoding: 'utf-8' }
+      ).trim();
+      return output;
+    } catch {
+      return 'unknown';
+    }
   }
   
   async waitForHealthy(): Promise<void> {
@@ -114,6 +245,7 @@ class ApmContainer {
     for (let i = 0; i < maxAttempts; i++) {
       const health = await this.getHealth();
       if (health === 'healthy') {
+        console.log('✅ Container is healthy');
         return;
       }
       console.log(`⏳ Waiting for container to be healthy... (${i + 1}/${maxAttempts})`);
@@ -122,62 +254,114 @@ class ApmContainer {
     throw new Error('Container failed to become healthy');
   }
   
-  async getHealth(): Promise<string> {
-    try {
-      const output = await this.docker([
-        'inspect', 
-        '--format', 
-        '{{.State.Health.Status}}',
-        this.CONTAINER_NAME
-      ]);
-      return output.trim();
-    } catch {
-      return 'unknown';
-    }
-  }
-  
   async exec(command: string[]): Promise<void> {
-    // Ensure container is healthy before exec
+    // Ensure container is ready
     await this.ensure();
     
+    // Get working directory
+    const projectRoot = this.findProjectRoot();
+    const relativePath = path.relative(projectRoot, process.cwd());
+    const workDir = path.join('/workspace', relativePath);
+    
+    // Execute command in container
     const args = [
       'exec', '-it',
-      '-w', this.getWorkingDirectory(),
+      '-w', workDir,
       '-e', `APM_AGENT_ROLE=${process.env.APM_AGENT_ROLE || 'developer'}`,
+      '-e', `APM_WORKTREE_NAME=${path.basename(process.cwd())}`,
       this.CONTAINER_NAME,
       ...command
     ];
     
-    await this.dockerExec(args);
+    // Use spawn for interactive commands
+    const docker = spawn('docker', args, {
+      stdio: 'inherit',
+      shell: false
+    });
+    
+    docker.on('exit', (code) => {
+      process.exit(code || 0);
+    });
   }
   
-  private getWorkingDirectory(): string {
-    const projectRoot = this.findProjectRoot();
-    const relativePath = path.relative(projectRoot, process.cwd());
-    return `/workspace/${relativePath}`;
+  async printStatus(): Promise<void> {
+    const status = await this.getStatus();
+    const health = status === 'running' ? await this.getHealth() : 'n/a';
+    
+    console.log(`Container: ${this.CONTAINER_NAME}`);
+    console.log(`Status: ${status}`);
+    console.log(`Health: ${health}`);
+    
+    if (status === 'running') {
+      // Show active sessions (simplified for now)
+      console.log('\nProject root mounted at: /workspace');
+    }
   }
+  
+  async logs(): Promise<void> {
+    execSync(`docker logs -f ${this.CONTAINER_NAME}`, { stdio: 'inherit' });
+  }
+  
+  private sleep(seconds: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+  }
+}
+
+// Run the container manager
+if (require.main === module) {
+  const container = new ApmContainer();
+  container.main().catch(error => {
+    console.error('Error:', error.message);
+    process.exit(1);
+  });
 }
 ```
 
 #### 1.2 Claude Wrapper Enhancement
-**File**: `.local/bin/claude` (updated)
+**File**: `.local/bin/claude` (project root level)
 
 ```bash
 #!/bin/bash
-# Single Container Claude Wrapper
-# Ensures container exists then executes Claude inside it
+# APM Single Container Claude Wrapper
+# This wrapper ensures the shared container exists then executes Claude inside it
+# Place this at project root: ~/www/claude-github-apm/.local/bin/claude
 
 set -e
 
-# Use TypeScript container manager
-PROJECT_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+# Find project root by looking for package.json and apm directory
+find_project_root() {
+  local current="$PWD"
+  while [ "$current" != "/" ]; do
+    if [ -f "$current/package.json" ] && [ -d "$current/apm" ]; then
+      echo "$current"
+      return 0
+    fi
+    # Check if we're in a worktree
+    local parent=$(dirname "$current")
+    if [ "$(basename "$parent")" = "worktrees" ]; then
+      echo "$(dirname "$parent")"
+      return 0
+    fi
+    current="$parent"
+  done
+  echo "Error: Not in an APM project directory" >&2
+  return 1
+}
+
+# Detect project root
+PROJECT_ROOT=$(find_project_root)
+if [ -z "$PROJECT_ROOT" ]; then
+  echo "❌ Could not find APM project root" >&2
+  echo "Make sure you're in an APM project directory" >&2
+  exit 1
+fi
+
 export APM_PROJECT_ROOT="$PROJECT_ROOT"
 
-# Ensure container is running
-"$PROJECT_ROOT/src/scripts/docker/apm-container.ts" ensure
-
-# Execute Claude in container
-exec "$PROJECT_ROOT/src/scripts/docker/apm-container.ts" exec \
+# Use tsx to run the container manager
+# Note: This assumes pnpm/npm is available on host
+cd "$PROJECT_ROOT"
+exec pnpm tsx src/scripts/docker/apm-container.ts exec \
   claude --dangerously-skip-permissions "$@"
 ```
 
@@ -214,31 +398,79 @@ RUN mkdir -p /home/claude/.config/direnv \
     && echo '/workspace' > /home/claude/.config/direnv/allowed
 ```
 
-#### 2.2 Container Initialization Script
-**File**: `src/docker/claude-container/init-workspace.sh`
+#### 2.2 Updated Dockerfile for Single Container
+**File**: `src/docker/claude-container/Dockerfile`
 
-```bash
-#!/bin/bash
-# Container workspace initialization
-# Runs once when container starts
+Key changes needed:
+```dockerfile
+# Add to existing Dockerfile:
 
-# Ensure APM structure exists
-mkdir -p /workspace/apm/{agents,messages,coordination}
+# Health check for container monitoring
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD pgrep -x bash || exit 1
 
-# Set up agent registry
-if [ ! -f /workspace/apm/coordination/agents.json ]; then
-  echo '{"agents":{}}' > /workspace/apm/coordination/agents.json
-fi
+# Ensure PATH includes common workspace locations
+ENV PATH="/workspace/.local/bin:/workspace/node_modules/.bin:${PATH}"
 
-# Initialize message queue
-touch /workspace/apm/messages/queue.jsonl
+# Remove the claude user - we'll run as root for simplicity
+# (Remove lines creating/switching to claude user)
 
-# Start background daemons if needed
-if [ -f /workspace/.local/daemons/message-router.sh ]; then
-  nohup /workspace/.local/daemons/message-router.sh &
-fi
+# Update entrypoint to not auto-run claude
+# The container should just stay alive, claude runs on demand
+ENTRYPOINT ["/bin/bash", "-c", "tail -f /dev/null"]
+```
 
-echo "✅ APM workspace initialized"
+#### 2.3 Complete Updated Dockerfile
+Here's what the complete Dockerfile should look like:
+
+```dockerfile
+FROM node:20-slim
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git curl bash zsh ca-certificates wget gnupg \
+    iptables netbase dnsutils jq sox alsa-utils \
+    && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor > /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
+    && apt-get update \
+    && apt-get install -y gh \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Claude Code globally
+RUN npm install -g @anthropic-ai/claude-code pnpm tsx
+
+# Create workspace directory
+RUN mkdir -p /workspace
+
+# Install direnv
+RUN curl -sfL https://direnv.net/install.sh | bash
+
+# Set up root user shell configuration
+RUN echo 'export HISTSIZE=100000' >> /root/.bashrc \
+    && echo 'export PATH="/workspace/.local/bin:/workspace/node_modules/.bin:$PATH"' >> /root/.bashrc \
+    && echo 'alias python=python3' >> /root/.bashrc \
+    && echo 'alias pip=pip3' >> /root/.bashrc \
+    && echo 'alias e="pnpm tsx"' >> /root/.bashrc \
+    && echo 'alias pn=pnpm' >> /root/.bashrc \
+    && echo 'eval "$(direnv hook bash)"' >> /root/.bashrc
+
+# Copy firewall script if security is needed
+COPY init-firewall.sh /usr/local/bin/init-firewall.sh
+RUN chmod +x /usr/local/bin/init-firewall.sh
+
+# Set environment variables
+ENV APM_CONTAINERIZED=true \
+    APM_PROJECT_ROOT=/workspace \
+    ALLOWED_DOMAINS="api.anthropic.com,github.com,registry.npmjs.org,githubusercontent.com,objects.githubusercontent.com"
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD pgrep -x bash || exit 1
+
+WORKDIR /workspace
+
+# Keep container running
+ENTRYPOINT ["/bin/bash", "-c", "tail -f /dev/null"]
 ```
 
 ### Phase 3: Multi-Agent Support (Day 2)
@@ -374,75 +606,55 @@ class ContainerMonitor {
 ### The Problem
 The Claude Code VS Code extension expects to connect to a local Claude process, but when Claude runs in a container, the extension cannot establish connection. This breaks IDE integration features.
 
-### Implementation Strategy
+### Research Findings
 
-#### Phase 1: Dev Container Approach (Priority)
-Since we're now mounting the entire project root, Dev Containers should work properly:
+#### Dev Container Investigation
+We thoroughly researched using VS Code Dev Containers to solve the extension compatibility issue:
 
-**Benefits of new mounting strategy:**
-- No more `.git` file path issues (entire project mounted)
-- All worktrees accessible from single container
-- Natural path resolution for git operations
-- VS Code and Claude in same environment
+**What we discovered:**
+- Claude Code doesn't run a local server (no port to forward)
+- The VS Code extension spawns `claude` CLI directly
+- Communication likely uses stdin/stdout or IPC, not network
+- No documented cases of extension working in containers
+- Official Anthropic devcontainer is for developing Claude Code, not using it
 
-**Implementation:**
-1. Create `devcontainer.json` at project root
-2. Configure to mount entire project at `/workspace`
-3. Use environment variable to select active worktree
-4. Install Claude Code extension inside container
-5. Full IDE integration preserved
+**Why Dev Containers won't help:**
+- Extension expects `claude` binary in local PATH
+- No network port means no port forwarding solution
+- Dev Container can't bridge process-based communication
+- Would require extension redesign by Anthropic
 
-**devcontainer.json example:**
-```json
-{
-  "name": "APM Claude Workspace",
-  "dockerFile": "src/docker/claude-container/Dockerfile",
-  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
-  "workspaceFolder": "/workspace",
-  "remoteUser": "root",
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "anthropic.claude-code",
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
-      ],
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
-      }
-    }
-  },
-  "postStartCommand": "echo 'Dev Container ready. Use: cd worktrees/${WORKTREE_NAME}'"
-}
+#### Community Approaches
+- **agentapi**: Wraps Claude in HTTP API, but requires custom extension
+- **MCP Servers**: For Claude Desktop, not VS Code extension
+- **Reality**: Everyone uses terminal Claude in containers, not extension
+
+### Our Solution: Terminal-Only Workflow
+
+**Decision**: Accept that VS Code extension won't work with containerized Claude. The security benefits of containerization outweigh the loss of IDE integration.
+
+**Implementation approach:**
+1. Use `pnpm claude` command for all Claude interactions
+2. Keep VS Code for editing, use terminal for Claude
+3. Single shared container for all agents/worktrees
+4. Full security isolation maintained
+
+**User Experience:**
+```bash
+# In VS Code terminal, from any worktree
+cd ~/www/claude-github-apm/worktrees/feature-123
+pnpm claude
+
+# Claude runs in secure container
+# Full --dangerously-skip-permissions safety
+# Natural file paths (/workspace/worktrees/feature-123)
 ```
 
-**Workflow:**
-1. Set `export WORKTREE_NAME=feature-123` in terminal
-2. Open VS Code: `code ~/www/claude-github-apm`
-3. Choose "Reopen in Container"
-4. VS Code runs inside container with full Claude integration
-5. Terminal: `cd worktrees/$WORKTREE_NAME` to work in specific worktree
-
-#### Phase 2: Fallback Options (If Dev Container fails)
-
-**Option A: Terminal-Only Workflow**
-- Use `pnpm claude` in terminal for all interactions
-- Accept loss of IDE integration for security benefits
-- Simplest implementation, guaranteed to work
-
-**Option B: Port Forwarding Investigation**
-- Research Claude's internal communication protocol
-- Expose necessary ports from container
-- Configure extension to connect through forwarded ports
-
-**Option C: MCP Server Bridge**
-- More complex but might provide full integration
-- Requires additional configuration and testing
-
-### Our Revised Recommendation
-1. **Try Dev Container approach first** - High chance of success with new mounting strategy
-2. **Fall back to terminal-only** if Dev Container has issues
-3. **Investigate advanced options** only if critical for workflow
+### Future Possibilities
+If Anthropic adds container support to their extension:
+- Could revisit Dev Container approach
+- Would need extension to support remote development
+- Not available today, not worth waiting for
 
 ---
 
@@ -536,27 +748,53 @@ With project root mounted at `/workspace`, we achieve:
 
 ## Implementation Checklist
 
-### Phase 1: Dev Container Approach
-- [ ] Create `.devcontainer/devcontainer.json` at project root
-- [ ] Update Dockerfile for Dev Container compatibility
-- [ ] Test VS Code "Reopen in Container" with full project mount
-- [ ] Verify Claude Code extension works inside container
-- [ ] Test git operations across worktrees
-- [ ] Document Dev Container workflow
+### Phase 1: Container Management Implementation
+- [ ] Create `src/scripts/docker/apm-container.ts` with TypeScript implementation
+  - Container lifecycle management (create, start, stop, health check)
+  - Auto-restart on unhealthy status
+  - Project root detection and mounting
+  - Health monitoring with 30s intervals
+- [ ] Test container manager script standalone
+- [ ] Add error handling for Docker not installed/running
 
-### Phase 2: Fallback Implementation (if needed)
-- [ ] Create `apm-container.ts` manager script with health checks
-- [ ] Update Dockerfile with PATH setup and HEALTHCHECK directive
-- [ ] Modify `.local/bin/claude` wrapper
-- [ ] Add npm scripts to package.json
-- [ ] Update worktree creation script
-- [ ] Implement container health monitoring
+### Phase 2: Dockerfile Updates
+- [ ] Update `src/docker/claude-container/Dockerfile`:
+  - Add HEALTHCHECK directive
+  - Configure PATH to include `/workspace/.local/bin`
+  - Remove claude user (use root for simplicity)
+  - Update entrypoint for persistent container
+- [ ] Build and test container image
+- [ ] Verify health checks work properly
 
-### Phase 3: Testing & Documentation
-- [ ] Test multi-agent scenarios
+### Phase 3: Integration Scripts
+- [ ] Create new `.local/bin/claude` wrapper:
+  - Detect if in APM project
+  - Call apm-container.ts to ensure container
+  - Execute claude inside container with proper working directory
+- [ ] Add npm scripts to package.json:
+  - `"claude": "tsx src/scripts/docker/apm-container.ts exec claude --dangerously-skip-permissions"`
+  - `"container:start"`, `"container:stop"`, `"container:status"`, etc.
+- [ ] Test `pnpm claude` from various worktrees
+
+### Phase 4: Worktree Updates
+- [ ] Simplify `src/scripts/git/worktree-create.sh`:
+  - Remove per-worktree Docker setup
+  - Create symlink to project-level claude wrapper
+  - Keep .envrc for environment variables only
+- [ ] Test worktree creation with new setup
+
+### Phase 5: Testing & Validation
+- [ ] Test multi-agent scenarios (multiple terminals, same container)
 - [ ] Test container recovery after crashes
-- [ ] Update documentation
-- [ ] Create migration guide
+- [ ] Verify container auto-starts on first `pnpm claude`
+- [ ] Test from different worktrees simultaneously
+- [ ] Measure performance impact
+
+### Phase 6: Documentation
+- [ ] Create migration guide for existing worktrees
+- [ ] Update main README with new workflow
+- [ ] Document troubleshooting steps
+- [ ] Add examples of multi-agent usage
 
 ---
 
@@ -571,3 +809,40 @@ With project root mounted at `/workspace`, we achieve:
 ---
 
 **Result**: Simpler, more efficient architecture that better matches your mental model and requirements.
+
+---
+
+## Implementation Summary for Next Agent
+
+### What We're Building
+A single Docker container shared by all Claude Code instances across all worktrees, providing security isolation while maintaining simple developer UX.
+
+### Key Architecture Decisions
+1. **One container** for entire project (not per-worktree)
+2. **Terminal-only** workflow (VS Code extension incompatible)
+3. **Mount at project root** (`~/www/claude-github-apm` → `/workspace`)
+4. **Auto-start container** on first `pnpm claude` usage
+5. **Health checks** for reliability
+
+### Implementation Order
+1. Create `src/scripts/docker/apm-container.ts` (full code provided above)
+2. Update Dockerfile (remove claude user, add health check, keep container alive)
+3. Create `.local/bin/claude` wrapper at project root
+4. Add npm scripts to package.json
+5. Test with multiple terminals/worktrees
+6. Update worktree creation script to use project-level wrapper
+
+### Critical Details
+- Container name: `apm-workspace`
+- Image name: `apm-claude-container:latest`
+- Working directory mapping: Current dir → `/workspace/[relative-path]`
+- Use `spawn()` not `execSync()` for interactive Claude session
+- Container persists between sessions (use `tail -f /dev/null`)
+
+### Testing Checklist
+- [ ] `pnpm claude` auto-creates container on first use
+- [ ] Multiple terminals can use same container
+- [ ] Correct working directory in each worktree
+- [ ] Container recovers from crashes
+- [ ] Git operations work correctly
+- [ ] File paths are natural (/workspace/worktrees/feature-x)
