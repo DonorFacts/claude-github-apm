@@ -374,39 +374,75 @@ class ContainerMonitor {
 ### The Problem
 The Claude Code VS Code extension expects to connect to a local Claude process, but when Claude runs in a container, the extension cannot establish connection. This breaks IDE integration features.
 
-### Potential Solutions
+### Implementation Strategy
 
-#### Option 1: Dev Container Approach (Recommended)
-- Use VS Code's Dev Container extension to develop inside the container
-- This provides full VS Code functionality within the container environment
-- Extension runs where Claude runs, avoiding connection issues
+#### Phase 1: Dev Container Approach (Priority)
+Since we're now mounting the entire project root, Dev Containers should work properly:
 
-#### Option 2: Port Forwarding
-- Expose Claude's communication port from container to host
-- Configure extension to connect to localhost:port
-- Requires investigation of Claude's internal communication protocol
+**Benefits of new mounting strategy:**
+- No more `.git` file path issues (entire project mounted)
+- All worktrees accessible from single container
+- Natural path resolution for git operations
+- VS Code and Claude in same environment
 
-#### Option 3: MCP Server Bridge
-- Use Model Context Protocol (MCP) to bridge container and host
-- Configure `claude_desktop_config.json` for container connection
-- More complex but provides full integration
+**Implementation:**
+1. Create `devcontainer.json` at project root
+2. Configure to mount entire project at `/workspace`
+3. Use environment variable to select active worktree
+4. Install Claude Code extension inside container
+5. Full IDE integration preserved
 
-#### Option 4: Simplified Workflow
-- Accept that VS Code extension won't work with containerized Claude
+**devcontainer.json example:**
+```json
+{
+  "name": "APM Claude Workspace",
+  "dockerFile": "src/docker/claude-container/Dockerfile",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind",
+  "workspaceFolder": "/workspace",
+  "remoteUser": "root",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "anthropic.claude-code",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "postStartCommand": "echo 'Dev Container ready. Use: cd worktrees/${WORKTREE_NAME}'"
+}
+```
+
+**Workflow:**
+1. Set `export WORKTREE_NAME=feature-123` in terminal
+2. Open VS Code: `code ~/www/claude-github-apm`
+3. Choose "Reopen in Container"
+4. VS Code runs inside container with full Claude integration
+5. Terminal: `cd worktrees/$WORKTREE_NAME` to work in specific worktree
+
+#### Phase 2: Fallback Options (If Dev Container fails)
+
+**Option A: Terminal-Only Workflow**
 - Use `pnpm claude` in terminal for all interactions
-- Trade-off: lose IDE integration for security benefits
+- Accept loss of IDE integration for security benefits
+- Simplest implementation, guaranteed to work
 
-### Our Recommendation
-Start with Option 4 (simplified workflow) for initial implementation. The security benefits of containerization outweigh the loss of IDE integration. Can explore MCP bridge solution later if needed.
+**Option B: Port Forwarding Investigation**
+- Research Claude's internal communication protocol
+- Expose necessary ports from container
+- Configure extension to connect through forwarded ports
 
-### Opening VS Code from Container
-**Not Advisable** - While technically possible with X11 forwarding, it would:
-- Create a nested VS Code instance inside the container
-- Complicate the workflow significantly  
-- Require additional GUI dependencies in container
-- Still not solve the extension connection issue
+**Option C: MCP Server Bridge**
+- More complex but might provide full integration
+- Requires additional configuration and testing
 
-Better to keep VS Code on host and use terminal for Claude interactions.
+### Our Revised Recommendation
+1. **Try Dev Container approach first** - High chance of success with new mounting strategy
+2. **Fall back to terminal-only** if Dev Container has issues
+3. **Investigate advanced options** only if critical for workflow
 
 ---
 
@@ -486,16 +522,37 @@ With project root mounted at `/workspace`, we achieve:
 - **No Path Translation**: `/workspace/worktrees/feature-123` works naturally
 - **Direct Access**: All project files accessible without complex mapping
 
+**Mount Mapping Clarification:**
+```bash
+# Host Path                               → Container Path
+~/www/claude-github-apm                   → /workspace
+~/www/claude-github-apm/main              → /workspace/main  
+~/www/claude-github-apm/worktrees         → /workspace/worktrees
+~/.claude                                 → /root/.claude
+~/.zshrc                                  → /root/.zshrc
+```
+
 ---
 
 ## Implementation Checklist
 
+### Phase 1: Dev Container Approach
+- [ ] Create `.devcontainer/devcontainer.json` at project root
+- [ ] Update Dockerfile for Dev Container compatibility
+- [ ] Test VS Code "Reopen in Container" with full project mount
+- [ ] Verify Claude Code extension works inside container
+- [ ] Test git operations across worktrees
+- [ ] Document Dev Container workflow
+
+### Phase 2: Fallback Implementation (if needed)
 - [ ] Create `apm-container.ts` manager script with health checks
 - [ ] Update Dockerfile with PATH setup and HEALTHCHECK directive
 - [ ] Modify `.local/bin/claude` wrapper
 - [ ] Add npm scripts to package.json
 - [ ] Update worktree creation script
 - [ ] Implement container health monitoring
+
+### Phase 3: Testing & Documentation
 - [ ] Test multi-agent scenarios
 - [ ] Test container recovery after crashes
 - [ ] Update documentation
