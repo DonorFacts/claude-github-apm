@@ -143,8 +143,8 @@ class ApmContainer {
     console.log(`🐳 Creating container with project root: ${projectRoot}`);
     
     // Get current user UID/GID for container
-    const uid = process.getuid();
-    const gid = process.getgid();
+    const uid = process.getuid?.() ?? 1000;
+    const gid = process.getgid?.() ?? 1000;
     
     const cmd = `docker run -d \
       --name ${this.CONTAINER_NAME} \
@@ -164,7 +164,7 @@ class ApmContainer {
       ${this.IMAGE_NAME} \
       tail -f /dev/null`;
     
-    execSync(cmd, { stdio: 'inherit', shell: true });
+    execSync(cmd, { stdio: 'inherit' });
     console.log('✅ Container created successfully');
   }
   
