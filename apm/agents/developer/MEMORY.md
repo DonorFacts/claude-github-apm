@@ -1,6 +1,6 @@
 # Long-Term Memory - Master Developer
 
-Last Updated: 2025-06-29T19:51:00Z
+Last Updated: 2025-06-29T19:45:00Z
 
 ## User Preferences & Patterns
 
@@ -75,6 +75,13 @@ Last Updated: 2025-06-29T19:51:00Z
 - Warning messages during setup provide education without blocking workflow
 - Script-based configuration preferred over verbose prompt instructions
 - "Recommended" vs "Required" language reduces friction while encouraging best practices
+
+### Documentation Patterns
+- Summary sections in README.md with detailed guides in docs/ directory works well
+- `.dev.ext` naming convention provides clear separation of debugging tools from production code
+- Co-location of debugging tools with production code improves discoverability
+- Comprehensive header documentation essential for development tools
+- Context limits require conversation continuity protocols for large documentation work
 
 ### Command System Design
 - Simple exclusion rules (underscore prefix) are more maintainable than complex import analysis
