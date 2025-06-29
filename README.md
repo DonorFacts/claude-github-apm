@@ -342,6 +342,32 @@ pnpm link
 
 TBD
 
+### Container Audio & Speech Notifications
+
+The framework provides two notification methods for Claude Code running in Docker containers:
+
+#### 1. **Notify_Jake** - Sound Notifications
+- **Purpose**: Quick audio feedback when tasks complete
+- **Sound**: Plays the macOS Hero.aiff sound
+- **When to use**: Task completion, build success, test completion
+- **Setup**: Run `./.local/bin/host-sound-daemon.sh` on host
+
+#### 2. **say-from-container.sh** - Speech Synthesis  
+- **Purpose**: Detailed spoken feedback and updates
+- **When to use**: 
+  - Explaining complex errors or results
+  - Providing progress updates on long-running tasks
+  - Delivering important warnings or alerts
+  - Making jokes to lighten the mood 😄
+- **Setup**: Run `./.local/bin/host-speech-daemon.sh` on host
+- **Usage**: `./local/bin/say-from-container.sh "Your message here"`
+
+#### Notification Guidelines
+- Use **Notify_Jake** for simple "done" signals
+- Use **speech** for messages that need attention or contain information
+- Both work seamlessly from within Docker containers while maintaining security
+- Host daemons process notification queues without exposing audio hardware to containers
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

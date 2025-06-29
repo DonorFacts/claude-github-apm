@@ -64,11 +64,11 @@ else
         PROJECT_ROOT="$PWD"
         MAIN_BRANCH_PATH="$PWD"
         WORKTREES_PATH="$PWD"
-    elif [ -d "${PWD}/../main" ]; then
+    elif [ -d "${PWD}/../main/.git" ]; then
         PROJECT_ROOT=$(dirname "$PWD")
         MAIN_BRANCH_PATH="${PROJECT_ROOT}/main"
         WORKTREES_PATH="$PROJECT_ROOT"
-    elif [ -d "${PWD}/../../main" ]; then
+    elif [ -d "${PWD}/../../main/.git" ]; then
         PROJECT_ROOT=$(dirname "$(dirname "$PWD")")
         MAIN_BRANCH_PATH="${PROJECT_ROOT}/main"
         WORKTREES_PATH="$(dirname "$PWD")"
@@ -101,6 +101,23 @@ else
     fi
     if [ -d "${HOME}/.claude" ]; then
         CLAUDE_CONFIG_MOUNT="$CLAUDE_CONFIG_MOUNT -v ${HOME}/.claude:/home/claude/.claude"
+    fi
+    
+    # Mount host shell configuration
+    SHELL_CONFIG_MOUNT=""
+    ZSHRC_PATH="${HOME}/.zshrc"
+    if [ -f "$ZSHRC_PATH" ]; then
+        SHELL_CONFIG_MOUNT="-v ${ZSHRC_PATH}:/home/claude/.host_zshrc:ro"
+        log_debug "✅ Mounted host .zshrc: $ZSHRC_PATH → /home/claude/.host_zshrc"
+    else
+        # Try alternative common locations
+        for alt_path in "${HOME}/.zsh" "/Users/$(whoami)/.zshrc"; do
+            if [ -f "$alt_path" ]; then
+                SHELL_CONFIG_MOUNT="-v ${alt_path}:/home/claude/.host_zshrc:ro"
+                log_debug "✅ Found zshrc at alternative location: $alt_path"
+                break
+            fi
+        done
     fi
     
     # Mount APM memory system
@@ -137,11 +154,13 @@ else
         $MAIN_MOUNT \
         $WORKTREES_MOUNT \
         $CLAUDE_CONFIG_MOUNT \
+        $SHELL_CONFIG_MOUNT \
         $APM_MOUNT \
         -e APM_CONTAINERIZED=true \
         -e APM_SECURITY_LEVEL="$SECURITY_LEVEL" \
         -e APM_DEBUG="$APM_DEBUG" \
         -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+        -e APM_WORKTREE_NAME="$(basename "$PWD")" \
         "$CONTAINER_IMAGE" \
         bash
 fi

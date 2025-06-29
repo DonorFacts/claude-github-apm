@@ -82,12 +82,12 @@ if [ -d "${PWD}/.git" ]; then
     PROJECT_ROOT="$PWD"
     MAIN_BRANCH_PATH="$PWD"
     WORKTREES_PATH="$PWD"
-elif [ -d "${PWD}/../main" ]; then
+elif [ -d "${PWD}/../main/.git" ]; then
     # We're in a worktree, find project root
     PROJECT_ROOT=$(dirname "$PWD")
     MAIN_BRANCH_PATH="${PROJECT_ROOT}/main"
     WORKTREES_PATH="$PROJECT_ROOT"
-elif [ -d "${PWD}/../../main" ]; then
+elif [ -d "${PWD}/../../main/.git" ]; then
     # We're in a nested worktree structure
     PROJECT_ROOT=$(dirname "$(dirname "$PWD")")
     MAIN_BRANCH_PATH="${PROJECT_ROOT}/main"
@@ -132,6 +132,24 @@ fi
 if [ -d "${HOME}/.claude" ]; then
     CLAUDE_CONFIG_MOUNT="$CLAUDE_CONFIG_MOUNT -v ${HOME}/.claude:/home/claude/.claude"
     log_debug "Mounted Claude directory (.claude/)"
+fi
+
+# Mount host shell configuration for developer productivity
+SHELL_CONFIG_MOUNT=""
+# Hardcode Jake's path for now to test mount
+ZSHRC_PATH="/Users/jakedetels/.zshrc"
+log_debug "Checking for zshrc at: $ZSHRC_PATH"
+if [ -f "$ZSHRC_PATH" ]; then
+    SHELL_CONFIG_MOUNT="-v ${ZSHRC_PATH}:/home/claude/.host_zshrc:ro"
+    log_debug "✅ Mounted host .zshrc: $ZSHRC_PATH → /home/claude/.host_zshrc"
+else
+    log_debug "❌ Host .zshrc not found at: $ZSHRC_PATH"
+    # Try HOME-based path as fallback
+    HOME_ZSHRC="${HOME}/.zshrc"
+    if [ -f "$HOME_ZSHRC" ]; then
+        SHELL_CONFIG_MOUNT="-v ${HOME_ZSHRC}:/home/claude/.host_zshrc:ro"
+        log_debug "✅ Found zshrc via HOME: $HOME_ZSHRC"
+    fi
 fi
 
 # Mount APM memory system (essential for agent coordination)
@@ -189,10 +207,12 @@ exec docker run \
     $MAIN_MOUNT \
     $WORKTREES_MOUNT \
     $CLAUDE_CONFIG_MOUNT \
+    $SHELL_CONFIG_MOUNT \
     $APM_MOUNT \
     -e APM_CONTAINERIZED=true \
     -e APM_SECURITY_LEVEL="$SECURITY_LEVEL" \
     -e APM_DEBUG="$APM_DEBUG" \
     -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+    -e APM_WORKTREE_NAME="$(basename "$PWD")" \
     "$CONTAINER_IMAGE" \
     "$@"
