@@ -30,7 +30,13 @@
     "sync:main": "./src/scripts/git/sync-main.sh",
     "container:shell": "./.local/bin/claude-shell",
     "shell": "npm run container:shell",
-    "start": "./src/scripts/watch-all.sh"
+    "start": "./src/scripts/watch-all.sh",
+    "container:start": "tsx src/scripts/docker/apm-container.ts start",
+    "container:stop": "tsx src/scripts/docker/apm-container.ts stop",
+    "container:status": "tsx src/scripts/docker/apm-container.ts status",
+    "container:logs": "docker logs -f apm-workspace",
+    "container:bash": "tsx src/scripts/docker/apm-container.ts shell",
+    "claude": "tsx src/scripts/docker/apm-container.ts exec claude --dangerously-skip-permissions"
   },
   "keywords": [
     "claude",
