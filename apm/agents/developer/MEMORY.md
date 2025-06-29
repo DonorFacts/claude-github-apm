@@ -1,6 +1,6 @@
 # Long-Term Memory - Master Developer
 
-Last Updated: 2025-06-29T03:00:00Z
+Last Updated: 2025-06-29T17:35:00Z
 
 ## User Preferences & Patterns
 
@@ -18,6 +18,8 @@ Last Updated: 2025-06-29T03:00:00Z
 - Uses pnpm exclusively, not npm or yarn (ALWAYS use pnpm, even in examples)
 - Wants exact same notification sounds (Hero.aiff) preserved in containers
 - Appreciates speech notifications for detailed feedback
+- Prefers single shared resources over distributed complexity
+- Values dynamic configuration over hardcoded values (e.g., UIDs)
 
 ### Project-Specific Patterns
 - Git worktrees for feature branches
@@ -83,6 +85,14 @@ Last Updated: 2025-06-29T03:00:00Z
 - Clear documentation for users
 
 ### Docker Container Integration
+- Single-container architecture simpler than multi-container for multi-agent systems
+- TypeScript container management preferred over bash scripts
+- Dynamic user mapping (--user $(id -u):$(id -g)) avoids permission issues
+- Generic home directories (/home/user) work better than hardcoded users
+- Container auto-start on first use improves UX
+- Health checks with graceful retry logic improve reliability
+- Persistent containers (--restart unless-stopped) reduce overhead
+- Project root mounting (/workspace) simplifies path management
 - File-based IPC (queues) simpler and more secure than network approaches
 - Volume mounting at host paths essential for git worktree compatibility  
 - Host daemons can bridge container limitations (audio, native APIs)

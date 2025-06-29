@@ -81,7 +81,19 @@
       "WebFetch(domain:support.anthropic.com)",
       "Bash(./workspace/.local/bin/say-from-container.sh:*)",
       "Bash(/workspace/.local/bin/say-from-container.sh:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "WebFetch(domain:docs.github.com)",
+      "Bash(docker:*)",
+      "Bash(pnpm container:status:*)",
+      "Bash(pnpm tsx:*)",
+      "Bash(./src/scripts/docker/apm-container.ts exec:*)",
+      "Bash(/usr/local/bin/gh:*)",
+      "Bash(command -v:*)",
+      "Bash(brew list:*)",
+      "Bash(/opt/homebrew/bin/gh --help)",
+      "Bash(pnpm container:stop:*)",
+      "Bash(pnpm:*)",
+      "Bash(/opt/homebrew/bin/gh help)"
     ],
     "deny": []
   }
