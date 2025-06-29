@@ -60,3 +60,6 @@ _x_*
 # Runtime files
 .local/sound-queue
 .local/speech-queue
+
+# Local settings
+.claude/settings.local.json
