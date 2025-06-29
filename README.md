@@ -411,81 +411,20 @@ The framework provides two notification methods for Claude Code running in Docke
 
 ## 🛠️ Development Tool Organization
 
-This project follows the **`.dev.ext` convention** for development and debugging tools, providing clear separation from production framework code.
+This project uses the **`.dev.ext` naming convention** for debugging and development tools, providing clear separation from production framework code.
 
-### When to Use `.dev.ext`
+**Quick examples:**
+- `apm-container.dev.ts` - Advanced container management with health monitoring
+- `claude-container` - Simple production wrapper for daily use
 
-Use the `.dev.ext` naming pattern when creating tools that are:
+**When to use `.dev.ext`:**
+- Debugging utilities and diagnostic tools
+- Enhanced versions of existing production tools  
+- Development workflow helpers
 
-- **Debugging utilities** - Tools for investigating issues or system state
-- **Development workflow helpers** - Scripts that aid in development but aren't part of the core framework
-- **Enhanced versions** - Feature-rich alternatives to simpler production tools
-- **Diagnostic tools** - Health checks, status monitoring, detailed logging
+**Alternative patterns:** `.test.ext` (testing), `.config.ext` (configuration), `tools/` (standalone utilities), `scripts/` (build/deployment)
 
-### Examples in This Codebase
-
-```
-src/scripts/docker/apm-container.dev.ts  # Advanced container management
-├── container:status    # Detailed health monitoring  
-├── container:logs      # Log viewing and analysis
-├── container:start     # Manual lifecycle management
-└── container:bash      # Interactive debugging shell
-
-vs.
-
-.local/bin/claude-container  # Simple production wrapper
-└── Just runs Claude in container (fast, minimal)
-```
-
-### Alternative Patterns & When to Use Them
-
-| Pattern | Use Case | Example |
-|---------|----------|---------|
-| `.dev.ext` | Enhanced debugging version of existing tool | `tool.dev.ts` vs `tool.ts` |
-| `.test.ext` | Testing and test utilities | `component.test.ts` |
-| `.config.ext` | Configuration files | `webpack.config.js` |
-| `tools/` directory | Standalone development utilities | `tools/migrate.ts` |
-| `scripts/` directory | Build, deployment, automation | `scripts/build.sh` |
-| `__dev__/` directory | Collections of dev-only files | `__dev__/fixtures/` |
-
-### Decision Framework
-
-**Use `.dev.ext` when:**
-- ✅ Tool enhances or debugs an existing production component
-- ✅ You want co-location with related production code
-- ✅ Tool provides debugging/diagnostic capabilities
-- ✅ It's a developer-facing utility, not end-user functionality
-
-**Use alternative patterns when:**
-- ❌ **Testing**: Use `.test.ext` or `__tests__/`
-- ❌ **Configuration**: Use `.config.ext` 
-- ❌ **Standalone tools**: Use `tools/` or `scripts/` directories
-- ❌ **Build processes**: Use `scripts/` directory
-
-### Agent Guidelines
-
-When creating development tools, agents should:
-
-1. **Assess the tool's purpose**: Is it debugging, testing, configuration, or standalone utility?
-2. **Check for existing patterns**: Follow established conventions in the target directory
-3. **Consider discoverability**: Will developers easily find and understand this tool?
-4. **Document clearly**: Add comprehensive header comments explaining usage and purpose
-
-### Integration with Package Scripts
-
-Development tools integrate cleanly with npm scripts using descriptive grouping:
-
-```json
-{
-  "scripts": {
-    "//container": "=== CONTAINER MANAGEMENT ===",
-    "container:status": "tsx path/to/tool.dev.ts status",
-    "container:logs": "tsx path/to/tool.dev.ts logs"
-  }
-}
-```
-
-This convention creates a clear mental model: **production code for the framework, `.dev.ext` for the developers working on it**.
+**Complete guide:** See [Development Tool Organization](docs/debugging-tools.md) for decision frameworks, agent guidelines, and integration patterns.
 
 ## 📄 License
 
