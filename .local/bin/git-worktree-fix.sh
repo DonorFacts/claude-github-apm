@@ -8,12 +8,12 @@ case "${1:-host}" in
             cp .git.host .git
             echo "✅ Restored host git worktree path"
         else
-            echo "gitdir: ../../main/.git/worktrees/$(basename "$PWD")" > .git
+            echo "gitdir: ../../main/.git/worktrees/feature-draft-git-worktree-docs" > .git
             echo "✅ Set host git worktree path"
         fi
         ;;
     container)
-        echo "gitdir: /workspace-main/.git/worktrees/$(basename "$PWD")" > .git
+        echo "gitdir: /workspace-main/.git/worktrees/${APM_WORKTREE_NAME:-feature-draft-git-worktree-docs}" > .git
         echo "✅ Set container git worktree path"
         ;;
     *)

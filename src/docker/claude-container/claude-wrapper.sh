@@ -105,22 +105,24 @@ log_debug "  Main branch: $MAIN_BRANCH_PATH"
 log_debug "  Worktrees: $WORKTREES_PATH"
 
 # Set up volume mounts for multi-agent collaboration
-WORKSPACE_MOUNT="${PWD}:/workspace"
+# CRITICAL: Mount at same paths as host to preserve git worktree functionality
+WORKSPACE_MOUNT="${PWD}:${PWD}"
 MAIN_MOUNT=""
 WORKTREES_MOUNT=""
 CLAUDE_CONFIG_MOUNT=""
 APM_MOUNT=""
 
-# Mount main branch for cross-team coordination
+# Mount main branch at SAME PATH as host
 if [ -d "$MAIN_BRANCH_PATH" ] && [ "$MAIN_BRANCH_PATH" != "$PWD" ]; then
-    MAIN_MOUNT="-v ${MAIN_BRANCH_PATH}:/workspace-main:rw"
-    log_debug "Mounted main branch for cross-team access"
+    MAIN_MOUNT="-v ${MAIN_BRANCH_PATH}:${MAIN_BRANCH_PATH}:rw"
+    log_debug "Mounted main branch at host path: $MAIN_BRANCH_PATH"
 fi
 
-# Mount all worktrees for multi-agent collaboration
-if [ -d "$WORKTREES_PATH" ] && [ "$WORKTREES_PATH" != "$PWD" ]; then
-    WORKTREES_MOUNT="-v ${WORKTREES_PATH}:/workspace-worktrees:rw"
-    log_debug "Mounted worktrees directory for multi-agent collaboration"
+# Mount parent directory to ensure git worktree paths work
+PARENT_DIR=$(dirname "$PWD")
+if [ -d "$PARENT_DIR" ]; then
+    PARENT_MOUNT="-v ${PARENT_DIR}:${PARENT_DIR}:rw"
+    log_debug "Mounted parent directory for git worktree access: $PARENT_DIR"
 fi
 
 # Mount Claude config files if they exist
@@ -199,13 +201,13 @@ exec docker run \
     --interactive \
     --tty \
     --name "$CONTAINER_NAME" \
-    --workdir /workspace \
+    --workdir "$PWD" \
     $NETWORK_CONFIG \
     $RESOURCE_LIMITS \
     $SECURITY_OPTS \
     -v "$WORKSPACE_MOUNT" \
     $MAIN_MOUNT \
-    $WORKTREES_MOUNT \
+    $PARENT_MOUNT \
     $CLAUDE_CONFIG_MOUNT \
     $SHELL_CONFIG_MOUNT \
     $APM_MOUNT \
