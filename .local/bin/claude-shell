@@ -78,21 +78,22 @@ else
         WORKTREES_PATH="$PWD"
     fi
     
-    # Set up volume mounts
-    WORKSPACE_MOUNT="${PWD}:/workspace"
+    # Set up volume mounts - use host paths to preserve git functionality
+    WORKSPACE_MOUNT="${PWD}:${PWD}"
     MAIN_MOUNT=""
-    WORKTREES_MOUNT=""
+    PARENT_MOUNT=""
     CLAUDE_CONFIG_MOUNT=""
     APM_MOUNT=""
     
-    # Mount main branch
+    # Mount main branch at same path
     if [ -d "$MAIN_BRANCH_PATH" ] && [ "$MAIN_BRANCH_PATH" != "$PWD" ]; then
-        MAIN_MOUNT="-v ${MAIN_BRANCH_PATH}:/workspace-main:rw"
+        MAIN_MOUNT="-v ${MAIN_BRANCH_PATH}:${MAIN_BRANCH_PATH}:rw"
     fi
     
-    # Mount worktrees
-    if [ -d "$WORKTREES_PATH" ] && [ "$WORKTREES_PATH" != "$PWD" ]; then
-        WORKTREES_MOUNT="-v ${WORKTREES_PATH}:/workspace-worktrees:rw"
+    # Mount parent directory for git worktree access
+    PARENT_DIR=$(dirname "$PWD")
+    if [ -d "$PARENT_DIR" ]; then
+        PARENT_MOUNT="-v ${PARENT_DIR}:${PARENT_DIR}:rw"
     fi
     
     # Mount Claude config files
@@ -146,13 +147,13 @@ else
         --interactive \
         --tty \
         --name "$NEW_CONTAINER_NAME" \
-        --workdir /workspace \
+        --workdir "$PWD" \
         $NETWORK_CONFIG \
         $RESOURCE_LIMITS \
         $SECURITY_OPTS \
         -v "$WORKSPACE_MOUNT" \
         $MAIN_MOUNT \
-        $WORKTREES_MOUNT \
+        $PARENT_MOUNT \
         $CLAUDE_CONFIG_MOUNT \
         $SHELL_CONFIG_MOUNT \
         $APM_MOUNT \
