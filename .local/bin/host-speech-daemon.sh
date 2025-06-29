@@ -10,7 +10,6 @@ mkdir -p "$(dirname "$SPEECH_QUEUE")"
 
 echo "🗣️  Host speech daemon started. Waiting for speech requests..."
 echo "   Queue file: $SPEECH_QUEUE"
-echo "   Press Ctrl+C to stop"
 
 # Process speech queue
 while true; do
