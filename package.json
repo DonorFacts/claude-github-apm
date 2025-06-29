@@ -14,29 +14,40 @@
     "src"
   ],
   "scripts": {
+    "//": "=== DEVELOPMENT ===",
     "dev": "echo 'Framework ready for linking'",
-    "link": "pnpm link --global",
-    "unlink": "pnpm unlink --global",
-    "build:prompts": "tsx src/scripts/command-sync/index.ts",
+    "start": "./src/scripts/watch-all.sh",
+    "shell": "npm run container:shell",
+    
+    "//build": "=== BUILD & COMMANDS ===",
     "build": "npm run build:prompts",
+    "build:prompts": "tsx src/scripts/command-sync/index.ts",
     "clean": "rm -rf dist",
+    "watch:commands": "tsx src/scripts/command-sync/index.ts --watch",
+    "sync:commands": "tsx src/scripts/command-sync/index.ts",
+    
+    "//test": "=== TESTING ===",
     "ts-check": "tsc --noEmit",
     "test": "tsc --noEmit && jest --silent",
     "test:verbose": "tsc --noEmit && jest --verbose",
     "test:prod": "tsc --noEmit && APM_TEST_PROD=true jest --silent --runInBand",
     "test:prod:verbose": "tsc --noEmit && APM_TEST_PROD=true jest --verbose --runInBand",
-    "watch:commands": "tsx src/scripts/command-sync/index.ts --watch",
-    "sync:commands": "tsx src/scripts/command-sync/index.ts",
+    
+    "//package": "=== PACKAGE MANAGEMENT ===",
+    "link": "pnpm link --global",
+    "unlink": "pnpm unlink --global",
+    
+    "//git": "=== GIT & SYNC ===",
     "sync:main": "./src/scripts/git/sync-main.sh",
+    
+    "//container": "=== CONTAINER MANAGEMENT ===",
+    "claude": "./.local/bin/claude-container",
     "container:shell": "./.local/bin/claude-shell",
-    "shell": "npm run container:shell",
-    "start": "./src/scripts/watch-all.sh",
     "container:start": "tsx src/scripts/docker/apm-container.dev.ts start",
     "container:stop": "tsx src/scripts/docker/apm-container.dev.ts stop",
     "container:status": "tsx src/scripts/docker/apm-container.dev.ts status",
     "container:logs": "tsx src/scripts/docker/apm-container.dev.ts logs",
-    "container:bash": "tsx src/scripts/docker/apm-container.dev.ts shell",
-    "claude": "./.local/bin/claude-container"
+    "container:bash": "tsx src/scripts/docker/apm-container.dev.ts shell"
   },
   "keywords": [
     "claude",
