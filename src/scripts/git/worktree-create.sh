@@ -2,7 +2,7 @@
 
 # Git Worktree Creation Script
 # Comprehensive worktree creation with automatic issue detection and handover
-# Usage: ./worktree-create.sh [branch-name] [agent-role] [purpose]
+# Usage: ./worktree-create.sh <branch-name> [agent-role] [purpose]
 # Run from main project directory
 
 set -e  # Exit on any error
@@ -14,11 +14,12 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Logging functions
-log_info() { echo -e "${BLUE}ℹ️  $1${NC}"; }
-log_success() { echo -e "${GREEN}✅ $1${NC}"; }
-log_warning() { echo -e "${YELLOW}⚠️  $1${NC}"; }
-log_error() { echo -e "${RED}❌ $1${NC}"; }
+# Logging functions (output to stderr to avoid polluting return values)
+log_info() { echo -e "${BLUE}ℹ️  $1${NC}" >&2; }
+log_success() { echo -e "${GREEN}✅ $1${NC}" >&2; }
+log_warning() { echo -e "${YELLOW}⚠️  $1${NC}" >&2; }
+log_error() { echo -e "${RED}❌ $1${NC}" >&2; }
+
 
 # Function to detect issue number from branch name
 detect_issue_from_branch() {
@@ -68,14 +69,52 @@ get_issue_number() {
         return 0
     fi
     
-    # No issue found - prompt user to create one
-    log_warning "No existing issue found in branch name or arguments"
-    echo ""
-    echo "Please create a GitHub issue first:"
-    echo "gh issue create --title 'Brief description' --body 'Detailed description' --assignee '@me'"
-    echo ""
-    echo "Then run this script again with: $0 $target_branch [issue-number]"
-    exit 1
+    # No issue found - create one automatically
+    log_info "No existing issue found - creating GitHub issue"
+    
+    # Check if gh CLI is available
+    if ! command -v gh >/dev/null 2>&1; then
+        log_error "GitHub CLI (gh) not found. Please install: brew install gh"
+        log_error "Or provide issue number manually: $0 $target_branch [issue-number]"
+        exit 1
+    fi
+    
+    # Create GitHub issue automatically
+    local issue_title="$2"  # Use the purpose as title
+    if [ -z "$issue_title" ]; then
+        issue_title="Feature development for $target_branch"
+    fi
+    
+    log_info "Creating GitHub issue: $issue_title"
+    
+    # Quick check if gh is authenticated
+    if ! gh auth status >/dev/null 2>&1; then
+        log_warning "GitHub CLI not authenticated - skipping issue creation"
+        log_info "Run: gh auth login"
+        echo "manual"
+        return 0
+    fi
+    
+    # Create issue with timeout protection and better error handling
+    local new_issue_number
+    local temp_output=$(mktemp)
+    if timeout 20 gh issue create --title "$issue_title" --body "Automated worktree creation for branch: $1" --assignee "@me" --json number > "$temp_output" 2>&1; then
+        new_issue_number=$(jq -r '.number' < "$temp_output" 2>/dev/null)
+        if [ -n "$new_issue_number" ] && [ "$new_issue_number" != "null" ]; then
+            log_success "Created GitHub issue #$new_issue_number"
+            rm -f "$temp_output"
+            echo "$new_issue_number"
+        else
+            log_warning "GitHub issue created but failed to parse issue number"
+            rm -f "$temp_output"
+            echo "manual"
+        fi
+    else
+        log_warning "GitHub issue creation failed/timed out (20s timeout)"
+        log_info "Create manually: gh issue create --title '$issue_title' --assignee '@me'"
+        rm -f "$temp_output"
+        echo "manual"
+    fi
 }
 
 # Function to create branch and worktree
@@ -90,21 +129,25 @@ create_worktree() {
         log_info "Branch $branch_name already exists, using existing branch"
     else
         log_info "Creating new branch: $branch_name"
-        git checkout -b "$branch_name"
-        git checkout main  # Switch back to main
+        git checkout -b "$branch_name" >/dev/null 2>&1
+        git checkout main >/dev/null 2>&1  # Switch back to main
     fi
     
     # Create worktree
     local worktree_path="../worktrees/$(basename "$branch_name")"
-    log_info "Creating worktree at: $worktree_path"
+    log_info "Setting up worktree at: $worktree_path"
     
     if [ -d "$worktree_path" ]; then
-        log_error "Worktree directory already exists: $worktree_path"
-        exit 1
+        log_info "Worktree directory already exists - updating configuration"
+    else
+        if git worktree add "$worktree_path" "$branch_name" >/dev/null 2>&1; then
+            log_success "Worktree created successfully"
+        else
+            log_error "Failed to create git worktree"
+            log_error "Command failed: git worktree add $worktree_path $branch_name"
+            exit 1
+        fi
     fi
-    
-    git worktree add "$worktree_path" "$branch_name"
-    log_success "Worktree created successfully"
     
     echo "$worktree_path"
 }
@@ -180,6 +223,64 @@ EOF
     echo "$handover_file"
 }
 
+# Function to setup containerized Claude
+setup_containerized_claude() {
+    local worktree_path="$1"
+    
+    log_info "Setting up containerized Claude execution..."
+    
+    # Check if Docker is available
+    if ! command -v docker >/dev/null 2>&1; then
+        log_warning "Docker not found. Claude will run directly on host (less secure)."
+        log_warning "To enable container security, install Docker Desktop."
+        return 0
+    fi
+    
+    # Create local bin directory in worktree
+    local bin_dir="$worktree_path/.local/bin"
+    mkdir -p "$bin_dir"
+    
+    # Create wrapper script that calls our Docker wrapper
+    local claude_wrapper="$bin_dir/claude"
+    local script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    local docker_wrapper="$script_dir/../../docker/claude-container/claude-wrapper.sh"
+    
+    # Verify Docker wrapper exists
+    if [ ! -f "$docker_wrapper" ]; then
+        log_error "Docker wrapper not found at: $docker_wrapper"
+        log_error "Docker containerization setup failed"
+        return 1
+    fi
+    
+    cat > "$claude_wrapper" << EOF
+#!/bin/bash
+# Auto-generated Claude wrapper for containerized execution
+# This script transparently runs Claude in a secure Docker container
+
+# Use absolute path to Docker wrapper (determined at creation time)
+DOCKER_WRAPPER="$docker_wrapper"
+
+if [ -f "\$DOCKER_WRAPPER" ]; then
+    exec "\$DOCKER_WRAPPER" "\$@"
+else
+    # Fallback to system claude if wrapper not found
+    exec claude "\$@"
+fi
+EOF
+    
+    chmod +x "$claude_wrapper"
+    
+    # Create .envrc file to add .local/bin to PATH for this worktree
+    cat > "$worktree_path/.envrc" << 'EOF'
+# APM Worktree Environment
+# Automatically adds .local/bin to PATH for containerized claude
+export PATH="$PWD/.local/bin:$PATH"
+EOF
+    
+    log_success "Containerized Claude configured"
+    log_info "When you run 'claude' in this worktree, it will use secure container execution"
+}
+
 # Function to open VS Code
 open_vscode() {
     local worktree_path="$1"
@@ -201,30 +302,36 @@ show_completion() {
     local issue_number="$2"
     local worktree_path="$3"
     
-    echo ""
-    log_success "Worktree created and VS Code opened!"
-    log_success "GitHub issue #$issue_number is being tracked"
-    echo ""
-    echo "Please switch to the new VS Code window and verify:"
-    echo ""
-    echo "1. Run 'pwd' - you should be in the worktree directory"
-    echo "   (e.g., $worktree_path)"
-    echo ""
-    echo "2. Run 'git branch --show-current' - you should see your feature branch"
-    echo "   (should be: $branch_name)"
-    echo ""
-    echo "3. Check that Claude is running in the terminal"
-    echo ""
-    echo "4. Read the handover file in apm/worktree-handovers/not-started/"
-    echo ""
-    echo "5. If everything looks correct, continue your work there."
-    echo ""
-    echo "🎯 HANDOFF COMPLETE"
-    echo ""
-    echo "┌─────────────────────────────────────────────┐"
-    echo "│  🚫 THIS WINDOW: Framework & project work   │"
-    echo "│  ✅ WORKTREE WINDOW: Feature development    │"
-    echo "└─────────────────────────────────────────────┘"
+    {
+        echo ""
+        log_success "Worktree created and VS Code opened!"
+        log_success "GitHub issue #$issue_number is being tracked"
+        
+        echo ""
+        echo "Please switch to the new VS Code window and verify:"
+        echo ""
+        echo "1. Run 'pwd' - you should be in the worktree directory"
+        echo "   (e.g., $worktree_path)"
+        echo ""
+        echo "2. Run 'git branch --show-current' - you should see your feature branch"
+        echo "   (should be: $branch_name)"
+        echo ""
+        echo "3. Run 'claude' in the terminal (automatically containerized for security)"
+        echo ""
+        echo "4. Read the handover file in apm/worktree-handovers/not-started/"
+        echo ""
+        echo "5. If everything looks correct, continue your work."
+        echo ""
+        echo "🐳 Security: Claude runs in isolated Docker container"
+        echo "💡 Experience: Same terminal UX, enhanced security"
+        echo ""
+        echo "🎯 HANDOFF COMPLETE"
+        echo ""
+        echo "┌─────────────────────────────────────────────┐"
+        echo "│  🚫 THIS WINDOW: Framework & project work   │"
+        echo "│  ✅ WORKTREE WINDOW: Feature development    │"
+        echo "└─────────────────────────────────────────────┘"
+    } >&2
 }
 
 # Main execution
@@ -248,8 +355,13 @@ main() {
     # Execute workflow
     assess_situation
     
-    local issue_number=$(get_issue_number "$branch_name" "$4")
+    local issue_number=$(get_issue_number "$branch_name" "$purpose")
     local worktree_path=$(create_worktree "$branch_name" "$issue_number")
+    
+    if ! setup_containerized_claude "$worktree_path"; then
+        log_error "Docker setup failed - continuing with host execution"
+    fi
+    
     local handover_file=$(create_handover "$branch_name" "$issue_number" "$agent_role" "$purpose" "$worktree_path")
     
     open_vscode "$worktree_path"

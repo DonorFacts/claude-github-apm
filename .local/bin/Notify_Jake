@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Notify_Jake - Task completion notification
+# Plays Hero.aiff sound just like host system
+
+# Check if we're in a container environment
+if [ -f /.dockerenv ] || [ -n "$APM_CONTAINERIZED" ] || [ -n "$REMOTE_CONTAINERS" ]; then
+    # In container: trigger host-side sound playback via queue
+    SOUND_QUEUE="/workspace/.local/sound-queue"
+    echo "play" > "$SOUND_QUEUE"
+    echo "🔔 Task completed by Claude Code!"
+else
+    # On host: use actual afplay command
+    if command -v afplay >/dev/null 2>&1; then
+        afplay /System/Library/Sounds/Hero.aiff
+    else
+        echo "🔔 Task completed! (afplay not available)"
+    fi
+fi

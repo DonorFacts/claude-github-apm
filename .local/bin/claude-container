@@ -1,0 +1,76 @@
+#!/bin/bash
+# Direct container wrapper for Claude Code
+# This avoids tsx/node_modules dependencies
+
+set -e
+
+CONTAINER_NAME="apm-workspace"
+CONTAINER_IMAGE="apm-claude-container:latest"
+
+# Get current directory relative to project root
+WORK_DIR="/workspace"
+if [ -n "$PWD" ]; then
+    # Find project root
+    PROJECT_ROOT="$PWD"
+    while [ "$PROJECT_ROOT" != "/" ]; do
+        if [ -f "$PROJECT_ROOT/package.json" ] && [ -d "$PROJECT_ROOT/apm" ]; then
+            break
+        fi
+        PROJECT_ROOT=$(dirname "$PROJECT_ROOT")
+    done
+    
+    if [ "$PROJECT_ROOT" != "/" ]; then
+        REL_PATH="${PWD#$PROJECT_ROOT}"
+        if [ -n "$REL_PATH" ]; then
+            WORK_DIR="/workspace$REL_PATH"
+        fi
+    fi
+fi
+
+# Check if container exists and is running
+if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+    echo "Starting APM container..."
+    
+    # Ensure container is stopped if it exists
+    docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
+    
+    # Start new container with restricted access
+    docker run -d \
+        --name "$CONTAINER_NAME" \
+        --restart unless-stopped \
+        --user "$(id -u):$(id -g)" \
+        -v "$PROJECT_ROOT:/workspace" \
+        -v "$HOME/.claude.json:/home/user/.claude.json:ro" \
+        -v "$HOME/.claude:/home/user/.claude" \
+        -e "HOME=/home/user" \
+        -e "APM_CONTAINERIZED=true" \
+        -e "GH_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
+        -e "GITHUB_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
+        -e "PATH=/workspace/.local/bin:/workspace/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+        "$CONTAINER_IMAGE"
+    
+    # Wait for container to be ready
+    echo "Waiting for container to be healthy..."
+    for i in {1..20}; do
+        if docker ps --filter "name=$CONTAINER_NAME" --filter "health=healthy" --format '{{.Names}}' | grep -q "$CONTAINER_NAME"; then
+            echo "✅ Container is healthy"
+            break
+        fi
+        sleep 2
+    done
+fi
+
+# Determine if we need interactive mode
+EXEC_FLAGS=""
+if [ -t 0 ] && [ -t 1 ]; then
+    EXEC_FLAGS="-it"
+fi
+
+# Execute Claude in container
+exec docker exec $EXEC_FLAGS \
+    -w "$WORK_DIR" \
+    -e "APM_AGENT_ROLE=${APM_AGENT_ROLE:-developer}" \
+    -e "APM_WORKTREE_NAME=$(basename "$PWD")" \
+    -e "PATH=/workspace/.local/bin:/workspace/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    "$CONTAINER_NAME" \
+    /usr/local/bin/claude --dangerously-skip-permissions "$@"
