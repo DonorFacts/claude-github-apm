@@ -1,6 +1,6 @@
 #!/bin/bash
-# create-handover.sh - Creates handover files in both main and worktree directories
-# This ensures the handover is accessible from both locations
+# create-handover.sh - Creates handover file in worktree agent directory
+# Uses agent-specific directory structure for better organization
 
 set -e
 
@@ -79,20 +79,13 @@ create_handover_content() {
 EOF
 }
 
-# Create directories in both locations
-echo -e "${YELLOW}Creating handover directories...${NC}"
-mkdir -p "${MAIN_DIR}/apm/worktree-handovers/not-started"
-mkdir -p "${WORKTREE_DIR}/apm/worktree-handovers/not-started"
+# Create directory in worktree using agent-specific structure
+echo -e "${YELLOW}Creating handover directory in worktree...${NC}"
+mkdir -p "${WORKTREE_DIR}/apm/agents/${AGENT_ROLE}/not-started"
 
-# Create handover file in main directory
-MAIN_HANDOVER="${MAIN_DIR}/apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
-echo -e "${GREEN}Creating handover in main directory...${NC}"
-create_handover_content > "${MAIN_HANDOVER}"
-echo "✅ Created: ${MAIN_HANDOVER}"
-
-# Create handover file in worktree directory
-WORKTREE_HANDOVER="${WORKTREE_DIR}/apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
-echo -e "${GREEN}Creating handover in worktree directory...${NC}"
+# Create handover file in worktree agent directory
+WORKTREE_HANDOVER="${WORKTREE_DIR}/apm/agents/${AGENT_ROLE}/not-started/${HANDOVER_FILENAME}"
+echo -e "${GREEN}Creating handover in worktree agent directory...${NC}"
 create_handover_content > "${WORKTREE_HANDOVER}"
 echo "✅ Created: ${WORKTREE_HANDOVER}"
 
@@ -123,16 +116,11 @@ fi
 
 cd - > /dev/null
 
-# Create symlink for future reference (optional)
-echo -e "${YELLOW}Creating reference link...${NC}"
-ln -sf "${WORKTREE_HANDOVER}" "${MAIN_DIR}/apm/worktree-handovers/not-started/${HANDOVER_FILENAME}.worktree"
-
 echo
-echo -e "${GREEN}✅ Handover files created successfully!${NC}"
+echo -e "${GREEN}✅ Handover file created successfully!${NC}"
 echo
-echo "The handover file is available in both locations:"
-echo "1. Main directory: apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
-echo "2. Worktree directory: apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
+echo "The handover file is available in the worktree:"
+echo "• Worktree directory: apm/agents/${AGENT_ROLE}/not-started/${HANDOVER_FILENAME}"
 echo
 echo -e "${YELLOW}Next steps:${NC}"
 echo "1. Edit the handover file to add specific details"
