@@ -1,14 +1,35 @@
 # Git Worktrees for Claude Code
 
-## Purpose & Limitation
+## Purpose & Requirements
 
-Claude Code cannot `cd` outside the original working directory. Git worktrees enable branch management by creating separate directories that Claude can reference but not navigate to.
+Git worktrees enable branch management by creating separate directories for feature development with seamless handoffs between Claude agents.
+
+**REQUIREMENT**: Worktree workflows require Claude Code to be running in Docker container mode from the start. This ensures consistent path handling and eliminates host/container path translation issues.
 
 **For users**: See `docs/workflow/worktree-handover.md` for understanding the handover system.
 
-## STOP: Create GitHub Issue First
+## STOP: Validate Container Environment First
 
-Before creating any worktree, ensure you have a GitHub issue to track the work:
+Before creating any worktree, ensure you're running in container mode:
+
+```bash
+# Check if running in container
+if [[ ! "$PWD" =~ ^/workspace ]]; then
+    echo "❌ ERROR: Worktree workflows require Claude Code to be running in Docker container mode"
+    echo "   Current path: $PWD"
+    echo "   Expected: /workspace/..."
+    echo ""
+    echo "   To fix: Start Claude Code with Docker integration from the beginning"
+    echo "   See README.md for container setup instructions"
+    exit 1
+fi
+
+echo "✅ Container environment detected - proceeding with worktree creation"
+```
+
+## STOP: Create GitHub Issue Second
+
+After validating container environment, ensure you have a GitHub issue to track the work:
 
 ```bash
 # Check if working on existing issue
@@ -27,7 +48,7 @@ ISSUE_NUMBER=$(echo "$ISSUE_URL" | grep -o '[0-9]\+$')
 echo "Issue created: #$ISSUE_NUMBER"
 ```
 
-## STOP: Assess Your Situation Second
+## STOP: Assess Your Situation Third
 
 After ensuring you have a GitHub issue, determine your current state:
 
@@ -99,22 +120,20 @@ git checkout main
 git worktree add "../worktrees/$BRANCH_NAME" "$BRANCH_NAME"
 
 # 6. Create handover file for the new Claude instance
-# CRITICAL: The handover file MUST be created in BOTH locations to ensure the new agent can find it
+# The handover file is created ONLY in the worktree directory using agent-specific structure
 # Option A: Use the handover creation script (RECOMMENDED)
-echo "📖 Creating handover file in both locations..."
+echo "📖 Creating handover file in worktree..."
 ./src/scripts/git-worktree/create-handover.sh "$BRANCH_NAME" "developer" "Brief purpose description"
 echo "✅ Handover created! Edit the file to add specific details."
 
 # Option B: Manual creation (if script not available)
 # Read template first: src/prompts/git/worktrees/handover-template.md
-# Then create in BOTH locations:
-mkdir -p apm/worktree-handovers/not-started
-mkdir -p "../worktrees/$BRANCH_NAME/apm/worktree-handovers/not-started"
+# Create in worktree only:
+mkdir -p "../worktrees/$BRANCH_NAME/apm/agents/developer/not-started"
 HANDOVER_FILE="$(date +%Y_%m_%d)-$BRANCH_NAME.md"
 echo "📅 Using current date: $(date +%Y_%m_%d)"
-# Create content in both:
-# - apm/worktree-handovers/not-started/$HANDOVER_FILE  
-# - ../worktrees/$BRANCH_NAME/apm/worktree-handovers/not-started/$HANDOVER_FILE
+# Create content in worktree:
+# - ../worktrees/$BRANCH_NAME/apm/agents/developer/not-started/$HANDOVER_FILE
 # IMPORTANT: Include GitHub issue #$ISSUE_NUMBER reference in the handover file
 
 # 7. Open VS Code and install dependencies
@@ -285,7 +304,7 @@ git worktree prune                                   # Clean stale info
 
 1. **ALWAYS assess situation before acting**
 2. **NEVER move changes you didn't make**
-3. **ALWAYS create handover file IN BOTH LOCATIONS before opening VS Code**
+3. **ALWAYS create handover file in worktree agent directory before opening VS Code**
 4. **SEPARATE changes by authorship independently**
 5. **ENFORCE boundaries after handoff**
 6. **VERIFY handover exists in worktree directory**
@@ -293,14 +312,15 @@ git worktree prune                                   # Clean stale info
 ## Common Handover Issues & Solutions
 
 ### Issue: "Handover file not found in worktree"
-**Cause**: File only created in main directory, not in worktree
+**Cause**: File not created in the correct worktree agent directory
 **Solution**: 
 ```bash
-# Use the script that creates in both locations:
+# Use the script that creates in the worktree:
 ./src/scripts/git-worktree/create-handover.sh "<branch>" "<role>" "<purpose>"
 
-# Or manually copy to worktree:
-cp apm/worktree-handovers/not-started/*.md ../worktrees/<branch>/apm/worktree-handovers/not-started/
+# Or manually create in worktree agent directory:
+mkdir -p ../worktrees/<branch>/apm/agents/<role>/not-started
+# Then create the handover file in that directory
 ```
 
 ## Determining Change Authorship
