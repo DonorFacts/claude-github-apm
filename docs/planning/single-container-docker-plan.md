@@ -88,7 +88,8 @@ class ApmContainer {
       '--name', this.CONTAINER_NAME,
       '--restart', 'unless-stopped',  // Auto-restart policy
       '-v', `${projectRoot}:/workspace`,
-      '-v', `${process.env.HOME}/.claude:/home/claude/.claude`,
+      '-v', `${process.env.HOME}/.claude:/root/.claude`,  // Simplified: map to root user
+      '-v', `${process.env.HOME}/.zshrc:/root/.zshrc:ro`,  // Read-only host shell config
       '--health-cmd', 'pgrep -x bash || exit 1',
       '--health-interval', `${this.HEALTH_CHECK_INTERVAL}s`,
       '--health-timeout', '5s',
@@ -368,6 +369,47 @@ class ContainerMonitor {
 
 ---
 
+## VS Code Extension Compatibility
+
+### The Problem
+The Claude Code VS Code extension expects to connect to a local Claude process, but when Claude runs in a container, the extension cannot establish connection. This breaks IDE integration features.
+
+### Potential Solutions
+
+#### Option 1: Dev Container Approach (Recommended)
+- Use VS Code's Dev Container extension to develop inside the container
+- This provides full VS Code functionality within the container environment
+- Extension runs where Claude runs, avoiding connection issues
+
+#### Option 2: Port Forwarding
+- Expose Claude's communication port from container to host
+- Configure extension to connect to localhost:port
+- Requires investigation of Claude's internal communication protocol
+
+#### Option 3: MCP Server Bridge
+- Use Model Context Protocol (MCP) to bridge container and host
+- Configure `claude_desktop_config.json` for container connection
+- More complex but provides full integration
+
+#### Option 4: Simplified Workflow
+- Accept that VS Code extension won't work with containerized Claude
+- Use `pnpm claude` in terminal for all interactions
+- Trade-off: lose IDE integration for security benefits
+
+### Our Recommendation
+Start with Option 4 (simplified workflow) for initial implementation. The security benefits of containerization outweigh the loss of IDE integration. Can explore MCP bridge solution later if needed.
+
+### Opening VS Code from Container
+**Not Advisable** - While technically possible with X11 forwarding, it would:
+- Create a nested VS Code instance inside the container
+- Complicate the workflow significantly  
+- Require additional GUI dependencies in container
+- Still not solve the extension connection issue
+
+Better to keep VS Code on host and use terminal for Claude interactions.
+
+---
+
 ## Migration Strategy
 
 ### From Multi-Container to Single Container
@@ -436,6 +478,13 @@ class ContainerMonitor {
 - Faster agent startup (no rebuild)
 - Preserves daemon processes
 - Maintains shared state
+
+### Simplified Mount Strategy
+With project root mounted at `/workspace`, we achieve:
+- **Path Consistency**: Container paths match project structure
+- **Simple Mounts**: Just three mounts needed (project, .claude, .zshrc)
+- **No Path Translation**: `/workspace/worktrees/feature-123` works naturally
+- **Direct Access**: All project files accessible without complex mapping
 
 ---
 
