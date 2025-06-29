@@ -29,7 +29,8 @@
     "sync:commands": "tsx src/scripts/command-sync/index.ts",
     "sync:main": "./src/scripts/git/sync-main.sh",
     "container:shell": "./.local/bin/claude-shell",
-    "shell": "npm run container:shell"
+    "shell": "npm run container:shell",
+    "start": "./src/scripts/watch-all.sh"
   },
   "keywords": [
     "claude",

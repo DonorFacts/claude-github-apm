@@ -10,7 +10,6 @@ mkdir -p "$(dirname "$SOUND_QUEUE")"
 
 echo "🎵 Host sound daemon started. Watching for container sound requests..."
 echo "   Queue file: $SOUND_QUEUE"
-echo "   Press Ctrl+C to stop"
 
 # Simple polling loop - check every 0.5 seconds
 while true; do
