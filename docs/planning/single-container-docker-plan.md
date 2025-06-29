@@ -456,14 +456,12 @@ RUN echo 'export HISTSIZE=100000' >> /root/.bashrc \
     && echo 'alias pn=pnpm' >> /root/.bashrc \
     && echo 'eval "$(direnv hook bash)"' >> /root/.bashrc
 
-# Copy firewall script if security is needed
-COPY init-firewall.sh /usr/local/bin/init-firewall.sh
-RUN chmod +x /usr/local/bin/init-firewall.sh
+# Network security through container isolation (no firewall needed)
 
 # Set environment variables
 ENV APM_CONTAINERIZED=true \
     APM_PROJECT_ROOT=/workspace \
-    ALLOWED_DOMAINS="api.anthropic.com,github.com,registry.npmjs.org,githubusercontent.com,objects.githubusercontent.com"
+    PNPM_STORE_DIR=/home/user/.pnpm-store
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \

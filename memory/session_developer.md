@@ -17,7 +17,7 @@ Last Updated: 2025-06-29
    - Parent directory mounted for worktree access
 
 2. **Security Features**:
-   - Network firewall with domain whitelisting
+   - Network isolation through container boundaries
    - Resource limits based on security level
    - Read-only filesystem options for maximum security
    - Container runs with --dangerously-skip-permissions safely isolated
@@ -42,7 +42,7 @@ Last Updated: 2025-06-29
 src/docker/claude-container/
 ├── Dockerfile           # Container image definition
 ├── claude-wrapper.sh    # Transparent execution wrapper
-└── init-firewall.sh     # Network security rules
+└── [network isolation via Docker]
 ```
 
 ### Usage Pattern

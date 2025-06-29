@@ -46,9 +46,7 @@ RUN chmod -R 777 /workspace
 # Create a generic home directory for any user
 RUN mkdir -p /home/user && chmod 777 /home/user
 
-# Copy and configure firewall script
-COPY init-firewall.sh /usr/local/bin/init-firewall.sh
-RUN chmod +x /usr/local/bin/init-firewall.sh
+# No firewall configuration needed - container has full network access
 
 # Add pre-approve direnv for workspace (in a location any user can access)
 RUN mkdir -p /etc/direnv \
@@ -58,7 +56,7 @@ RUN mkdir -p /etc/direnv \
 # Set environment variables
 ENV APM_CONTAINERIZED=true \
     APM_PROJECT_ROOT=/workspace \
-    ALLOWED_DOMAINS="api.anthropic.com,github.com,registry.npmjs.org,githubusercontent.com,objects.githubusercontent.com"
+    PNPM_STORE_DIR=/home/user/.pnpm-store
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \

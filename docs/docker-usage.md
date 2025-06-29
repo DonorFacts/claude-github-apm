@@ -34,10 +34,9 @@
 - Credential and SSH key protection
 
 **Tier 2: Network Security**
-- Configurable network policies (none/restricted/standard)
-- Domain whitelist firewall for restricted mode
-- Default-deny outbound traffic with approved exceptions
-- DNS resolution limited to whitelisted domains
+- Configurable network policies (none/isolated/standard)
+- Container network isolation from host
+- Controlled internet access for development needs
 
 **Tier 3: Multi-Agent Collaboration**
 - Single container shared by all agents and worktrees
@@ -139,7 +138,7 @@ export APM_SECURITY_LEVEL=standard
 
 ```bash
 # Container configuration for restricted security
---network bridge  # Custom network with firewall
+--network bridge  # Isolated network bridge
 --memory=4g --cpus=2.0 --pids-limit=200
 --tmpfs /tmp:rw,size=1g
 ```
@@ -156,24 +155,13 @@ export APM_SECURITY_LEVEL=standard
 --memory=8g --cpus=4.0
 ```
 
-### Network Whitelist Configuration
+### Network Configuration
 
-For `restricted` security level, configure allowed domains:
-
-```bash
-# Environment variable (comma-separated)
-export ALLOWED_DOMAINS="api.anthropic.com,github.com,registry.npmjs.org,your-domain.com"
-
-# Or disable firewall entirely
-export APM_SKIP_FIREWALL=true
-```
-
-**Default Whitelist**:
-- `api.anthropic.com` - Claude API access
-- `github.com` - Git operations, issue management
-- `registry.npmjs.org` - NPM package installations
-- `githubusercontent.com` - GitHub raw content
-- `objects.githubusercontent.com` - GitHub LFS objects
+The `restricted` security level provides isolated networking while maintaining internet access for development needs including:
+- Claude API access
+- Git operations and GitHub integration  
+- NPM package installations
+- Documentation and research
 
 ### Container Mounts
 
@@ -225,7 +213,7 @@ Automatically set in containers for agent coordination:
 - `APM_MAIN_BRANCH_PATH=/workspace-main` - Main branch access path
 - `APM_WORKTREES_PATH=/workspace-worktrees` - All worktrees access path
 - `APM_SECURITY_LEVEL` - Current security configuration
-- `ALLOWED_DOMAINS` - Whitelisted domains for network access
+- `APM_SKIP_RESTRICTIONS` - Bypass additional security restrictions
 
 ## UX Flow
 

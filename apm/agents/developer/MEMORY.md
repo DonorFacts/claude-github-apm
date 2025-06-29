@@ -1,6 +1,6 @@
 # Long-Term Memory - Master Developer
 
-Last Updated: 2025-06-29T17:35:00Z
+Last Updated: 2025-06-29T18:43:56Z
 
 ## User Preferences & Patterns
 
@@ -46,6 +46,7 @@ Last Updated: 2025-06-29T17:35:00Z
 - Don't create documentation unless requested
 - Never modify .git file directly in worktrees (breaks VS Code)
 - Don't assume container paths match host paths
+- Avoid keeping dead code "just in case" - user prefers clean, maintainable code
 
 ### Process Improvements
 - Simplified command classification (underscore-only) is more predictable
@@ -100,11 +101,20 @@ Last Updated: 2025-06-29T17:35:00Z
 - Container-git wrapper pattern useful for path translation issues
 - Authentication via ~/.claude.json mount (not .credentials.json)
 
+### Container Security Model
+- File system isolation more valuable than network restrictions for dev containers
+- Industry consensus: full network access with container boundaries for security
+- Network firewalls in dev containers are "security theater" - provide little real benefit
+- Non-root execution + file restrictions + container isolation is sufficient security model
+- Research-based security decisions preferred over theoretical restrictions
+
 ### Audio/Speech Notifications
 - Jake's Notify_Jake uses Hero.aiff sound - important to preserve exact UX
 - Text-to-speech via say command adds rich feedback capability
 - Separate use cases: Notify_Jake for completion, speech for details
 - Queue files enable async processing without blocking
+- Shell aliases can override scripts - use full paths in CLAUDE.md for reliability
+- Container PATH configuration essential for command execution
 
 ## Command Sync System Insights
 
