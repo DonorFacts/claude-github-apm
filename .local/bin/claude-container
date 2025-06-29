@@ -10,17 +10,38 @@ CONTAINER_IMAGE="apm-claude-container:latest"
 # Get current directory relative to project root
 WORK_DIR="/workspace"
 if [ -n "$PWD" ]; then
-    # Find project root (looks for main/package.json and main/apm structure)
+    # Find project root (prioritize main/worktrees structure)
     PROJECT_ROOT="$PWD"
-    while [ "$PROJECT_ROOT" != "/" ]; do
-        if [ -f "$PROJECT_ROOT/main/package.json" ] && [ -d "$PROJECT_ROOT/main/apm" ]; then
-            break
-        elif [ -f "$PROJECT_ROOT/package.json" ] && [ -d "$PROJECT_ROOT/apm" ]; then
-            # Legacy structure or we're already in main
+    FOUND_ROOT=""
+    
+    # First pass: look for main/worktrees structure with proper validation
+    TEMP_ROOT="$PWD"
+    while [ "$TEMP_ROOT" != "/" ]; do
+        if [ -d "$TEMP_ROOT/main" ] && [ -d "$TEMP_ROOT/worktrees" ] && [ -f "$TEMP_ROOT/main/package.json" ] && [ -d "$TEMP_ROOT/main/apm" ]; then
+            FOUND_ROOT="$TEMP_ROOT"
             break
         fi
-        PROJECT_ROOT=$(dirname "$PROJECT_ROOT")
+        TEMP_ROOT=$(dirname "$TEMP_ROOT")
     done
+    
+    # If not found, second pass: look for other valid structures
+    if [ -z "$FOUND_ROOT" ]; then
+        TEMP_ROOT="$PWD"
+        while [ "$TEMP_ROOT" != "/" ]; do
+            if [ -f "$TEMP_ROOT/main/package.json" ] && [ -d "$TEMP_ROOT/main/apm" ]; then
+                FOUND_ROOT="$TEMP_ROOT"
+                break
+            elif [ -f "$TEMP_ROOT/package.json" ] && [ -d "$TEMP_ROOT/apm" ]; then
+                FOUND_ROOT="$TEMP_ROOT"
+                break
+            fi
+            TEMP_ROOT=$(dirname "$TEMP_ROOT")
+        done
+    fi
+    
+    if [ -n "$FOUND_ROOT" ]; then
+        PROJECT_ROOT="$FOUND_ROOT"
+    fi
     
     if [ "$PROJECT_ROOT" != "/" ]; then
         REL_PATH="${PWD#$PROJECT_ROOT}"
