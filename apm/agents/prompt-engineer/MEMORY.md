@@ -215,6 +215,18 @@ Role: prompt-engineer
 - Mental model consistency (one window = one branch = one conversation) is critical
 - Workflow automation should be invisible to users - complexity belongs in implementation
 
+### Docker Worktree Integration Insights - BREAKTHROUGH ACHIEVED
+
+- **CRITICAL SUCCESS**: Fixed complete Docker integration with git worktrees after systematic debugging
+- **Root Issue**: Git worktrees use relative paths but Docker container working directory calculation was incorrect
+- **Project Structure Challenge**: main/worktrees architecture requires specialized detection logic
+- **Container Persistence**: Long-running containers can have stale mounts requiring recreation
+- **Permission Requirements**: Claude Code needs read-write access to configuration files
+- **Solution Pattern**: Three-part fix: commit wrapper to git, enhance path detection, fix container mounts
+- **Verification Approach**: Systematic testing with debug worktrees and production validation
+- **Documentation Value**: Comprehensive fix documentation prevents future recurrence
+- **User Preference**: Jake values complete solutions (fix + test + document)
+
 ### State Management Clarification
 
 - The `.claude/` directory approach was incorrect for agent state

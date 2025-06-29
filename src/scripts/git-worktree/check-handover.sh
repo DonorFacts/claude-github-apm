@@ -2,39 +2,28 @@
 # Git worktree handover check script
 # Used by Claude Code when VS Code opens a new window
 
-# 1. Handle container vs host path detection
+# 1. Check if we're in a worktree (container environment assumed)
 CURRENT_DIR=$(pwd)
 echo "🔧 Starting in: $CURRENT_DIR"
 
-# Check if we're in a worktree by path pattern (works in both container and host)
-if [[ ! "$CURRENT_DIR" =~ worktrees/ ]]; then
+# Verify we're in container environment
+if [[ ! "$CURRENT_DIR" =~ ^/workspace ]]; then
+    echo "❌ ERROR: Worktree handover requires container environment"
+    echo "   Current path: $CURRENT_DIR"
+    echo "   Expected: /workspace/..."
+    exit 1
+fi
+
+# Check if we're in a worktree by path pattern
+if [[ ! "$CURRENT_DIR" =~ /worktrees/ ]]; then
     # Not a worktree - regular VS Code session
     echo "What would you like to work on?"
     exit 0
 fi
 
-# For container environments, we may not be able to run git commands directly
-# Skip git verification in container mode and rely on path detection
-if [[ "$CURRENT_DIR" =~ ^/workspace ]]; then
-    echo "🐳 Container environment detected - skipping git verification"
-else
-    # Verify git repository exists (host environment only)
-    if ! git status >/dev/null 2>&1; then
-        echo "⚠️  Git repository not found in current directory"
-        echo "   You may need to recreate this worktree"
-        exit 1
-    fi
-fi
-
-# 2. Get branch and look for handover
-if [[ "$CURRENT_DIR" =~ ^/workspace ]]; then
-    # Container environment - extract branch from path
-    BRANCH=$(basename "$CURRENT_DIR")
-    echo "🐳 Detected branch from path: $BRANCH"
-else
-    # Host environment - use git command
-    BRANCH=$(git branch --show-current)
-fi
+# 2. Get branch name from path (container environment)
+BRANCH=$(basename "$CURRENT_DIR")
+echo "🐳 Detected branch from path: $BRANCH"
 
 BRANCH_SAFE=${BRANCH//\//-}  # Convert forward slashes to hyphens for file matching
 

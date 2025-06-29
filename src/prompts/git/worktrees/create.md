@@ -1,14 +1,35 @@
 # Git Worktrees for Claude Code
 
-## Purpose & Limitation
+## Purpose & Requirements
 
-Claude Code cannot `cd` outside the original working directory. Git worktrees enable branch management by creating separate directories that Claude can reference but not navigate to.
+Git worktrees enable branch management by creating separate directories for feature development with seamless handoffs between Claude agents.
+
+**REQUIREMENT**: Worktree workflows require Claude Code to be running in Docker container mode from the start. This ensures consistent path handling and eliminates host/container path translation issues.
 
 **For users**: See `docs/workflow/worktree-handover.md` for understanding the handover system.
 
-## STOP: Create GitHub Issue First
+## STOP: Validate Container Environment First
 
-Before creating any worktree, ensure you have a GitHub issue to track the work:
+Before creating any worktree, ensure you're running in container mode:
+
+```bash
+# Check if running in container
+if [[ ! "$PWD" =~ ^/workspace ]]; then
+    echo "❌ ERROR: Worktree workflows require Claude Code to be running in Docker container mode"
+    echo "   Current path: $PWD"
+    echo "   Expected: /workspace/..."
+    echo ""
+    echo "   To fix: Start Claude Code with Docker integration from the beginning"
+    echo "   See README.md for container setup instructions"
+    exit 1
+fi
+
+echo "✅ Container environment detected - proceeding with worktree creation"
+```
+
+## STOP: Create GitHub Issue Second
+
+After validating container environment, ensure you have a GitHub issue to track the work:
 
 ```bash
 # Check if working on existing issue
@@ -27,7 +48,7 @@ ISSUE_NUMBER=$(echo "$ISSUE_URL" | grep -o '[0-9]\+$')
 echo "Issue created: #$ISSUE_NUMBER"
 ```
 
-## STOP: Assess Your Situation Second
+## STOP: Assess Your Situation Third
 
 After ensuring you have a GitHub issue, determine your current state:
 

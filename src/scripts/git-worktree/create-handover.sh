@@ -1,8 +1,18 @@
 #!/bin/bash
 # create-handover.sh - Creates handover file in worktree agent directory
 # Uses agent-specific directory structure for better organization
+# REQUIRES: Container environment for consistent path handling
 
 set -e
+
+# Validate container environment
+if [[ ! "$PWD" =~ ^/workspace ]]; then
+    echo "❌ ERROR: Handover creation requires container environment"
+    echo "   Current path: $PWD"
+    echo "   Expected: /workspace/..."
+    echo "   Start Claude Code in container mode first"
+    exit 1
+fi
 
 # Colors for output
 GREEN='\033[0;32m'
