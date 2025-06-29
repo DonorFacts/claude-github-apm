@@ -1,6 +1,8 @@
 # Docker Container Security for APM Framework
 
-**Enterprise Security**: Run Claude Code agents in isolated Docker containers with `--dangerously-skip-permissions` safely contained, enabling autonomous multi-agent collaboration while maintaining enterprise-grade security boundaries.
+**Enterprise Security**: Run Claude Code agents in a shared Docker container with `--dangerously-skip-permissions` safely contained, enabling autonomous multi-agent collaboration while maintaining enterprise-grade security boundaries.
+
+**Architecture**: Single persistent container serving all agents and worktrees with automatic lifecycle management.
 
 ## Quick Start
 
@@ -16,9 +18,10 @@
 
 ### Start Containerized Development
 1. VS Code opens worktree automatically
-2. Container environment is configured transparently
-3. Run `claude` in VS Code terminal (automatically containerized)
-4. Same terminal UX with enhanced security underneath
+2. Run `pnpm claude` in VS Code terminal
+3. Container auto-creates on first use (takes ~30 seconds)
+4. Subsequent runs connect instantly to existing container
+5. Same terminal UX with enhanced security underneath
 
 ## Security Architecture
 
@@ -37,10 +40,11 @@
 - DNS resolution limited to whitelisted domains
 
 **Tier 3: Multi-Agent Collaboration**
+- Single container shared by all agents and worktrees
 - Cross-worktree file access for team coordination
 - Shared APM memory system across all agents
 - Main branch visibility for architectural decisions
-- Secure inter-agent communication through filesystem
+- Zero overhead for inter-agent communication
 
 ### Benefits
 
@@ -51,39 +55,50 @@
 - **Configurable Security Levels**: From maximum isolation to standard compatibility
 
 #### Multi-Agent Collaboration
+- **Single Container**: All agents share one persistent container
 - **Cross-Team Access**: Agents can review and coordinate across different worktrees
 - **Shared Memory**: APM agent memory system enables handoffs and knowledge transfer
 - **Architectural Visibility**: All agents can see main branch for architectural context
-- **Concurrent Development**: Multiple agents working safely in parallel
+- **Concurrent Development**: Multiple agents working safely in parallel with zero container overhead
 
 #### Developer Experience
 - **Same VS Code Terminal**: Familiar interface, same keyboard shortcuts
-- **Transparent Execution**: Container runs invisibly behind `claude` command
+- **Transparent Execution**: Container runs invisibly behind `pnpm claude` command
+- **Auto-start**: Container creates itself on first use
 - **Seamless Integration**: No workflow changes required
 - **Agent Memory Persists**: Memory system works identically in containers
+- **Dynamic User**: Runs as your host user, not root
 
 ## How It Works
 
 ### Architecture
 ```
-VS Code (Host)                    Docker Container
-├── Terminal UI                   ├── Claude Code instance
-├── File explorer                 ├── Project files (mounted)
-├── Git integration               ├── APM memory (mounted)
-└── 'claude' command              └── Isolated execution environment
+VS Code (Host)                    Docker Container (Shared)
+├── Terminal UI                   ├── Claude Code instance(s)
+├── File explorer                 ├── Project root (mounted at /workspace)
+├── Git integration               ├── All worktrees accessible
+└── 'pnpm claude' command         ├── APM memory (shared)
+                                  └── Persistent container (apm-workspace)
 ```
 
 ### File Structure
 ```
-worktree/
+claude-github-apm/                # Project root
+├── src/
+│   ├── scripts/
+│   │   └── docker/
+│   │       └── apm-container.ts  # Container management
+│   └── docker/
+│       └── claude-container/
+│           └── Dockerfile        # Container image definition
 ├── .local/
 │   └── bin/
-│       └── claude                # Transparent container wrapper
-├── .envrc                        # Environment setup (adds .local/bin to PATH)
-├── apm/                          # Memory system (mounted)
-│   ├── agents/                   # Agent memory persists
-│   └── setup/
-└── project files                 # Mounted read-write
+│       └── claude                # Project-level wrapper
+├── apm/                          # Memory system (shared)
+│   └── agents/                   # Agent memory persists
+└── worktrees/                    # All worktrees share container
+    └── feature-x/
+        └── .local/bin/claude     # Symlink to project wrapper
 ```
 
 ## Security Configuration
@@ -160,49 +175,46 @@ export APM_SKIP_FIREWALL=true
 - `githubusercontent.com` - GitHub raw content
 - `objects.githubusercontent.com` - GitHub LFS objects
 
-### Multi-Agent Collaboration Mounts
+### Container Mounts
 
-The container automatically detects project structure and mounts:
-
-```bash
-# Current worktree (read-write)
--v "${PWD}:/workspace"
-
-# Main branch access (read-write for coordination)
--v "${PROJECT_ROOT}/main:/workspace-main:rw"
-
-# All worktrees (read-write for multi-agent collaboration)  
--v "${PROJECT_ROOT}/worktrees:/workspace-worktrees:rw"
-
-# Shared APM memory system (read-write)
--v "${PROJECT_ROOT}/apm:/workspace/apm"
-
-# Claude configuration (read-write)
--v "${HOME}/.claude:/home/claude/.claude"
-```
-
-### Container Template
-
-The framework automatically configures a transparent Docker wrapper with full security stack:
+The single container mounts the entire project root:
 
 ```bash
-# Generated claude wrapper in .local/bin/claude
-docker run --rm -it \
-  --name "claude-$(basename "$PWD")-$$" \
-  --workdir /workspace \
-  $NETWORK_CONFIG \           # Based on security level
-  $RESOURCE_LIMITS \          # Based on security level  
-  $SECURITY_OPTS \            # Based on security level
-  -v "${PWD}:/workspace" \
-  -v "${PROJECT_ROOT}/main:/workspace-main:rw" \
-  -v "${PROJECT_ROOT}/worktrees:/workspace-worktrees:rw" \
-  -v "${PROJECT_ROOT}/apm:/workspace/apm" \
-  -v "${HOME}/.claude:/home/claude/.claude" \
-  -e APM_CONTAINERIZED=true \
-  -e APM_SECURITY_LEVEL="$SECURITY_LEVEL" \
-  apm-claude-container:latest \
-  claude --dangerously-skip-permissions "$@"
+# Project root mounted at /workspace
+-v "${PROJECT_ROOT}:/workspace"
+
+# User's Claude configuration
+-v "${HOME}/.claude:/home/user/.claude"
+
+# User's shell configuration (read-only)
+-v "${HOME}/.zshrc:/home/user/.zshrc:ro"
 ```
+
+This provides access to:
+- All worktrees at `/workspace/worktrees/`
+- Main branch at `/workspace/main/`
+- Shared APM memory at `/workspace/apm/`
+- Natural path structure matching host filesystem
+
+### Container Lifecycle
+
+The framework uses TypeScript for container management:
+
+```typescript
+// src/scripts/docker/apm-container.ts handles:
+- Container creation with health checks
+- Automatic start/restart on failures  
+- Dynamic user mapping (runs as host user)
+- Working directory preservation
+- Environment variable passing
+```
+
+Container details:
+- **Name**: `apm-workspace`
+- **Image**: `apm-claude-container:latest`
+- **Policy**: `--restart unless-stopped`
+- **Health**: Monitors every 30 seconds
+- **User**: Runs as your host UID/GID (not root)
 
 ### Environment Variables
 
@@ -220,14 +232,15 @@ Automatically set in containers for agent coordination:
 ### Development Workflow
 1. **Create worktree**: `./src/scripts/git/worktree-create.sh feature-branch developer "Description"`
 2. **VS Code opens**: Automatically opens worktree in new window
-3. **Container setup**: Transparent Docker wrapper configured automatically
-4. **Start Claude**: Run `claude` command (automatically containerized)
-5. **Develop securely**: Same terminal UX with container security underneath
+3. **Start Claude**: Run `pnpm claude` (container auto-creates on first use)
+4. **Develop securely**: Same terminal UX with container security underneath
+5. **Switch worktrees**: Other terminals can use same container concurrently
 
 ### Mental Model
-- **One VS Code window** = One worktree = One transparent container = One Claude conversation
+- **One container** = Entire project (all worktrees share it)
+- **Multiple terminals** = Multiple Claude sessions in same container
 - **No visible containers** - everything appears native
-- **Same UX** with container security invisibly underneath
+- **Persistent state** - container keeps running between sessions
 
 ## Agent Behavior
 
@@ -343,27 +356,27 @@ Existing worktrees with old Docker configurations can be updated:
 - Use minimal container images for reduced attack surface
 - Regularly rebuild containers to get security updates
 
-## Comparison: Before vs. After
+## Comparison: Multi-Container vs. Single-Container
 
-### Before (claude-code-sandbox)
+### Previous Design (Multi-Container)
 ```
-1. Run worktree script with --docker flag
-2. Manually run claude-sandbox command
-3. Switch to web browser at localhost:3456
-4. Use web terminal interface
-5. Lose VS Code integrations
-```
-
-### After (Transparent Docker Containers)
-```
-1. Run worktree script (containers by default)
-2. VS Code opens worktree automatically
-3. Run claude command in terminal
-4. Container runs invisibly behind the scenes
-5. Same VS Code terminal experience
+- One container per worktree
+- Complex path mapping
+- Higher resource usage
+- Container management overhead
+- Difficult inter-agent communication
 ```
 
-**Result**: Enterprise-grade security isolation with zero UX compromise - same familiar VS Code terminal experience with invisible container protection underneath.
+### Current Implementation (Single-Container)
+```
+- One container for entire project
+- Simple /workspace mount
+- Minimal resource usage
+- Auto-start on first use
+- Direct inter-agent file access
+```
+
+**Result**: Simpler architecture with better performance and easier multi-agent collaboration.
 
 ---
 

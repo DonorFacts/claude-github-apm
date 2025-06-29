@@ -21,70 +21,50 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y gh \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Claude Code globally
-RUN npm install -g @anthropic-ai/claude-code
+# Install Claude Code and development tools globally
+RUN npm install -g @anthropic-ai/claude-code pnpm tsx
 
-# Create secure workspace structure for multi-agent collaboration
-RUN mkdir -p /workspace /workspace-main /workspace-worktrees /tmp/claude-workspace \
-    && useradd -m -s /bin/bash claude \
-    && chown claude:claude /workspace /workspace-main /workspace-worktrees /tmp/claude-workspace \
-    && mkdir -p /home/claude \
-    && chown claude:claude /home/claude
+# Create workspace directory structure
+RUN mkdir -p /workspace
 
 # Install direnv for automatic environment loading
 RUN curl -sfL https://direnv.net/install.sh | bash
 
-# Set up shell configuration for claude user
-RUN echo '# Container shell configuration (mirroring Jake'\''s ~/.zshrc)' > /home/claude/.bashrc \
-    && echo 'export HISTSIZE=100000' >> /home/claude/.bashrc \
-    && echo 'export PS1="%~ > "' >> /home/claude/.bashrc \
-    && echo 'alias code="echo \"VS Code not available in container\""' >> /home/claude/.bashrc \
-    && echo 'alias python=python3' >> /home/claude/.bashrc \
-    && echo 'alias pip=pip3' >> /home/claude/.bashrc \
-    && echo 'alias e="pnpm tsx"' >> /home/claude/.bashrc \
-    && echo 'alias pn=pnpm' >> /home/claude/.bashrc \
-    && echo 'eval "$(direnv hook bash)"' >> /home/claude/.bashrc \
-    && echo '' >> /home/claude/.bashrc \
-    && echo '# Source host shell functions (including Notify_Jake) if available' >> /home/claude/.bashrc \
-    && echo 'if [ -f /home/claude/.host_zshrc ]; then' >> /home/claude/.bashrc \
-    && echo '    # Extract and source functions from host zshrc' >> /home/claude/.bashrc \
-    && echo '    source /home/claude/.host_zshrc 2>/dev/null || true' >> /home/claude/.bashrc \
-    && echo 'fi' >> /home/claude/.bashrc \
-    && chown claude:claude /home/claude/.bashrc
+# Don't create a specific user - we'll run as the host user
+# Set up shell configuration that works for any user
+RUN echo 'export HISTSIZE=100000' >> /etc/bash.bashrc \
+    && echo 'export PATH="/workspace/.local/bin:/workspace/node_modules/.bin:$PATH"' >> /etc/bash.bashrc \
+    && echo 'alias python=python3' >> /etc/bash.bashrc \
+    && echo 'alias pip=pip3' >> /etc/bash.bashrc \
+    && echo 'alias e="pnpm tsx"' >> /etc/bash.bashrc \
+    && echo 'alias pn=pnpm' >> /etc/bash.bashrc \
+    && echo 'eval "$(direnv hook bash)"' >> /etc/bash.bashrc
+
+# Make workspace writable by any user
+RUN chmod -R 777 /workspace
+
+# Create a generic home directory for any user
+RUN mkdir -p /home/user && chmod 777 /home/user
 
 # Copy and configure firewall script
 COPY init-firewall.sh /usr/local/bin/init-firewall.sh
 RUN chmod +x /usr/local/bin/init-firewall.sh
 
-# Security: Create entrypoint script
-RUN echo '#!/bin/bash\n\
-set -e\n\
-\n\
-# Initialize firewall if not skipped\n\
-if [ "$APM_SKIP_FIREWALL" != "true" ] && [ "$EUID" -eq 0 ]; then\n\
-    /usr/local/bin/init-firewall.sh\n\
-fi\n\
-\n\
-# No git worktree path fixing needed - using host paths directly\n\
-\n\
-# Switch to claude user if running as root\n\
-if [ "$EUID" -eq 0 ]; then\n\
-    exec su claude -c "claude --dangerously-skip-permissions $*"\n\
-else\n\
-    exec claude --dangerously-skip-permissions "$@"\n\
-fi' > /usr/local/bin/entrypoint.sh \
-    && chmod +x /usr/local/bin/entrypoint.sh
+# Add pre-approve direnv for workspace (in a location any user can access)
+RUN mkdir -p /etc/direnv \
+    && echo '/workspace' > /etc/direnv/allowed \
+    && chmod -R 755 /etc/direnv
 
-# Set environment variables for multi-agent collaboration
+# Set environment variables
 ENV APM_CONTAINERIZED=true \
     APM_PROJECT_ROOT=/workspace \
-    APM_MAIN_BRANCH_PATH=/workspace-main \
-    APM_WORKTREES_PATH=/workspace-worktrees \
     ALLOWED_DOMAINS="api.anthropic.com,github.com,registry.npmjs.org,githubusercontent.com,objects.githubusercontent.com"
 
-# Switch to restricted user for normal operation
-USER claude
+# Add health check
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD test -f /workspace/package.json || exit 1
+
 WORKDIR /workspace
 
-# Use secure entrypoint with firewall initialization
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+# Keep container running
+ENTRYPOINT ["/bin/bash", "-c", "tail -f /dev/null"]

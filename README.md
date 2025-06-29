@@ -43,7 +43,13 @@ Claude GitHub APM is a **multi-agent project management framework** that coordin
 
 ### 🤖 Multi-Agent Architecture
 
-**Enterprise Security**: All agents run in isolated Docker containers with `--dangerously-skip-permissions` safely contained within security boundaries.
+**Enterprise Security**: All agents run in a shared Docker container with `--dangerously-skip-permissions` safely contained within security boundaries.
+
+**Single-Container Architecture**: One persistent container serves all agents and worktrees:
+- Automatic container creation on first `pnpm claude` usage
+- Shared resources reduce overhead and complexity
+- Dynamic user mapping - runs as your host user (not root)
+- Health monitoring with auto-restart capabilities
 
 **Multi-Agent Collaboration**: Agents can coordinate across worktrees with shared access to:
 - Main branch for architectural context
@@ -111,9 +117,7 @@ This enables **organic agent development** where expertise emerges through real 
 - **Docker Desktop** for container security (`docker --version`)
   - Required for safe `--dangerously-skip-permissions` execution
   - Enables multi-agent collaboration with enterprise security
-- **direnv** for automatic environment loading (`brew install direnv`)
-  - Add to shell: `echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc`
-  - Required for transparent Docker container integration
+  - Container auto-starts when you run `pnpm claude`
 
 ### Installation
 
@@ -162,7 +166,27 @@ claude --apm manager init
 # - Agent task assignment
 ```
 
-**Security**: All agents run in isolated Docker containers with `--dangerously-skip-permissions` safely contained.
+**Security**: All agents run in a shared Docker container with `--dangerously-skip-permissions` safely contained.
+
+### Docker Container Management
+
+The APM framework uses a single persistent Docker container for all agents:
+
+```bash
+# Start Claude (container auto-creates if needed)
+pnpm claude
+
+# Container management commands (optional)
+pnpm container:status   # Check if container is running
+pnpm container:stop     # Stop when done for the day
+pnpm container:logs     # Debug any issues
+```
+
+The container:
+- **Auto-starts** when you run `pnpm claude`
+- **Persists** between sessions (restart-unless-stopped policy)
+- **Shares** resources across all agents and worktrees
+- **Maps** your user ID to avoid permission issues
 
 ## 📖 Core Concepts
 
