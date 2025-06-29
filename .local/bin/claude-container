@@ -10,10 +10,13 @@ CONTAINER_IMAGE="apm-claude-container:latest"
 # Get current directory relative to project root
 WORK_DIR="/workspace"
 if [ -n "$PWD" ]; then
-    # Find project root
+    # Find project root (looks for main/package.json and main/apm structure)
     PROJECT_ROOT="$PWD"
     while [ "$PROJECT_ROOT" != "/" ]; do
-        if [ -f "$PROJECT_ROOT/package.json" ] && [ -d "$PROJECT_ROOT/apm" ]; then
+        if [ -f "$PROJECT_ROOT/main/package.json" ] && [ -d "$PROJECT_ROOT/main/apm" ]; then
+            break
+        elif [ -f "$PROJECT_ROOT/package.json" ] && [ -d "$PROJECT_ROOT/apm" ]; then
+            # Legacy structure or we're already in main
             break
         fi
         PROJECT_ROOT=$(dirname "$PROJECT_ROOT")
