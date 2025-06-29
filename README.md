@@ -41,7 +41,17 @@ Claude GitHub APM is a **multi-agent project management framework** that coordin
 - **Project Boards**: Visual progress tracking and sprint management
 - **Extensible**: Architecture supports swapping GitHub for Jira, Linear, etc.
 
-### 🤖 Enhanced Agent Roles
+### 🤖 Multi-Agent Architecture
+
+**Enterprise Security**: All agents run in isolated Docker containers with `--dangerously-skip-permissions` safely contained within security boundaries.
+
+**Multi-Agent Collaboration**: Agents can coordinate across worktrees with shared access to:
+- Main branch for architectural context
+- All worktrees for cross-team coordination  
+- Shared APM memory system for handoffs and knowledge transfer
+- Real-time inter-agent communication through secure filesystem mounts
+
+#### Specialized Agent Roles
 
 Each agent role has specialized capabilities and maintains its own memory:
 
@@ -98,10 +108,33 @@ This enables **organic agent development** where expertise emerges through real 
 - Claude Code installed globally
 - GitHub CLI (`gh`) authenticated
 - Active GitHub repository
+- **Docker Desktop** for container security (`docker --version`)
+  - Required for safe `--dangerously-skip-permissions` execution
+  - Enables multi-agent collaboration with enterprise security
+- **direnv** for automatic environment loading (`brew install direnv`)
+  - Add to shell: `echo 'eval "$(direnv hook zsh)"' >> ~/.zshrc`
+  - Required for transparent Docker container integration
 
 ### Installation
 
 TBD
+
+### Configure Security Level (Optional)
+
+Choose your security posture based on environment:
+
+```bash
+# Development (default) - Full compatibility
+export APM_SECURITY_LEVEL=standard
+
+# Production - Firewall with domain whitelist  
+export APM_SECURITY_LEVEL=restricted
+
+# Maximum Security - No network access
+export APM_SECURITY_LEVEL=maximum
+```
+
+See [Docker Security Guide](docs/docker-usage.md) for detailed configuration.
 
 ### Initialize APM in Your Project
 
@@ -119,7 +152,7 @@ claude-github-apm init
 ### Start Your First APM Session
 
 ```bash
-# Initialize Manager Agent
+# Initialize Manager Agent (automatically containerized)
 claude --apm manager init
 
 # The Manager will guide you through:
@@ -128,6 +161,8 @@ claude --apm manager init
 # - GitHub integration setup
 # - Agent task assignment
 ```
+
+**Security**: All agents run in isolated Docker containers with `--dangerously-skip-permissions` safely contained.
 
 ## 📖 Core Concepts
 
@@ -306,6 +341,32 @@ pnpm link
 ### Project Structure
 
 TBD
+
+### Container Audio & Speech Notifications
+
+The framework provides two notification methods for Claude Code running in Docker containers:
+
+#### 1. **Notify_Jake** - Sound Notifications
+- **Purpose**: Quick audio feedback when tasks complete
+- **Sound**: Plays the macOS Hero.aiff sound
+- **When to use**: Task completion, build success, test completion
+- **Setup**: Run `./.local/bin/host-sound-daemon.sh` on host
+
+#### 2. **say-from-container.sh** - Speech Synthesis  
+- **Purpose**: Detailed spoken feedback and updates
+- **When to use**: 
+  - Explaining complex errors or results
+  - Providing progress updates on long-running tasks
+  - Delivering important warnings or alerts
+  - Making jokes to lighten the mood 😄
+- **Setup**: Run `./.local/bin/host-speech-daemon.sh` on host
+- **Usage**: `./local/bin/say-from-container.sh "Your message here"`
+
+#### Notification Guidelines
+- Use **Notify_Jake** for simple "done" signals
+- Use **speech** for messages that need attention or contain information
+- Both work seamlessly from within Docker containers while maintaining security
+- Host daemons process notification queues without exposing audio hardware to containers
 
 ## 📄 License
 

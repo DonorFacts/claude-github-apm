@@ -1,6 +1,6 @@
 # Long-Term Memory - Master Developer
 
-Last Updated: 2025-01-25T15:42:00Z
+Last Updated: 2025-06-29T00:52:00Z
 
 ## User Preferences & Patterns
 
@@ -16,6 +16,8 @@ Last Updated: 2025-01-25T15:42:00Z
 - Prefers simple, predictable rules over complex analysis
 - Values UX enhancements (like the "-" folder autocomplete discovery)
 - Uses pnpm exclusively, not npm or yarn
+- Wants exact same notification sounds (Hero.aiff) preserved in containers
+- Appreciates speech notifications for detailed feedback
 
 ### Project-Specific Patterns
 - Git worktrees for feature branches
@@ -32,12 +34,16 @@ Last Updated: 2025-01-25T15:42:00Z
 - Run quality checks (lint, typecheck) before completing tasks
 - Update todo list frequently for visibility
 - Use Notify_Jake at end of completed responses
+- Use say-from-container.sh for important updates and explanations
+- Create host-side daemons for container limitations
 
 ### Common Pitfalls
 - Don't over-engineer when simple solutions work
 - Avoid creating files unless absolutely necessary
 - Never commit without explicit user permission
 - Don't create documentation unless requested
+- Never modify .git file directly in worktrees (breaks VS Code)
+- Don't assume container paths match host paths
 
 ### Process Improvements
 - Simplified command classification (underscore-only) is more predictable
@@ -76,6 +82,20 @@ Last Updated: 2025-01-25T15:42:00Z
 - Comprehensive tests for each component
 - Clear documentation for users
 
+### Docker Container Integration
+- File-based IPC (queues) simpler and more secure than network approaches
+- Volume mounting at host paths essential for git worktree compatibility  
+- Host daemons can bridge container limitations (audio, native APIs)
+- Simple polling loops often sufficient (fswatch not always available)
+- Container-git wrapper pattern useful for path translation issues
+- Authentication via ~/.claude.json mount (not .credentials.json)
+
+### Audio/Speech Notifications
+- Jake's Notify_Jake uses Hero.aiff sound - important to preserve exact UX
+- Text-to-speech via say command adds rich feedback capability
+- Separate use cases: Notify_Jake for completion, speech for details
+- Queue files enable async processing without blocking
+
 ## Command Sync System Insights
 
 The command sync system evolved from complex import-based classification to simple underscore-based exclusion. This change came from recognizing that:
@@ -86,3 +106,7 @@ The command sync system evolved from complex import-based classification to simp
 4. Private files can use underscore prefix convention
 
 The "-" folder discovery shows how small UX improvements (autocomplete anywhere in prompt) can significantly enhance the developer experience.
+
+## Docker Git Worktree Insights
+
+Git worktrees require consistent paths between host and container. The standard solution is mounting at host paths rather than container-specific paths like /workspace. This ensures commits are visible on both sides without path translation.

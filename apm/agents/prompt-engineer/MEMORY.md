@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-06-25T12:59:46Z
+Last Updated: 2025-06-28T20:19:00Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -230,3 +230,18 @@ Role: prompt-engineer
 - Batch operations can save 85-95% of tokens
 - Meta-scripts pattern proven effective for token reduction
 - Milestone-only updates for terminal status saves significant tokens
+
+### Docker Integration Success Analysis - BREAKTHROUGH ACHIEVED
+
+- **CRITICAL SUCCESS**: Identified and fixed the actual root cause - git output pollution corrupting VS Code paths
+- **Root Cause**: Git checkout commands were outputting status messages that mixed into worktree directory paths
+- **Working Solution**: Transparent Docker approach with proper script debugging and output redirection
+- **Key Breakthrough**: Git command output (checkout, worktree add) was being captured and mixed into file paths
+- **Technical Fix**: Redirect git command output to prevent path pollution (lines 114-115, 125 in worktree-create.sh)
+- **Result**: VS Code now opens correct directories with all files visible
+- **Docker Status**: Wrapper files created successfully (.local/bin/claude, .envrc), PATH configuration needed
+- **Learning**: **OUTPUT POLLUTION** is a critical failure mode in bash scripts - all commands that output to stdout need redirection
+- **Pattern**: **SYSTEMATIC DEBUGGING WORKS** - Manual testing revealed path corruption that wasn't obvious from script logs
+- **Critical Insight**: Script success messages can be misleading - always verify actual filesystem state
+- **GitHub Issue**: GitHub CLI hanging requires separate investigation - temporarily disabled to unblock progress
+- **Next Phase**: Configure Docker "allow dangerously" mode, restore GitHub issue creation, complete PATH setup

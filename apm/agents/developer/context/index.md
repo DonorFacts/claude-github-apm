@@ -3,18 +3,24 @@
 ## Latest Context
 
 **File**: latest.md  
-**Updated**: 2025-01-25T15:40:00Z  
-**Summary**: Completed command sync system implementation with simplified underscore-based classification and flattened naming convention. Discovered "-" folder for enhanced autocomplete UX.
+**Updated**: 2025-06-29T00:51:00Z  
+**Summary**: Completed Docker audio/speech implementation with host daemons, fixed git worktree issues, cleaned up failed attempts
 
 ## Context History
 
-### 20250125_154000_context.md
+### 20250629_005100_context.md
 
-- **Saved**: 2025-01-25T15:40:00Z
-- **Agent State**: Feature complete, preparing for handover
-- **Primary Focus**: Command sync system with simplified rules
-- **Key Decisions**: 
-  - Simplified to underscore-only exclusion
-  - Flattened naming with hyphens
-  - Discovered "-" folder autocomplete enhancement
-- **Handover**: Yes - for continuation of "-" folder integration
+- **Saved**: 2025-06-29T00:51:00Z
+- **Agent State**: Feature complete - Docker audio/speech working
+- **Primary Focus**: Implemented Notify_Jake + speech synthesis via host daemons
+- **Key Decisions**: File-based IPC, mount at host paths, container-git wrapper
+- **Handover**: No - work completed
+
+### 20250628_163246_context.md
+
+- **Saved**: 2025-06-28T16:32:46Z
+- **Agent State**: Docker containerization work in progress
+- **Primary Focus**: Claude Code container with persistent auth and shell customization
+- **Key Decisions**: Use ~/.claude.json mount for auth, mirror zshrc customizations
+- **Critical Issue**: Notify_Jake visual notification works but no actual sound in containers
+- **Handover**: Yes - to resolve Docker audio/sound device access for Notify_Jake functionality

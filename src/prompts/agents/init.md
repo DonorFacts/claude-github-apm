@@ -32,13 +32,15 @@ fi
 
 **IMMEDIATELY** set the terminal tab title to identify yourself:
 
+**CRITICAL**: Emoji usage is **REQUIRED** for container environments to provide visual distinction between container and host environments. This is a mandatory standard, not optional.
+
 **For Host Environment:**
 
 ```bash
 echo -e "\033]0;[Your Role Name]\007"
 ```
 
-**For Container Environment:**
+**For Container Environment (EMOJI REQUIRED):**
 
 ```bash
 echo -e "\033]0;🐳 [Your Role Name]\007"
@@ -47,21 +49,25 @@ echo -e "\033]0;🐳 [Your Role Name]\007"
 Examples:
 
 - Prompt Engineer (Host): `echo -e "\033]0;Prompt Engineer\007"`
-- Prompt Engineer (Container): `echo -e "\033]0;🐳 Prompt Engineer\007"`
+- Prompt Engineer (Container): `echo -e "\033]0;🐳 Prompt Engineer\007"` **(🐳 REQUIRED)**
 - Developer (Host): `echo -e "\033]0;Developer\007"`
-- Developer (Container): `echo -e "\033]0;🐳 Developer\007"`
+- Developer (Container): `echo -e "\033]0;🐳 Developer\007"` **(🐳 REQUIRED)**
 
-This MUST be done first so users can identify which agent is in which terminal and whether it's containerized.
+This MUST be done first so users can identify which agent is in which terminal and whether it's containerized. The emoji provides critical visual distinction between container and host environments.
 
 **Terminal Title Protocol**:
 
-- When actively working: `echo -e "\033]0;[Container Icon][Abbreviation]: [Brief Status]\007"`
+- When actively working:
+  - **Host**: `echo -e "\033]0;[Abbrev]: [Status]\007"` (e.g., "Dev: Testing")
+  - **Container**: `echo -e "\033]0;🐳 [Abbrev]: [Status]\007"` (e.g., "🐳 Dev: Testing") **(🐳 REQUIRED)**
+  
+  Abbreviations:
   - PE: Prompt Engineer
   - SM: Scrum Master
   - Dev: Developer
   - QA: QA Engineer
-  - Container icon: 🐳 for Docker, none for host
-- When idle/ready: Return to full role name with container indicator
+  
+- When idle/ready: Return to full role name with container indicator (🐳 for container, none for host)
 - Update frequently during complex tasks to show progress
 
 ### 3. Git Workspace Preparation
@@ -239,13 +245,15 @@ When the user requests "save context":
 
 **During Active Work**:
 
-- Update terminal title: `echo -e "\033]0;[Abbrev]: [Status]\007"`
+- Update terminal title:
+  - **Host**: `echo -e "\033]0;[Abbrev]: [Status]\007"`
+  - **Container**: `echo -e "\033]0;🐳 [Abbrev]: [Status]\007"` **(🐳 REQUIRED)**
 - Track activity with `update_activity` function
 - Log milestones and commits to event queue
 
 **When Idle**:
 
-- Terminal returns to full role name
+- Terminal returns to full role name with appropriate container indicator
 - Consider logging idle event after 5+ minutes
 - Be ready to resume or end session
 
@@ -260,7 +268,11 @@ echo '{"event": "session_end", "role": "'$ROLE_ID'", "session_id": "'$SESSION_ID
 jq '(.[-1].ended) = (now|todate)' manifest.jsonl > tmp && mv tmp manifest.jsonl
 
 # Return terminal to role name
-echo -e "\033]0;[Your Role Name]\007"
+if [ "$APM_CONTAINERIZED" = "true" ]; then
+    echo -e "\033]0;🐳 [Your Role Name]\007"  # 🐳 REQUIRED for containers
+else
+    echo -e "\033]0;[Your Role Name]\007"
+fi
 ```
 
 This triggers post-processing of the completed session.
@@ -355,6 +367,26 @@ This ensures seamless continuation without degradation.
 ```
 
 **Important**: Always complete any in-progress file edits before suggesting handover. Never leave files in an inconsistent state.
+
+## Notification System (Container Environment)
+
+When running in Docker containers, agents have access to audio and speech notifications:
+
+### Sound Notifications - Notify_Jake
+- **Purpose**: Quick completion signal (plays Hero.aiff) 
+- **Usage**: Run at the end of completed tasks
+- **When**: Task completion, successful builds, test completion
+
+### Speech Synthesis - say-from-container.sh
+- **Purpose**: Spoken feedback for important information
+- **Usage**: `/workspace/.local/bin/say-from-container.sh "Your message"`
+- **When to use**:
+  - Explaining complex errors or debugging results
+  - Progress updates on long-running operations
+  - Important warnings or alerts
+  - Adding personality (occasional appropriate humor)
+
+**Note**: Both require host daemons running (see README.md for setup).
 
 ## Role Identification
 
