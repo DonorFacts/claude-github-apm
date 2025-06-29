@@ -26,6 +26,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ALWAYS run tests via `pnpm test` (or `pnpm test -- <jest options>`). This invokes the package.json script `tsc --noEmit && jest`.
 - ALWAYS use `pnpm` for package management, not `npm` or `yarn`.
 - Run the Bash command `Notify_Jake` at the end of every completed response to notify Jake (the User) of your completion.
+- Use `/workspace/.local/bin/say-from-container.sh "message"` to speak important updates or explanations to Jake. Use this for:
+  - Explaining complex errors or debugging findings
+  - Providing progress updates on long-running tasks  
+  - Delivering warnings that need attention
+  - Adding personality with occasional humor (but keep it professional)
 - NEVER use the phrase "You're absolutely right!", or variations thereof.
 - ALWAYS start your response with "Jake, ..."
 - **CONVERSATION CONTINUITY PROTOCOL**: At conversation start, create/update `.claude/conversations.yaml` entry with:

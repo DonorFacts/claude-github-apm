@@ -1,0 +1,167 @@
+#!/bin/bash
+
+# Claude Container Shell Access
+# Connects to the running Claude container or creates a new shell session
+
+set -e
+
+# Colors for output
+BLUE='\033[0;34m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+# Logging functions
+log_info() { echo -e "${GREEN}✅ $1${NC}" >&2; }
+log_warn() { echo -e "${YELLOW}⚠️  $1${NC}" >&2; }
+log_error() { echo -e "${RED}❌ $1${NC}" >&2; }
+log_debug() { 
+    if [ "${APM_DEBUG:-}" = "true" ]; then
+        echo -e "${BLUE}🐳 $1${NC}" >&2
+    fi
+}
+
+# Container configuration
+CONTAINER_IMAGE="apm-claude-container:latest"
+CONTAINER_PREFIX="claude-$(basename "$PWD")"
+
+# Check if Docker is available
+if ! command -v docker >/dev/null 2>&1; then
+    log_error "Docker not found. Please install Docker Desktop."
+    exit 1
+fi
+
+# Check if Docker daemon is running
+if ! docker info >/dev/null 2>&1; then
+    log_error "Docker daemon not running. Please start Docker Desktop."
+    exit 1
+fi
+
+# Look for running Claude containers for this worktree
+RUNNING_CONTAINERS=$(docker ps --filter "name=${CONTAINER_PREFIX}" --format "{{.Names}}" 2>/dev/null)
+
+if [ -n "$RUNNING_CONTAINERS" ]; then
+    # Connect to existing container
+    CONTAINER_NAME=$(echo "$RUNNING_CONTAINERS" | head -1)
+    log_info "Connecting to running Claude container: $CONTAINER_NAME"
+    log_debug "Executing: docker exec -it $CONTAINER_NAME bash"
+    exec docker exec -it "$CONTAINER_NAME" bash
+else
+    # No running container found, create a new shell session
+    log_warn "No running Claude container found for this worktree"
+    log_info "Creating new container shell session..."
+    
+    # Use the same configuration as claude-wrapper.sh
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    
+    # Detect project structure (same logic as wrapper)
+    PROJECT_ROOT=""
+    MAIN_BRANCH_PATH=""
+    WORKTREES_PATH=""
+    
+    if [ -d "${PWD}/.git" ]; then
+        PROJECT_ROOT="$PWD"
+        MAIN_BRANCH_PATH="$PWD"
+        WORKTREES_PATH="$PWD"
+    elif [ -d "${PWD}/../main/.git" ]; then
+        PROJECT_ROOT=$(dirname "$PWD")
+        MAIN_BRANCH_PATH="${PROJECT_ROOT}/main"
+        WORKTREES_PATH="$PROJECT_ROOT"
+    elif [ -d "${PWD}/../../main/.git" ]; then
+        PROJECT_ROOT=$(dirname "$(dirname "$PWD")")
+        MAIN_BRANCH_PATH="${PROJECT_ROOT}/main"
+        WORKTREES_PATH="$(dirname "$PWD")"
+    else
+        PROJECT_ROOT="$PWD"
+        MAIN_BRANCH_PATH="$PWD"
+        WORKTREES_PATH="$PWD"
+    fi
+    
+    # Set up volume mounts - use host paths to preserve git functionality
+    WORKSPACE_MOUNT="${PWD}:${PWD}"
+    MAIN_MOUNT=""
+    PARENT_MOUNT=""
+    CLAUDE_CONFIG_MOUNT=""
+    APM_MOUNT=""
+    
+    # Mount main branch at same path
+    if [ -d "$MAIN_BRANCH_PATH" ] && [ "$MAIN_BRANCH_PATH" != "$PWD" ]; then
+        MAIN_MOUNT="-v ${MAIN_BRANCH_PATH}:${MAIN_BRANCH_PATH}:rw"
+    fi
+    
+    # Mount parent directory for git worktree access
+    PARENT_DIR=$(dirname "$PWD")
+    if [ -d "$PARENT_DIR" ]; then
+        PARENT_MOUNT="-v ${PARENT_DIR}:${PARENT_DIR}:rw"
+    fi
+    
+    # Mount Claude config files
+    if [ -f "${HOME}/.claude.json" ]; then
+        CLAUDE_CONFIG_MOUNT="-v ${HOME}/.claude.json:/home/claude/.claude.json"
+    fi
+    if [ -d "${HOME}/.claude" ]; then
+        CLAUDE_CONFIG_MOUNT="$CLAUDE_CONFIG_MOUNT -v ${HOME}/.claude:/home/claude/.claude"
+    fi
+    
+    # Mount host shell configuration
+    SHELL_CONFIG_MOUNT=""
+    ZSHRC_PATH="${HOME}/.zshrc"
+    if [ -f "$ZSHRC_PATH" ]; then
+        SHELL_CONFIG_MOUNT="-v ${ZSHRC_PATH}:/home/claude/.host_zshrc:ro"
+        log_debug "✅ Mounted host .zshrc: $ZSHRC_PATH → /home/claude/.host_zshrc"
+    else
+        # Try alternative common locations
+        for alt_path in "${HOME}/.zsh" "/Users/$(whoami)/.zshrc"; do
+            if [ -f "$alt_path" ]; then
+                SHELL_CONFIG_MOUNT="-v ${alt_path}:/home/claude/.host_zshrc:ro"
+                log_debug "✅ Found zshrc at alternative location: $alt_path"
+                break
+            fi
+        done
+    fi
+    
+    # Mount APM memory system
+    if [ -d "${PROJECT_ROOT}/apm" ]; then
+        APM_MOUNT="-v ${PROJECT_ROOT}/apm:/workspace/apm"
+    elif [ -d "apm" ]; then
+        APM_MOUNT="-v ${PWD}/apm:/workspace/apm"
+    fi
+    
+    # Security configuration (use standard for shell access)
+    SECURITY_LEVEL="${APM_SECURITY_LEVEL:-standard}"
+    NETWORK_CONFIG="--network host"
+    RESOURCE_LIMITS="--memory=8g --cpus=4.0"
+    SECURITY_OPTS=""
+    
+    # Create new container name
+    NEW_CONTAINER_NAME="${CONTAINER_PREFIX}-shell-$$"
+    
+    log_debug "Creating container: $NEW_CONTAINER_NAME"
+    log_debug "Workspace: $PWD"
+    log_debug "Security level: $SECURITY_LEVEL"
+    
+    # Run new container with shell
+    exec docker run \
+        --rm \
+        --interactive \
+        --tty \
+        --name "$NEW_CONTAINER_NAME" \
+        --workdir "$PWD" \
+        $NETWORK_CONFIG \
+        $RESOURCE_LIMITS \
+        $SECURITY_OPTS \
+        -v "$WORKSPACE_MOUNT" \
+        $MAIN_MOUNT \
+        $PARENT_MOUNT \
+        $CLAUDE_CONFIG_MOUNT \
+        $SHELL_CONFIG_MOUNT \
+        $APM_MOUNT \
+        -e APM_CONTAINERIZED=true \
+        -e APM_SECURITY_LEVEL="$SECURITY_LEVEL" \
+        -e APM_DEBUG="$APM_DEBUG" \
+        -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+        -e APM_WORKTREE_NAME="$(basename "$PWD")" \
+        "$CONTAINER_IMAGE" \
+        bash
+fi
