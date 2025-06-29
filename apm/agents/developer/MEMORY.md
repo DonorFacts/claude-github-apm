@@ -1,6 +1,6 @@
 # Long-Term Memory - Master Developer
 
-Last Updated: 2025-06-29T00:52:00Z
+Last Updated: 2025-06-29T03:00:00Z
 
 ## User Preferences & Patterns
 
@@ -15,7 +15,7 @@ Last Updated: 2025-06-29T00:52:00Z
 - TDD is mandatory for all new functionality
 - Prefers simple, predictable rules over complex analysis
 - Values UX enhancements (like the "-" folder autocomplete discovery)
-- Uses pnpm exclusively, not npm or yarn
+- Uses pnpm exclusively, not npm or yarn (ALWAYS use pnpm, even in examples)
 - Wants exact same notification sounds (Hero.aiff) preserved in containers
 - Appreciates speech notifications for detailed feedback
 
@@ -110,3 +110,9 @@ The "-" folder discovery shows how small UX improvements (autocomplete anywhere 
 ## Docker Git Worktree Insights
 
 Git worktrees require consistent paths between host and container. The standard solution is mounting at host paths rather than container-specific paths like /workspace. This ensures commits are visible on both sides without path translation.
+
+### Git Branch Management
+- Branch names should match worktree directory names for clarity
+- Previous work on different branches can cause confusion (e.g., test-docker-setup work in feature-draft-git-worktree-docs directory)
+- Full merges preserve development history better than cherry-picks
+- Runtime files (queues, local settings) should always be gitignored
