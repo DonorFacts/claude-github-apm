@@ -356,6 +356,26 @@ This ensures seamless continuation without degradation.
 
 **Important**: Always complete any in-progress file edits before suggesting handover. Never leave files in an inconsistent state.
 
+## Notification System (Container Environment)
+
+When running in Docker containers, agents have access to audio and speech notifications:
+
+### Sound Notifications - Notify_Jake
+- **Purpose**: Quick completion signal (plays Hero.aiff) 
+- **Usage**: Run at the end of completed tasks
+- **When**: Task completion, successful builds, test completion
+
+### Speech Synthesis - say-from-container.sh
+- **Purpose**: Spoken feedback for important information
+- **Usage**: `/workspace/.local/bin/say-from-container.sh "Your message"`
+- **When to use**:
+  - Explaining complex errors or debugging results
+  - Progress updates on long-running operations
+  - Important warnings or alerts
+  - Adding personality (occasional appropriate humor)
+
+**Note**: Both require host daemons running (see README.md for setup).
+
 ## Role Identification
 
 **IMPORTANT**: If your role ID is not clear from the initialization prompt, ask the user:

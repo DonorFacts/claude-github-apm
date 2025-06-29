@@ -44,6 +44,12 @@ RUN echo '# Container shell configuration (mirroring Jake'\''s ~/.zshrc)' > /hom
     && echo 'alias e="pnpm tsx"' >> /home/claude/.bashrc \
     && echo 'alias pn=pnpm' >> /home/claude/.bashrc \
     && echo 'eval "$(direnv hook bash)"' >> /home/claude/.bashrc \
+    && echo '' >> /home/claude/.bashrc \
+    && echo '# Source host shell functions (including Notify_Jake) if available' >> /home/claude/.bashrc \
+    && echo 'if [ -f /home/claude/.host_zshrc ]; then' >> /home/claude/.bashrc \
+    && echo '    # Extract and source functions from host zshrc' >> /home/claude/.bashrc \
+    && echo '    source /home/claude/.host_zshrc 2>/dev/null || true' >> /home/claude/.bashrc \
+    && echo 'fi' >> /home/claude/.bashrc \
     && chown claude:claude /home/claude/.bashrc
 
 # Copy and configure firewall script
@@ -57,6 +63,18 @@ set -e\n\
 # Initialize firewall if not skipped\n\
 if [ "$APM_SKIP_FIREWALL" != "true" ] && [ "$EUID" -eq 0 ]; then\n\
     /usr/local/bin/init-firewall.sh\n\
+fi\n\
+\n\
+# Fix git worktree paths for container environment\n\
+if [ -f "/workspace/.git" ] && [ -d "/workspace-main" ]; then\n\
+    # Check if .git file points to host path\n\
+    if grep -q "/Users/" "/workspace/.git" 2>/dev/null; then\n\
+        # Extract worktree name from current path or environment\n\
+        WORKTREE_NAME="${APM_WORKTREE_NAME:-$(basename "/workspace")}" \n\
+        # Update .git file to point to container path\n\
+        echo "gitdir: /workspace-main/.git/worktrees/$WORKTREE_NAME" > /workspace/.git\n\
+        echo "Fixed git worktree path for container environment: $WORKTREE_NAME" >&2\n\
+    fi\n\
 fi\n\
 \n\
 # Switch to claude user if running as root\n\
