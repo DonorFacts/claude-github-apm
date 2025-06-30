@@ -6,6 +6,8 @@ Git worktrees enable branch management by creating separate directories for feat
 
 **REQUIREMENT**: Worktree workflows require Claude Code to be running in Docker container mode from the start. This ensures consistent path handling and eliminates host/container path translation issues.
 
+**AUTOMATIC PATH FIX**: Our worktree creation scripts automatically convert absolute paths in `.git` files to relative paths, ensuring worktrees work seamlessly in both container and host environments. No manual intervention required.
+
 **For users**: See `docs/workflow/worktree-handover.md` for understanding the handover system.
 
 ## STOP: Validate Container Environment First

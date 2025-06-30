@@ -103,6 +103,27 @@ echo "✅ Created: ${WORKTREE_HANDOVER}"
 echo -e "${YELLOW}Configuring git credentials in worktree...${NC}"
 cd "${WORKTREE_DIR}"
 
+# Fix .git file to use relative paths (container/host compatibility)
+echo -e "${YELLOW}Fixing .git file for container/host compatibility...${NC}"
+if [[ -f ".git" ]]; then
+    # Read current gitdir path
+    CURRENT_GITDIR=$(cat .git | sed 's/gitdir: //')
+    
+    # Convert absolute path to relative path
+    # From: /workspace/main/.git/worktrees/branch-name
+    # To:   ../../main/.git/worktrees/branch-name
+    if [[ "$CURRENT_GITDIR" =~ ^/workspace/main/.git/worktrees/ ]]; then
+        BRANCH_PART=$(echo "$CURRENT_GITDIR" | sed 's|^/workspace/main/.git/worktrees/||')
+        RELATIVE_GITDIR="../../main/.git/worktrees/${BRANCH_PART}"
+        echo "gitdir: $RELATIVE_GITDIR" > .git
+        echo "✅ Fixed .git file to use relative path"
+    else
+        echo "⚠️  .git file already uses relative path or unexpected format"
+    fi
+else
+    echo "⚠️  No .git file found in worktree"
+fi
+
 # Check if bot token is available
 if [ -n "${GITHUB_BOT_TOKEN:-}" ]; then
     git config --local user.name "Bot"
