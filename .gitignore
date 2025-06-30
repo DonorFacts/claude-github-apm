@@ -61,6 +61,8 @@ _x_*
 # Runtime files
 .local/sound-queue
 .local/speech-queue
+.local/vscode-queue
+.local/vscode-response
 
 # Local settings
 .claude/settings.local.json
