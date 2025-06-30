@@ -14,6 +14,8 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[0;33m'
+MAGENTA='\033[0;35m'
+CYAN='\033[0;36m'
 NC='\033[0m' # No Color
 
 # Function to prefix output with process name and color
@@ -38,24 +40,14 @@ trap cleanup EXIT INT TERM
 
 echo -e "${YELLOW}[WATCH-ALL]${NC} Starting concurrent watch processes..."
 
-# Start host sound daemon with prefixed output (if it exists)
-if [ -f "$PROJECT_ROOT/.local/bin/host-sound-daemon.sh" ]; then
-    echo -e "${YELLOW}[WATCH-ALL]${NC} Starting sound daemon..."
-    "$PROJECT_ROOT/.local/bin/host-sound-daemon.sh" 2>&1 | prefix_output "SOUND" "$RED" &
-    SOUND_PID=$!
+# Start unified host-bridge daemon with prefixed output (if it exists)
+if [ -f "$PROJECT_ROOT/.local/bin/host-bridge-daemon.sh" ]; then
+    echo -e "${YELLOW}[WATCH-ALL]${NC} Starting unified host-bridge daemon (VS Code, audio, speech)..."
+    "$PROJECT_ROOT/.local/bin/host-bridge-daemon.sh" 2>&1 | prefix_output "HOST-BRIDGE" "$MAGENTA" &
+    BRIDGE_PID=$!
 else
-    echo -e "${YELLOW}[WATCH-ALL]${NC} Sound daemon not found (Docker-only feature)"
-    SOUND_PID=""
-fi
-
-# Start host speech daemon with prefixed output (if it exists)
-if [ -f "$PROJECT_ROOT/.local/bin/host-speech-daemon.sh" ]; then
-    echo -e "${YELLOW}[WATCH-ALL]${NC} Starting speech daemon..."
-    "$PROJECT_ROOT/.local/bin/host-speech-daemon.sh" 2>&1 | prefix_output "SPEECH" "$GREEN" &
-    SPEECH_PID=$!
-else
-    echo -e "${YELLOW}[WATCH-ALL]${NC} Speech daemon not found (Docker-only feature)"
-    SPEECH_PID=""
+    echo -e "${YELLOW}[WATCH-ALL]${NC} Host-bridge daemon not found (Docker-only feature)"
+    BRIDGE_PID=""
 fi
 
 # Start command sync watcher with prefixed output
@@ -71,9 +63,8 @@ COMMANDS_PID=$!
 
 echo -e "${YELLOW}[WATCH-ALL]${NC} All processes started successfully."
 echo -e "${YELLOW}[WATCH-ALL]${NC} Process PIDs:"
-[ -n "$SOUND_PID" ] && echo -e "  ${RED}[SOUND]${NC}    PID: $SOUND_PID"
-[ -n "$SPEECH_PID" ] && echo -e "  ${GREEN}[SPEECH]${NC}   PID: $SPEECH_PID"
-echo -e "  ${BLUE}[COMMANDS]${NC} PID: $COMMANDS_PID"
+[ -n "$BRIDGE_PID" ] && echo -e "  ${MAGENTA}[HOST-BRIDGE]${NC} PID: $BRIDGE_PID"
+echo -e "  ${BLUE}[COMMANDS]${NC}    PID: $COMMANDS_PID"
 echo -e "${YELLOW}[WATCH-ALL]${NC} Press Ctrl+C to stop all processes."
 
 # Wait for all background processes

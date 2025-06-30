@@ -58,7 +58,13 @@ _x_*
 # # Claude Commands
 # .claude/commands/
 
-# Runtime files
+# Host-Bridge runtime files
+.local/host-bridge/requests/
+.local/host-bridge/responses/
+.local/host-bridge/logs/
+.local/host-bridge/config/daemon.pid
+
+# Legacy runtime files (to be removed)
 .local/sound-queue
 .local/speech-queue
 .local/vscode-queue
