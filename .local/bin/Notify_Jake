@@ -1,19 +1,28 @@
-#!/bin/bash
+#!/usr/bin/env tsx
 
-# Notify_Jake - Task completion notification
-# Plays Hero.aiff sound just like host system
+/**
+ * Notify_Jake - Task completion notification
+ * Updated to use unified host-bridge system
+ */
 
-# Check if we're in a container environment
-if [ -f /.dockerenv ] || [ -n "$APM_CONTAINERIZED" ] || [ -n "$REMOTE_CONTAINERS" ]; then
-    # In container: trigger host-side sound playback via queue
-    SOUND_QUEUE="/workspace/.local/sound-queue"
-    echo "play" > "$SOUND_QUEUE"
-    echo "🔔 Task completed by Claude Code!"
-else
-    # On host: use actual afplay command
-    if command -v afplay >/dev/null 2>&1; then
-        afplay /System/Library/Sounds/Hero.aiff
-    else
-        echo "🔔 Task completed! (afplay not available)"
-    fi
-fi
+import { hostBridge } from '../../src/tools/host-bridge/index.js';
+
+async function notifyJake() {
+  try {
+    // Play notification sound via host-bridge
+    const success = await hostBridge.audio_play('Hero.aiff');
+    
+    if (success) {
+      console.log('🔔 Task completed by Claude Code!');
+    } else {
+      console.log('🔔 Task completed! (audio notification may have failed)');
+      console.log('💡 Ensure host-bridge daemon is running: npm start');
+    }
+  } catch (error) {
+    console.log('🔔 Task completed by Claude Code!');
+    console.error('⚠️  Audio notification failed:', error.message);
+    console.log('💡 Ensure host-bridge daemon is running: npm start');
+  }
+}
+
+notifyJake();
