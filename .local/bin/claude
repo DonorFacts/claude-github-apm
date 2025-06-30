@@ -4,6 +4,13 @@
 
 set -e
 
+# Load shared environment loader
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/../lib/env-loader.sh"
+
+# Load environment automatically
+load_project_env
+
 # PID file for tracking watch processes
 WATCH_PID_FILE="/tmp/apm-watch-processes.pid"
 
@@ -24,7 +31,8 @@ if [ -n "$PWD" ]; then
             FOUND_ROOT="$TEMP_ROOT"
             break
         fi
-        TEMP_ROOT=$(dirname "$TEMP_ROOT")
+        TEMP_ROOT="${TEMP_ROOT%/*}"
+        [ "$TEMP_ROOT" = "" ] && TEMP_ROOT="/"
     done
     
     # If not found, second pass: look for other valid structures
@@ -38,7 +46,8 @@ if [ -n "$PWD" ]; then
                 FOUND_ROOT="$TEMP_ROOT"
                 break
             fi
-            TEMP_ROOT=$(dirname "$TEMP_ROOT")
+            TEMP_ROOT="${TEMP_ROOT%/*}"
+        [ "$TEMP_ROOT" = "" ] && TEMP_ROOT="/"
         done
     fi
     
@@ -94,7 +103,9 @@ if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         -v "$HOME/.claude.json:/home/user/.claude.json" \
         -v "$HOME/.claude:/home/user/.claude" \
         -e "HOME=/home/user" \
-        -e "APM_CONTAINERIZED=true" \
+        -e "APM_CONTAINERIZED=${APM_CONTAINERIZED:-true}" \
+        -e "APM_SECURITY_LEVEL=${APM_SECURITY_LEVEL:-standard}" \
+        -e "APM_DEBUG=${APM_DEBUG:-false}" \
         -e "GH_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
         -e "GITHUB_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
         -e "PATH=/workspace/.local/bin:/workspace/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
