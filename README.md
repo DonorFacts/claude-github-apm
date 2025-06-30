@@ -387,27 +387,43 @@ TBD
 
 The framework provides two notification methods for Claude Code running in Docker containers:
 
-#### 1. **Notify_Jake** - Sound Notifications
-- **Purpose**: Quick audio feedback when tasks complete
-- **Sound**: Plays the macOS Hero.aiff sound
-- **When to use**: Task completion, build success, test completion
-- **Setup**: Run `./.local/bin/host-sound-daemon.sh` on host
+#### Host-Bridge Communication System
 
-#### 2. **say-from-container.sh** - Speech Synthesis  
-- **Purpose**: Detailed spoken feedback and updates
-- **When to use**: 
-  - Explaining complex errors or results
-  - Providing progress updates on long-running tasks
-  - Delivering important warnings or alerts
-  - Making jokes to lighten the mood 😄
-- **Setup**: Run `./.local/bin/host-speech-daemon.sh` on host
-- **Usage**: `./local/bin/say-from-container.sh "Your message here"`
+The framework uses a unified host-bridge system for container-host communication:
+
+- **VS Code Integration**: Open folders/files on host from container
+- **Audio Notifications**: Play system sounds for task completion
+- **Speech Synthesis**: Text-to-speech for detailed feedback and updates
+- **Type-Safe API**: Full TypeScript client with async/await support
+
+#### Setup
+```bash
+# Start the unified daemon (handles all services)
+npm start
+
+# Test the system
+pnpm test:bridge
+```
+
+#### Usage from Container
+```typescript
+import { hostBridge } from 'src/tools/host-bridge';
+
+// Open VS Code windows
+await hostBridge.vscode_open('/workspace/main/docs');
+
+// Play notification sounds
+await hostBridge.audio_play('Hero.aiff');
+
+// Text-to-speech
+await hostBridge.speech_say('Task completed successfully!');
+```
 
 #### Notification Guidelines
-- Use **Notify_Jake** for simple "done" signals
+- Use **audio** for simple "done" signals
 - Use **speech** for messages that need attention or contain information
-- Both work seamlessly from within Docker containers while maintaining security
-- Host daemons process notification queues without exposing audio hardware to containers
+- Use **VS Code** for opening relevant files/folders during development
+- All services work seamlessly from within Docker containers while maintaining security
 
 ## 🛠️ Development Tool Organization
 
