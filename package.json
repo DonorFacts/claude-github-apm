@@ -51,7 +51,8 @@
     
     "//host-bridge": "=== HOST-BRIDGE SYSTEM ===",
     "test:bridge": "tsx src/tools/host-bridge/test-bridge.ts",
-    "notify": "tsx .local/bin/Notify_Jake"
+    "notify": "tsx .local/bin/Notify_Jake",
+    "speak": "tsx src/tools/host-bridge/speech-helper.ts"
   },
   "keywords": [
     "claude",
