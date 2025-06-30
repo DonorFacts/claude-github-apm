@@ -21,29 +21,16 @@ async function openWorktreeInVSCode(worktreePath: string): Promise<void> {
   }
   
   // Install dependencies using cwd to work around Claude's cd limitation
-  // Use --force to ensure multi-platform binaries are installed correctly
   console.log(`📦 Installing dependencies...`);
   try {
-    execSync('pnpm install --force', { 
+    execSync('pnpm install', { 
       stdio: 'inherit',
       cwd: worktreePath
     });
     console.log(`✅ Dependencies installed`);
   } catch (error) {
     console.error(`⚠️  Failed to install dependencies: ${(error as Error).message}`);
-    console.log(`💡 Trying fallback installation without force flag...`);
-    
-    try {
-      execSync('pnpm install', { 
-        stdio: 'inherit',
-        cwd: worktreePath
-      });
-      console.log(`✅ Dependencies installed (fallback)`);
-    } catch (fallbackError) {
-      console.error(`⚠️  Both installation attempts failed`);
-      console.log(`💡 You may need to run 'pnpm install' manually in the worktree`);
-      console.log(`💡 Or try: 'rm -rf node_modules && pnpm install' in the worktree`);
-    }
+    console.log(`💡 You may need to run 'pnpm install' manually in the worktree`);
   }
   
   // Open VS Code via host-bridge
