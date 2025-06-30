@@ -1,0 +1,21 @@
+{
+  "vscode": {
+    "enabled": true,
+    "command": "code",
+    "timeout": 10000,
+    "path_translation": true,
+    "description": "Open VS Code windows on host"
+  },
+  "audio": {
+    "enabled": true,
+    "sounds_dir": "/System/Library/Sounds",
+    "timeout": 5000,
+    "description": "Play notification sounds"
+  },
+  "speech": {
+    "enabled": true,
+    "voice": "system",
+    "timeout": 30000,
+    "description": "Text-to-speech synthesis"
+  }
+}

@@ -47,7 +47,11 @@
     "container:stop": "tsx src/scripts/docker/apm-container.dev.ts stop",
     "container:status": "tsx src/scripts/docker/apm-container.dev.ts status",
     "container:logs": "tsx src/scripts/docker/apm-container.dev.ts logs",
-    "container:bash": "tsx src/scripts/docker/apm-container.dev.ts shell"
+    "container:bash": "tsx src/scripts/docker/apm-container.dev.ts shell",
+    
+    "//host-bridge": "=== HOST-BRIDGE SYSTEM ===",
+    "test:bridge": "tsx src/tools/host-bridge/test-bridge.ts",
+    "notify": "tsx .local/bin/Notify_Jake_v2"
   },
   "keywords": [
     "claude",
