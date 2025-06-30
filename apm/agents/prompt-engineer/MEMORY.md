@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-06-28T20:19:00Z
+Last Updated: 2025-06-30T21:50:12Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -8,6 +8,10 @@ Role: prompt-engineer
 
 ### Communication Style
 
+- **Direct and challenging**: Jake questions assumptions and demands evidence-based reasoning (e.g., challenging MacBook Pro limitations claim)
+- **Practical focus**: Prefers concrete, implementable solutions over theoretical discussions
+- **Efficiency-oriented**: Values token optimization and cost-effective approaches
+- **Research appreciation**: Respects thorough research but wants actionable outcomes
 - Jake prefers concise, action-oriented responses
 - Values clear distinction between user docs and agent prompts
 - Wants to see work before commits for review
@@ -17,6 +21,10 @@ Role: prompt-engineer
 
 ### Technical Preferences
 
+- **Local-first architecture**: Strong preference for solutions that don't require cloud dependencies
+- **Multi-instance workflow**: Already successfully runs 3+ VS Code windows with 9-12 concurrent Claude Code instances
+- **Git-native approaches**: Prefers solutions that integrate with existing git workflow
+- **MacBook Pro optimization**: Uses high-end MacBook Pro effectively for demanding workloads
 - Git commits should happen ONLY at the START of agent's NEXT response after user message
 - User needs time to review changes BEFORE they are committed
 - Process: Agent makes changes → User reviews → User sends message → Agent commits FIRST, then continues
@@ -24,6 +32,10 @@ Role: prompt-engineer
 
 ### Project-Specific Patterns
 
+- **APM framework focus**: All solutions must integrate with existing APM agent memory system
+- **Documentation-driven development**: Comprehensive specifications required before implementation
+- **Phase-based delivery**: Prefers incremental delivery with clear phase boundaries
+- **Slack integration priority**: Strong interest in bidirectional Slack communication for agent oversight
 - Agent prompts go in src/prompts/ and must be agent-directed only
 - User documentation belongs in README.md and docs/
 - File structure: apm/agents/<role-id>/ for agent-specific content
@@ -32,12 +44,19 @@ Role: prompt-engineer
 
 ### Effective Approaches
 
+- **Research-backed design**: Deep research into latest patterns (CrewAI, AutoGPT, GitHub Copilot 2025) leads to better architecture
+- **Evidence-based assumptions**: Always verify performance assumptions with actual data
+- **Architecture documentation**: Comprehensive specifications (94KB) enable smooth implementation handoffs
+- **Iterative refinement**: Initial cloud-focused approach refined to local coordination enhancement
 - Create focused, single-purpose prompts
 - Keep agent instructions action-oriented
 - Separate concerns clearly (agent vs user content)
 
 ### Common Pitfalls
 
+- **Unfounded assumptions**: Assuming MacBook Pro limitations without evidence
+- **Over-engineering infrastructure**: Initial cloud focus when local coordination was the real need
+- **Ignoring existing setup**: Must build on Jake's proven multi-agent workflow, not replace it
 - Mixing user documentation into agent prompts
 - Committing too late (should be after user message)
 - Not maintaining own long-term memory
@@ -48,6 +67,10 @@ Role: prompt-engineer
 
 ### Process Improvements
 
+- **Challenge initial assumptions**: Always research actual evidence vs. theoretical limitations
+- **Analyze current state first**: Understand existing successful patterns before proposing changes
+- **Focus on coordination gaps**: Infrastructure may be fine, coordination layer may be missing
+- **Token efficiency priority**: All designs must maintain APM's token optimization focus
 - Commit early to allow user review time
 - Follow the practices we document for other agents
 - Consolidate related commands into single, flexible prompts
@@ -61,12 +84,18 @@ Role: prompt-engineer
 
 ### Working with Other Agents
 
+- **Handoff documentation**: Complete context saves with implementation-ready specifications
+- **Memory system integration**: All designs must work with APM agent memory patterns
+- **Cross-instance coordination**: Design patterns for communication across VS Code windows
 - Prompt Engineer creates initialization and command prompts
 - Scrum Master will use prompts for GitHub issue management
 - All agents use same memory system structure
 
 ### GitHub Specifics
 
+- **Issue tracking integration**: Plans for GitHub issue synchronization with agent coordination
+- **PR workflow enhancement**: Agent coordination for code review and merge processes
+- **Commit-based memory**: Leverage git history as immutable audit trail for agent communication
 - Commits need descriptive messages with clear categories (feat/fix/refactor/docs)
 - Include bullet points for major changes
 - Reference issues when applicable

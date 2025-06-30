@@ -161,37 +161,39 @@ interface AgentStatusMessage {
 - APM agent framework integration
 - Channel organization structure
 
-### Phase 2: Core Coordination (Week 3-4)
+### Phase 2: Multi-Agent Coordination (Week 3-4)
 
-#### 2.1 GitHub Integration
-- [ ] GitHub issue status synchronization
-- [ ] Commit message parsing for progress updates
-- [ ] PR status notifications in Slack
-- [ ] Issue assignment tracking
+**⚠️ ARCHITECTURE UPDATE**: Based on discovery that Jake already runs 9-12 concurrent Claude Code instances successfully across multiple VS Code windows, Phase 2 now focuses on **coordination enhancement** rather than infrastructure scaling. See `docs/planning/slack-integration-v2.md` for detailed updated architecture.
 
-#### 2.2 Implementation Plan Integration
-- [ ] Parse Implementation Plan structure
-- [ ] Map tasks to CC instances
-- [ ] Progress reporting against plan milestones
-- [ ] Completion tracking and notifications
+#### 2.1 Agent Registry & Discovery
+- [ ] Implement agent registration system for existing CC instances
+- [ ] Agent heartbeat and health monitoring
+- [ ] Cross-VS Code window agent discovery
+- [ ] Agent capability and availability tracking
 
-#### 2.3 Advanced Message Patterns
-- [ ] Rich status formatting with emojis and structure
-- [ ] Thread organization for related updates
-- [ ] Cross-project coordination messages
-- [ ] Error and blocking notifications
+#### 2.2 Bidirectional Slack Communication
+- [ ] Human-to-agent task assignment commands (`/apm-assign`, `/apm-spawn`)
+- [ ] Agent-to-human queries and approval requests
+- [ ] Real-time agent status dashboard in Slack
+- [ ] Cross-instance coordination messages
 
-#### 2.4 Context Management
-- [ ] Agent handover notifications
-- [ ] Context save triggers from Slack
-- [ ] Work resumption coordination
-- [ ] Memory system integration
+#### 2.3 Task Assignment Engine
+- [ ] Automatic task analysis and agent matching
+- [ ] New agent spawning in optimal VS Code windows
+- [ ] Workload balancing across existing agents
+- [ ] Dependency tracking and notification system
+
+#### 2.4 Local Multi-Instance Architecture
+- [ ] Enhanced CC adapter for existing instances
+- [ ] Terminal tab management and agent spawning
+- [ ] Process isolation and resource monitoring
+- [ ] MacBook Pro performance optimization
 
 **Phase 2 Deliverables**:
-- GitHub workflow integration
-- Implementation Plan progress tracking
-- Advanced message formatting
-- Context management capabilities
+- Coordination layer for existing multi-agent setup
+- Slack-based human oversight and control
+- Automatic task assignment and agent spawning
+- Cross-instance communication and dependency tracking
 
 ### Phase 3: Advanced Features (Week 5-6)
 
