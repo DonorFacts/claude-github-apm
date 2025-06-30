@@ -190,8 +190,12 @@ claude --apm manager init
 The APM framework uses a single persistent Docker container for all agents:
 
 ```bash
-# Start Claude (container auto-creates if needed)
+# Start Claude with automatic watch processes
 pnpm claude
+
+# Watch process management
+pnpm claude:logs        # View real-time logs from background processes
+pnpm claude:stop        # Stop background watch processes
 
 # Container management commands (optional)
 pnpm container:status   # Check if container is running
@@ -199,9 +203,11 @@ pnpm container:stop     # Stop when done for the day
 pnpm container:logs     # Debug any issues
 ```
 
-The container:
-- **Auto-starts** when you run `pnpm claude`
-- **Persists** between sessions (restart-unless-stopped policy)
+The system automatically:
+- **Starts watch processes** on host (`pnpm start`) when you run `pnpm claude`
+- **Prevents duplicates** by checking for existing processes
+- **Logs to `/tmp/apm-watch.log`** for debugging and monitoring
+- **Auto-creates container** if needed and persists between sessions
 - **Shares** resources across all agents and worktrees
 - **Maps** your user ID to avoid permission issues
 
@@ -399,7 +405,14 @@ The framework uses a unified host-bridge system for container-host communication
 #### Setup
 ```bash
 # Start the unified daemon (handles all services)
-npm start
+# This happens automatically when you run: pnpm claude
+pnpm start
+
+# View real-time logs from watch processes
+pnpm claude:logs
+
+# Stop watch processes when done
+pnpm claude:stop
 
 # Test the system
 pnpm test:bridge
