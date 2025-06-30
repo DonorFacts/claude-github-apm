@@ -3,6 +3,7 @@
     "allow": [
       "Read(~/www/claude-github-apm/)",
       "Read(~/www/claude-github-apm/*)",
+      "Read(/workspace/)",
 
       "Bash(Notify_Jake)",
 
