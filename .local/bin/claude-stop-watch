@@ -1,0 +1,26 @@
+#!/bin/bash
+# Stop watch processes started by claude script
+
+WATCH_PID_FILE="/tmp/apm-watch-processes.pid"
+
+if [ -f "$WATCH_PID_FILE" ]; then
+    WATCH_PID=$(cat "$WATCH_PID_FILE" 2>/dev/null || echo "")
+    if [ -n "$WATCH_PID" ] && kill -0 "$WATCH_PID" 2>/dev/null; then
+        echo "🛑 Stopping watch processes (PID: $WATCH_PID)..."
+        kill "$WATCH_PID" 2>/dev/null || true
+        # Wait a moment for graceful shutdown
+        sleep 2
+        # Force kill if still running
+        if kill -0 "$WATCH_PID" 2>/dev/null; then
+            echo "⚡ Force stopping watch processes..."
+            kill -9 "$WATCH_PID" 2>/dev/null || true
+        fi
+        rm -f "$WATCH_PID_FILE"
+        echo "✅ Watch processes stopped"
+    else
+        echo "❌ No running watch processes found"
+        rm -f "$WATCH_PID_FILE"
+    fi
+else
+    echo "❌ No watch processes PID file found"
+fi

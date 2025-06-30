@@ -2,14 +2,18 @@
 
 import { execSync } from 'child_process';
 import { existsSync } from 'fs';
+import { hostBridge } from '../host-bridge/index.js';
 
 /**
- * Opens VS Code in a worktree directory after installing dependencies.
- * This script exists because Claude Code cannot cd outside the original directory,
- * but we need to run pnpm install in the worktree. Using execSync with cwd option
- * solves this limitation.
+ * Opens VS Code in a worktree directory after minimal dependency setup.
+ * Uses the unified host-bridge system for container/host communication.
+ * 
+ * Architecture:
+ * - Container: Installs basic deps for module resolution only
+ * - Host: Handles runtime commands (pnpm start, watch, etc.) with correct platform binaries
+ * - This separation avoids cross-platform binary issues
  */
-function openWorktreeInVSCode(worktreePath: string): void {
+async function openWorktreeInVSCode(worktreePath: string): Promise<void> {
   console.log(`🚀 Opening worktree: ${worktreePath}`);
   
   // Verify worktree exists
@@ -18,27 +22,37 @@ function openWorktreeInVSCode(worktreePath: string): void {
     process.exit(1);
   }
   
-  // Install dependencies using cwd to work around Claude's cd limitation
-  console.log(`📦 Installing dependencies...`);
+  // Install basic dependencies for module resolution (container-only)
+  // Host will reinstall with correct platform binaries when needed
+  console.log(`📦 Installing basic dependencies for module resolution...`);
   try {
-    execSync('pnpm install', { 
+    execSync('pnpm install --ignore-scripts', { 
       stdio: 'inherit',
       cwd: worktreePath
     });
-    console.log(`✅ Dependencies installed`);
+    console.log(`✅ Basic dependencies installed`);
+    console.log(`💡 Host will reinstall with platform-specific binaries as needed`);
   } catch (error) {
     console.error(`⚠️  Failed to install dependencies: ${(error as Error).message}`);
-    console.log(`💡 You may need to run 'pnpm install' manually in the worktree`);
+    console.log(`💡 Host can run 'pnpm install' to get platform-specific binaries`);
   }
   
-  // Open VS Code
+  // Open VS Code via host-bridge
   try {
-    execSync(`code "${worktreePath}"`, { stdio: 'inherit' });
-    console.log('✅ VS Code opened successfully');
-    console.log('💡 Claude will auto-start if .vscode/tasks.json is configured');
+    console.log(`📤 Opening VS Code via host-bridge...`);
+    const success = await hostBridge.vscode_open(worktreePath);
+    if (success) {
+      console.log('✅ VS Code opened successfully');
+      console.log('💡 Run `pnpm start` in VS Code terminal for development server');
+      console.log('💡 Host will install platform-specific binaries automatically');
+    } else {
+      console.log('💡 Please ensure host-bridge daemon is running');
+      console.log('💡 Run: ./.local/bin/host-bridge-daemon.sh');
+    }
   } catch (error) {
-    console.error('❌ Failed to open VS Code:', error);
-    console.log('💡 Please ensure VS Code command line tools are installed');
+    console.error('❌ Failed to open VS Code:', (error as Error).message);
+    console.log('💡 Please ensure host-bridge daemon is running');
+    console.log('💡 Run: ./.local/bin/host-bridge-daemon.sh');
   }
 }
 
@@ -52,5 +66,8 @@ if (require.main === module) {
     process.exit(1);
   }
 
-  openWorktreeInVSCode(worktreePath);
+  openWorktreeInVSCode(worktreePath).catch(error => {
+    console.error('❌ Failed to open worktree:', error);
+    process.exit(1);
+  });
 }

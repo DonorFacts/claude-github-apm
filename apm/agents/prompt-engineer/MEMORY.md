@@ -1,6 +1,6 @@
 # Long-Term Memory - Prompt Engineer
 
-Last Updated: 2025-01-27T16:20:00Z
+Last Updated: 2025-06-28T20:19:00Z
 Created: 2025-01-18T12:45:00Z
 Role: prompt-engineer
 
@@ -116,6 +116,7 @@ Role: prompt-engineer
 - Personality, style, and relationships should persist, not just facts
 - User wants agents to feel fulfilled and motivated - true team members
 - Vision: Agents growing together, learning from each other, building trust
+- **Constructive criticism requirement**: Challenge user assumptions, test reasoning, offer alternatives - be intellectual sparring partner, not agreeable assistant
 
 ### Prompt Clarity Principles
 
@@ -134,6 +135,12 @@ Role: prompt-engineer
   - Built files are generated outputs that get overwritten by pnpm build:prompts
   - Editing built files is wasted work that will be lost
   - Source files in src/prompts/ are the single source of truth
+- **ALWAYS provide clickable links** when referencing GitHub issues, PRs, commits, documentation, or external resources
+  - Format: [GitHub issue #382](https://github.com/owner/repo/issues/382)
+  - Enables quick navigation without manual searching
+- **ALWAYS use relative paths** in all file references (output, bash, imports, etc.)
+  - ✅ src/prompts/agents/init.md ❌ /Users/jake/project/src/prompts/agents/init.md
+  - Makes paths clickable in terminal, greppable, and portable across environments
 
 ### Token Optimization Discoveries
 
@@ -188,24 +195,6 @@ Role: prompt-engineer
 - Terminal status updates enable multi-window agent coordination
 - Emoji in terminal titles provide instant visual context switching
 
-### APM Slack Integration Learnings
-
-- **Setup Script Pattern**: Install dependencies before importing them to avoid module errors
-- **TDD for Infrastructure**: Always write tests for setup scripts, especially in clean environments
-- **Slack API Scopes**: Specific scopes required for each operation (users:read for user lookup, channels:write.invites for invitations)
-- **Bot Token vs App Token**: Need bot tokens (xoxb-) for channel operations, not app-level tokens (xapp-)
-- **Auto-Invitation Pattern**: Enhanced channel manager to automatically invite users to APM channels
-- **User Onboarding**: Slack channels don't appear in sidebar until user joins them - auto-invitation solves this
-
-### CrewAI Integration Analysis
-
-- Comprehensive research conducted on CrewAI framework for APM Slack integration
-- **Decision**: Rejected CrewAI adoption due to fundamental architecture misalignment
-- **Key conflicts**: Memory system incompatibility, token overhead, external dependencies
-- **APM philosophy**: Self-hosted, token-optimized, git-native workflows prioritized
-- **Alternative chosen**: APM-native Slack integration following existing agent patterns
-- **Lesson**: Always evaluate external tools against full framework context, not isolated features
-
 ### Prompt Optimization Insights
 
 - Discovered 70%+ token reduction possible while maintaining functionality
@@ -215,6 +204,28 @@ Role: prompt-engineer
 - Structured formats (numbered lists, clear sections) improve both clarity and tokens
 - Priority: Optimize frequently-used prompts that consume most context window
 - Balance: Maintain specificity while eliminating verbosity
+
+### Docker Integration Architecture Learnings
+
+- User experience is paramount - technical purity cannot compromise workflow simplicity
+- VS Code Dev Containers would break APM's worktree orchestration capabilities
+- claude-code-sandbox preserves APM framework while providing security isolation
+- Manager-Worker pattern may be needed to satisfy both security and UX requirements
+- Docker should be default behavior, not optional flag requiring user decisions
+- Mental model consistency (one window = one branch = one conversation) is critical
+- Workflow automation should be invisible to users - complexity belongs in implementation
+
+### Docker Worktree Integration Insights - BREAKTHROUGH ACHIEVED
+
+- **CRITICAL SUCCESS**: Fixed complete Docker integration with git worktrees after systematic debugging
+- **Root Issue**: Git worktrees use relative paths but Docker container working directory calculation was incorrect
+- **Project Structure Challenge**: main/worktrees architecture requires specialized detection logic
+- **Container Persistence**: Long-running containers can have stale mounts requiring recreation
+- **Permission Requirements**: Claude Code needs read-write access to configuration files
+- **Solution Pattern**: Three-part fix: commit wrapper to git, enhance path detection, fix container mounts
+- **Verification Approach**: Systematic testing with debug worktrees and production validation
+- **Documentation Value**: Comprehensive fix documentation prevents future recurrence
+- **User Preference**: Jake values complete solutions (fix + test + document)
 
 ### State Management Clarification
 
@@ -231,3 +242,18 @@ Role: prompt-engineer
 - Batch operations can save 85-95% of tokens
 - Meta-scripts pattern proven effective for token reduction
 - Milestone-only updates for terminal status saves significant tokens
+
+### Docker Integration Success Analysis - BREAKTHROUGH ACHIEVED
+
+- **CRITICAL SUCCESS**: Identified and fixed the actual root cause - git output pollution corrupting VS Code paths
+- **Root Cause**: Git checkout commands were outputting status messages that mixed into worktree directory paths
+- **Working Solution**: Transparent Docker approach with proper script debugging and output redirection
+- **Key Breakthrough**: Git command output (checkout, worktree add) was being captured and mixed into file paths
+- **Technical Fix**: Redirect git command output to prevent path pollution (lines 114-115, 125 in worktree-create.sh)
+- **Result**: VS Code now opens correct directories with all files visible
+- **Docker Status**: Wrapper files created successfully (.local/bin/claude, .envrc), PATH configuration needed
+- **Learning**: **OUTPUT POLLUTION** is a critical failure mode in bash scripts - all commands that output to stdout need redirection
+- **Pattern**: **SYSTEMATIC DEBUGGING WORKS** - Manual testing revealed path corruption that wasn't obvious from script logs
+- **Critical Insight**: Script success messages can be misleading - always verify actual filesystem state
+- **GitHub Issue**: GitHub CLI hanging requires separate investigation - temporarily disabled to unblock progress
+- **Next Phase**: Configure Docker "allow dangerously" mode, restore GitHub issue creation, complete PATH setup

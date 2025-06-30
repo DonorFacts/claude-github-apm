@@ -60,3 +60,21 @@ _x_*
 # Slack configuration
 .slack-config.json
 .cc-slack-config.json
+
+# Host-Bridge runtime files
+.local/host-bridge/requests/
+.local/host-bridge/responses/
+.local/host-bridge/logs/
+.local/host-bridge/config/daemon.pid
+
+# Legacy runtime files (to be removed)
+.local/sound-queue
+.local/speech-queue
+.local/vscode-queue
+.local/vscode-response
+
+# Local settings
+.claude/settings.local.json
+
+# pnpm store (should use global store, not local)
+.pnpm-store/

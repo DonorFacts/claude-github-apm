@@ -41,7 +41,23 @@ Claude GitHub APM is a **multi-agent project management framework** that coordin
 - **Project Boards**: Visual progress tracking and sprint management
 - **Extensible**: Architecture supports swapping GitHub for Jira, Linear, etc.
 
-### 🤖 Enhanced Agent Roles
+### 🤖 Multi-Agent Architecture
+
+**Enterprise Security**: All agents run in a shared Docker container with `--dangerously-skip-permissions` safely contained within security boundaries.
+
+**Single-Container Architecture**: One persistent container serves all agents and worktrees:
+- Automatic container creation on first `pnpm claude` usage
+- Shared resources reduce overhead and complexity
+- Dynamic user mapping - runs as your host user (not root)
+- Health monitoring with auto-restart capabilities
+
+**Multi-Agent Collaboration**: Agents can coordinate across worktrees with shared access to:
+- Main branch for architectural context
+- All worktrees for cross-team coordination  
+- Shared APM memory system for handoffs and knowledge transfer
+- Real-time inter-agent communication through secure filesystem mounts
+
+#### Specialized Agent Roles
 
 Each agent role has specialized capabilities and maintains its own memory:
 
@@ -98,10 +114,48 @@ This enables **organic agent development** where expertise emerges through real 
 - Claude Code installed globally
 - GitHub CLI (`gh`) authenticated
 - Active GitHub repository
+- **Docker Desktop** for container security (`docker --version`)
+  - Required for safe `--dangerously-skip-permissions` execution
+  - Enables multi-agent collaboration with enterprise security
+  - Container auto-starts when you run `pnpm claude`
+
+### GitHub Bot Account Setup (Recommended)
+
+For enhanced security, Claude agents can use a dedicated bot account that prevents unauthorized access to your main branch. The system gracefully falls back to your personal credentials with appropriate warnings if no bot account is configured.
+
+**Quick Setup:**
+1. Create bot account with email alias: `your-email+bot@gmail.com`
+2. Generate Personal Access Token with `repo` and `workflow` scopes
+3. Set environment variable: `export GITHUB_BOT_TOKEN="<token>"`
+
+**What this achieves:**
+- ✅ Your commits in main: `your-email@gmail.com`
+- ✅ Bot commits in worktrees: `your-email+bot@gmail.com`  
+- ✅ Bot cannot push to main (blocked by branch rulesets)
+- ✅ Clear audit trail of human vs automated changes
+
+**Complete Guide:** See [GitHub Bot Account Setup](docs/github-bot-account.md) for detailed instructions, security model, and troubleshooting.
 
 ### Installation
 
 TBD
+
+### Configure Security Level (Optional)
+
+Choose your security posture based on environment:
+
+```bash
+# Development (default) - Full compatibility
+export APM_SECURITY_LEVEL=standard
+
+# Production - Firewall with domain whitelist  
+export APM_SECURITY_LEVEL=restricted
+
+# Maximum Security - No network access
+export APM_SECURITY_LEVEL=maximum
+```
+
+See [Docker Security Guide](docs/docker-usage.md) for detailed configuration.
 
 ### Initialize APM in Your Project
 
@@ -119,7 +173,7 @@ claude-github-apm init
 ### Start Your First APM Session
 
 ```bash
-# Initialize Manager Agent
+# Initialize Manager Agent (automatically containerized)
 claude --apm manager init
 
 # The Manager will guide you through:
@@ -128,6 +182,34 @@ claude --apm manager init
 # - GitHub integration setup
 # - Agent task assignment
 ```
+
+**Security**: All agents run in a shared Docker container with `--dangerously-skip-permissions` safely contained.
+
+### Docker Container Management
+
+The APM framework uses a single persistent Docker container for all agents:
+
+```bash
+# Start Claude with automatic watch processes
+pnpm claude
+
+# Watch process management
+pnpm claude:logs        # View real-time logs from background processes
+pnpm claude:stop        # Stop background watch processes
+
+# Container management commands (optional)
+pnpm container:status   # Check if container is running
+pnpm container:stop     # Stop when done for the day
+pnpm container:logs     # Debug any issues
+```
+
+The system automatically:
+- **Starts watch processes** on host (`pnpm start`) when you run `pnpm claude`
+- **Prevents duplicates** by checking for existing processes
+- **Logs to `/tmp/apm-watch.log`** for debugging and monitoring
+- **Auto-creates container** if needed and persists between sessions
+- **Shares** resources across all agents and worktrees
+- **Maps** your user ID to avoid permission issues
 
 ## 📖 Core Concepts
 
@@ -306,6 +388,72 @@ pnpm link
 ### Project Structure
 
 TBD
+
+### Container Audio & Speech Notifications
+
+The framework provides two notification methods for Claude Code running in Docker containers:
+
+#### Host-Bridge Communication System
+
+The framework uses a unified host-bridge system for container-host communication:
+
+- **VS Code Integration**: Open folders/files on host from container
+- **Audio Notifications**: Play system sounds for task completion
+- **Speech Synthesis**: Text-to-speech for detailed feedback and updates
+- **Type-Safe API**: Full TypeScript client with async/await support
+
+#### Setup
+```bash
+# Start the unified daemon (handles all services)
+# This happens automatically when you run: pnpm claude
+pnpm start
+
+# View real-time logs from watch processes
+pnpm claude:logs
+
+# Stop watch processes when done
+pnpm claude:stop
+
+# Test the system
+pnpm test:bridge
+```
+
+#### Usage from Container
+```typescript
+import { hostBridge } from 'src/tools/host-bridge';
+
+// Open VS Code windows
+await hostBridge.vscode_open('/workspace/main/docs');
+
+// Play notification sounds
+await hostBridge.audio_play('Hero.aiff');
+
+// Text-to-speech
+await hostBridge.speech_say('Task completed successfully!');
+```
+
+#### Notification Guidelines
+- Use **audio** for simple "done" signals
+- Use **speech** for messages that need attention or contain information
+- Use **VS Code** for opening relevant files/folders during development
+- All services work seamlessly from within Docker containers while maintaining security
+
+## 🛠️ Development Tool Organization
+
+This project uses the **`.dev.ext` naming convention** for debugging and development tools, providing clear separation from production framework code.
+
+**Quick examples:**
+- `apm-container.dev.ts` - Advanced container management with health monitoring
+- `claude-container` - Simple production wrapper for daily use
+
+**When to use `.dev.ext`:**
+- Debugging utilities and diagnostic tools
+- Enhanced versions of existing production tools  
+- Development workflow helpers
+
+**Alternative patterns:** `.test.ext` (testing), `.config.ext` (configuration), `tools/` (standalone utilities), `scripts/` (build/deployment)
+
+**Complete guide:** See [Development Tool Organization](docs/debugging-tools.md) for decision frameworks, agent guidelines, and integration patterns.
 
 ## 📄 License
 

@@ -1,8 +1,18 @@
 #!/bin/bash
-# create-handover.sh - Creates handover files in both main and worktree directories
-# This ensures the handover is accessible from both locations
+# create-handover.sh - Creates handover file in worktree agent directory
+# Uses agent-specific directory structure for better organization
+# REQUIRES: Container environment for consistent path handling
 
 set -e
+
+# Validate container environment
+if [[ ! "$PWD" =~ ^/workspace ]]; then
+    echo "❌ ERROR: Handover creation requires container environment"
+    echo "   Current path: $PWD"
+    echo "   Expected: /workspace/..."
+    echo "   Start Claude Code in container mode first"
+    exit 1
+fi
 
 # Colors for output
 GREEN='\033[0;32m'
@@ -79,33 +89,69 @@ create_handover_content() {
 EOF
 }
 
-# Create directories in both locations
-echo -e "${YELLOW}Creating handover directories...${NC}"
-mkdir -p "${MAIN_DIR}/apm/worktree-handovers/not-started"
-mkdir -p "${WORKTREE_DIR}/apm/worktree-handovers/not-started"
+# Create directory in worktree using agent-specific structure
+echo -e "${YELLOW}Creating handover directory in worktree...${NC}"
+mkdir -p "${WORKTREE_DIR}/apm/agents/${AGENT_ROLE}/not-started"
 
-# Create handover file in main directory
-MAIN_HANDOVER="${MAIN_DIR}/apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
-echo -e "${GREEN}Creating handover in main directory...${NC}"
-create_handover_content > "${MAIN_HANDOVER}"
-echo "✅ Created: ${MAIN_HANDOVER}"
-
-# Create handover file in worktree directory
-WORKTREE_HANDOVER="${WORKTREE_DIR}/apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
-echo -e "${GREEN}Creating handover in worktree directory...${NC}"
+# Create handover file in worktree agent directory
+WORKTREE_HANDOVER="${WORKTREE_DIR}/apm/agents/${AGENT_ROLE}/not-started/${HANDOVER_FILENAME}"
+echo -e "${GREEN}Creating handover in worktree agent directory...${NC}"
 create_handover_content > "${WORKTREE_HANDOVER}"
 echo "✅ Created: ${WORKTREE_HANDOVER}"
 
-# Create symlink for future reference (optional)
-echo -e "${YELLOW}Creating reference link...${NC}"
-ln -sf "${WORKTREE_HANDOVER}" "${MAIN_DIR}/apm/worktree-handovers/not-started/${HANDOVER_FILENAME}.worktree"
+# Configure git credentials in worktree
+echo -e "${YELLOW}Configuring git credentials in worktree...${NC}"
+cd "${WORKTREE_DIR}"
+
+# Fix .git file to use relative paths (container/host compatibility)
+echo -e "${YELLOW}Fixing .git file for container/host compatibility...${NC}"
+if [[ -f ".git" ]]; then
+    # Read current gitdir path
+    CURRENT_GITDIR=$(cat .git | sed 's/gitdir: //')
+    
+    # Convert absolute path to relative path
+    # From: /workspace/main/.git/worktrees/branch-name
+    # To:   ../../main/.git/worktrees/branch-name
+    if [[ "$CURRENT_GITDIR" =~ ^/workspace/main/.git/worktrees/ ]]; then
+        BRANCH_PART=$(echo "$CURRENT_GITDIR" | sed 's|^/workspace/main/.git/worktrees/||')
+        RELATIVE_GITDIR="../../main/.git/worktrees/${BRANCH_PART}"
+        echo "gitdir: $RELATIVE_GITDIR" > .git
+        echo "✅ Fixed .git file to use relative path"
+    else
+        echo "⚠️  .git file already uses relative path or unexpected format"
+    fi
+else
+    echo "⚠️  No .git file found in worktree"
+fi
+
+# Check if bot token is available
+if [ -n "${GITHUB_BOT_TOKEN:-}" ]; then
+    git config --local user.name "Bot"
+    git config --local user.email "jake.detels+bot@gmail.com"
+    echo "✅ Bot git config set (using GITHUB_BOT_TOKEN)"
+else
+    # Fallback to personal credentials with warning
+    echo -e "${RED}⚠️  WARNING: No GITHUB_BOT_TOKEN found!${NC}"
+    echo -e "${YELLOW}   Commits will be attributed to your personal account${NC}"
+    echo -e "${YELLOW}   For security, set up bot account: see README.md 'GitHub Bot Account Setup'${NC}"
+    echo ""
+    
+    # Use global config values as fallback
+    GLOBAL_NAME=$(git config --global user.name || echo "Your Name")
+    GLOBAL_EMAIL=$(git config --global user.email || echo "your.email@example.com")
+    
+    git config --local user.name "$GLOBAL_NAME"
+    git config --local user.email "$GLOBAL_EMAIL"
+    echo "✅ Personal git config set (fallback)"
+fi
+
+cd - > /dev/null
 
 echo
-echo -e "${GREEN}✅ Handover files created successfully!${NC}"
+echo -e "${GREEN}✅ Handover file created successfully!${NC}"
 echo
-echo "The handover file is available in both locations:"
-echo "1. Main directory: apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
-echo "2. Worktree directory: apm/worktree-handovers/not-started/${HANDOVER_FILENAME}"
+echo "The handover file is available in the worktree:"
+echo "• Worktree directory: apm/agents/${AGENT_ROLE}/not-started/${HANDOVER_FILENAME}"
 echo
 echo -e "${YELLOW}Next steps:${NC}"
 echo "1. Edit the handover file to add specific details"

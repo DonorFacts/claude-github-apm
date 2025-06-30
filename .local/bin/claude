@@ -1,0 +1,133 @@
+#!/bin/bash
+# Direct container wrapper for Claude Code
+# This avoids tsx/node_modules dependencies
+
+set -e
+
+# PID file for tracking watch processes
+WATCH_PID_FILE="/tmp/apm-watch-processes.pid"
+
+CONTAINER_NAME="apm-workspace"
+CONTAINER_IMAGE="apm-claude-container:latest"
+
+# Get current directory relative to project root
+WORK_DIR="/workspace"
+if [ -n "$PWD" ]; then
+    # Find project root (prioritize main/worktrees structure)
+    PROJECT_ROOT="$PWD"
+    FOUND_ROOT=""
+    
+    # First pass: look for main/worktrees structure with proper validation
+    TEMP_ROOT="$PWD"
+    while [ "$TEMP_ROOT" != "/" ]; do
+        if [ -d "$TEMP_ROOT/main" ] && [ -d "$TEMP_ROOT/worktrees" ] && [ -f "$TEMP_ROOT/main/package.json" ] && [ -d "$TEMP_ROOT/main/apm" ]; then
+            FOUND_ROOT="$TEMP_ROOT"
+            break
+        fi
+        TEMP_ROOT=$(dirname "$TEMP_ROOT")
+    done
+    
+    # If not found, second pass: look for other valid structures
+    if [ -z "$FOUND_ROOT" ]; then
+        TEMP_ROOT="$PWD"
+        while [ "$TEMP_ROOT" != "/" ]; do
+            if [ -f "$TEMP_ROOT/main/package.json" ] && [ -d "$TEMP_ROOT/main/apm" ]; then
+                FOUND_ROOT="$TEMP_ROOT"
+                break
+            elif [ -f "$TEMP_ROOT/package.json" ] && [ -d "$TEMP_ROOT/apm" ]; then
+                FOUND_ROOT="$TEMP_ROOT"
+                break
+            fi
+            TEMP_ROOT=$(dirname "$TEMP_ROOT")
+        done
+    fi
+    
+    if [ -n "$FOUND_ROOT" ]; then
+        PROJECT_ROOT="$FOUND_ROOT"
+    fi
+    
+    if [ "$PROJECT_ROOT" != "/" ]; then
+        REL_PATH="${PWD#$PROJECT_ROOT}"
+        if [ -n "$REL_PATH" ]; then
+            WORK_DIR="/workspace$REL_PATH"
+        fi
+    fi
+fi
+
+# Function to start watch processes on host if not already running
+start_watch_processes() {
+    if [ -f "$WATCH_PID_FILE" ]; then
+        WATCH_PID=$(cat "$WATCH_PID_FILE" 2>/dev/null || echo "")
+        if [ -n "$WATCH_PID" ] && kill -0 "$WATCH_PID" 2>/dev/null; then
+            echo "📋 Watch processes already running (PID: $WATCH_PID)"
+            return 0
+        else
+            echo "🔄 Cleaning up stale PID file..."
+            rm -f "$WATCH_PID_FILE"
+        fi
+    fi
+    
+    echo "🚀 Starting watch processes on host..."
+    cd "$PROJECT_ROOT"
+    nohup pnpm start > /tmp/apm-watch.log 2>&1 &
+    WATCH_PID=$!
+    echo "$WATCH_PID" > "$WATCH_PID_FILE"
+    echo "✅ Watch processes started (PID: $WATCH_PID, logs: /tmp/apm-watch.log)"
+}
+
+# Start watch processes before container
+start_watch_processes
+
+# Check if container exists and is running
+if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
+    echo "Starting APM container..."
+    
+    # Ensure container is stopped if it exists
+    docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
+    
+    # Start new container with restricted access
+    docker run -d \
+        --name "$CONTAINER_NAME" \
+        --restart unless-stopped \
+        --user "$(id -u):$(id -g)" \
+        -v "$PROJECT_ROOT:/workspace" \
+        -v "$HOME/.claude.json:/home/user/.claude.json" \
+        -v "$HOME/.claude:/home/user/.claude" \
+        -e "HOME=/home/user" \
+        -e "APM_CONTAINERIZED=true" \
+        -e "GH_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
+        -e "GITHUB_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
+        -e "PATH=/workspace/.local/bin:/workspace/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+        "$CONTAINER_IMAGE"
+    
+    # Wait for container to be ready
+    echo "Waiting for container to be healthy..."
+    for i in {1..20}; do
+        if docker ps --filter "name=$CONTAINER_NAME" --filter "health=healthy" --format '{{.Names}}' | grep -q "$CONTAINER_NAME"; then
+            echo "✅ Container is healthy"
+            break
+        fi
+        sleep 2
+    done
+fi
+
+# Determine if we need interactive mode
+EXEC_FLAGS=""
+if [ -t 0 ] && [ -t 1 ]; then
+    EXEC_FLAGS="-it"
+fi
+
+# Execute Claude in container
+echo "🐳 Executing Claude Code within Docker container '$CONTAINER_NAME'"
+echo "📁 Working directory: $WORK_DIR"
+echo "👤 Agent role: ${APM_AGENT_ROLE:-developer}"
+echo "🌿 Worktree: $(basename "$PWD")"
+echo ""
+
+exec docker exec $EXEC_FLAGS \
+    -w "$WORK_DIR" \
+    -e "APM_AGENT_ROLE=${APM_AGENT_ROLE:-developer}" \
+    -e "APM_WORKTREE_NAME=$(basename "$PWD")" \
+    -e "PATH=/workspace/.local/bin:/workspace/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+    "$CONTAINER_NAME" \
+    /usr/local/bin/claude --dangerously-skip-permissions "$@"
