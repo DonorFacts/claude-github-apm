@@ -1,0 +1,13 @@
+#!/bin/bash
+# View logs from watch processes started by claude script
+
+WATCH_LOG_FILE="/tmp/apm-watch.log"
+
+if [ -f "$WATCH_LOG_FILE" ]; then
+    echo "📋 Watching APM logs (Ctrl+C to exit):"
+    echo "────────────────────────────────────────"
+    tail -f "$WATCH_LOG_FILE"
+else
+    echo "❌ No watch logs found at $WATCH_LOG_FILE"
+    echo "💡 Start watch processes with: pnpm claude"
+fi

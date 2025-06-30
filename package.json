@@ -37,6 +37,8 @@
     "sync:main": "./src/scripts/git/sync-main.sh",
     "=== CONTAINER MANAGEMENT ===": "",
     "claude": "./.local/bin/claude",
+    "claude:logs": "./.local/bin/claude-logs",
+    "claude:stop": "./.local/bin/claude-stop-watch",
     "container:shell": "./.local/bin/claude-shell",
     "container:start": "tsx src/scripts/docker/apm-container.dev.ts start",
     "container:stop": "tsx src/scripts/docker/apm-container.dev.ts stop",
