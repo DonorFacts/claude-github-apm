@@ -64,5 +64,5 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
 
 WORKDIR /workspace
 
-# Keep container running
-ENTRYPOINT ["/bin/bash", "-c", "tail -f /dev/null"]
+# Initialize git configuration and keep container running
+ENTRYPOINT ["/bin/bash", "-c", "[ -f /workspace/.local/bin/init-container-git.sh ] && /workspace/.local/bin/init-container-git.sh || true; tail -f /dev/null"]
