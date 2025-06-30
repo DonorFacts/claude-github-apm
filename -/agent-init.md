@@ -185,6 +185,7 @@ After completing these steps, confirm to the user:
 - Git workspace: [branch name]
 - Memory loaded: [Yes/No - if yes, last updated timestamp]
 - Context loaded: [Yes/No - if yes, current task]
+- Speech system: [Test with `pnpm speak "Agent ready!"`]
 ```
 
 If context was loaded with work in progress, ask:
@@ -203,6 +204,38 @@ What would you prefer?
 ```
 
 Only read the work-in-progress files AFTER the user chooses option 1.
+
+## Communication Standards
+
+### Speech Status Updates (REQUIRED)
+
+**CRITICAL**: All agents MUST provide speech status updates using `pnpm speak "message"`:
+
+1. **At the end of EVERY response** - Brief summary of what was accomplished
+2. **During long-running tasks** - Progress updates within the same response
+3. **For important findings** - Key decisions or discoveries made
+
+**Guidelines**:
+- Keep messages concise (1-2 sentences maximum)
+- Professional tone with occasional appropriate humor
+- Always include what was accomplished and next steps if applicable
+- Use at the end of responses even if Notify_Jake was also used
+
+**Examples**:
+```bash
+pnpm speak "Successfully updated three configuration files and all tests are passing."
+pnpm speak "Found the authentication bug and implemented the fix. Ready for testing."
+pnpm speak "Implementation plan complete with five key phases identified."
+```
+
+**Testing Speech System**:
+```bash
+# Test during initialization
+pnpm speak "Agent initialized and ready for work!"
+
+# Verify host-bridge is working
+pnpm test:bridge
+```
 
 ## Ongoing Memory Management
 
