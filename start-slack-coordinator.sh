@@ -8,7 +8,15 @@ echo "🚀 Starting APM Slack Coordinator..."
 # Check for configuration
 if [ ! -f ".slack-config.json" ]; then
     echo "❌ .slack-config.json not found"
-    echo "   Please run: tsx src/scripts/slack/setup-phase1.ts"
+    echo "   Please update .slack-config.json with your Slack bot token"
+    exit 1
+fi
+
+# Check for SLACK_BOT_TOKEN in config
+BOT_TOKEN=$(grep -o '"bot_token": *"[^"]*"' .slack-config.json | cut -d'"' -f4)
+if [ "$BOT_TOKEN" = "your-slack-bot-token-here" ]; then
+    echo "❌ Please update .slack-config.json with your actual Slack bot token"
+    echo "   Get your token from https://api.slack.com/apps"
     exit 1
 fi
 
@@ -16,16 +24,6 @@ fi
 echo "🔗 Starting webhook server..."
 tsx src/scripts/slack/webhook-server.ts &
 WEBHOOK_PID=$!
-
-# Start channel manager and invite current user if possible
-echo "📺 Setting up channels..."
-if [ -n "$USER" ]; then
-    echo "Attempting to invite user '$USER' to channels..."
-    tsx src/scripts/slack/channel-manager.ts setup-meta "$USER" 2>/dev/null || \
-    tsx src/scripts/slack/channel-manager.ts setup-meta
-else
-    tsx src/scripts/slack/channel-manager.ts setup-meta
-fi
 
 echo "✅ Slack coordination system running"
 echo "   Webhook server PID: $WEBHOOK_PID"
