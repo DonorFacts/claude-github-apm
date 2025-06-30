@@ -113,7 +113,9 @@ This enables **organic agent development** where expertise emerges through real 
 - Node.js 18+ and pnpm (or npm)
 - Claude Code installed globally
 - GitHub CLI (`gh`) authenticated
-- Active GitHub repository
+- Active GitHub repository with **git configured**
+  - Run `git config user.name` and `git config user.email` to verify
+  - Container automatically inherits your host git configuration
 - **Docker Desktop** for container security (`docker --version`)
   - Required for safe `--dangerously-skip-permissions` execution
   - Enables multi-agent collaboration with enterprise security
