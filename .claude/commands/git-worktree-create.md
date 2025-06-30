@@ -6,7 +6,9 @@ Git worktrees enable branch management by creating separate directories for feat
 
 **REQUIREMENT**: Worktree workflows require Claude Code to be running in Docker container mode from the start. This ensures consistent path handling and eliminates host/container path translation issues.
 
-**AUTOMATIC PATH FIX**: Our worktree creation scripts automatically convert absolute paths in `.git` files to relative paths, ensuring worktrees work seamlessly in both container and host environments. No manual intervention required.
+**ARCHITECTURE**: Container handles development (file editing, git, Claude), Host handles runtime (pnpm start, watch commands, builds). This separation avoids cross-platform binary issues.
+
+**AUTOMATIC PATH FIX**: Our worktree creation scripts automatically convert absolute paths in `.git` files to relative paths, ensuring worktrees work seamlessly in both container and host environments.
 
 **For users**: See `docs/workflow/worktree-handover.md` for understanding the handover system.
 
@@ -274,7 +276,10 @@ After prompting the user to verify, the agent must:
 The user should:
 1. Switch to the new VS Code window
 2. Verify Claude is running
-3. Continue feature work there
+3. Run `pnpm start` or `pnpm watch:commands` in VS Code terminal (host handles runtime)
+4. Continue feature work there
+
+**Note**: Runtime commands (`pnpm start`, `watch:commands`, builds) run on host with correct platform binaries. Container handles development only.
 
 ### Ongoing Behavior
 
