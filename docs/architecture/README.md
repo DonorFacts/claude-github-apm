@@ -12,20 +12,10 @@ The complete architecture specification including all components, data flows, an
 ### 🚀 [1-Day Implementation Plan](./implementation-plan-1-day.md)
 Hour-by-hour plan to implement core functionality in a single focused day.
 
-## Evolution History
+## Architecture Documents
 
-### Phase 1: Team Management Concepts
-- [Persistent Team Management](./persistent-team-management.md) - Initial concept with persistent identities
-- [UML System Architecture](./uml-system-architecture.md) - Original team-based diagrams
-
-### Phase 2: Collective Intelligence
-- [Collective Intelligence v1](./collective-intelligence-architecture.md) - Shift to ephemeral + collective memory
-- [Collective Intelligence v2](./collective-intelligence-v2.md) - Added cross-conversation search & dynamic capabilities
-
-### Implementation Roadmaps
-- [Implementation Roadmap v1](./implementation-roadmap.md) - Original week-based plan
-- [Collective Intelligence Roadmap](./collective-intelligence-roadmap.md) - Updated for Borg model
-- [Implementation Roadmap v2](./implementation-roadmap-v2.md) - With search and capabilities
+### 📋 [Design Evolution & Insights](./design-evolution-insights.md)
+Preserves key insights from the architecture evolution process, including team awareness, cross-conversation search, and design principles that emerged.
 
 ## Key Concepts
 
