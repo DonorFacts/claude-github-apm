@@ -11,6 +11,13 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { spawn } from 'child_process';
 
+// Import commands using modern ES modules
+import { listCommand } from './cli/user/list';
+import { initCommand } from './cli/user/init';
+import { recoverCommand } from './cli/user/recover';
+import { searchCommand } from './cli/user/search';
+import { heartbeatCommand } from './cli/user/heartbeat';
+
 // Environment setup
 const APM_ROOT = path.resolve(__dirname, '..');
 const APM_EXTERNAL = path.resolve(APM_ROOT, '..', 'apm');
@@ -32,22 +39,10 @@ function ensureDirectories() {
   });
 }
 
-// Import commands
-async function importCommands() {
-  const { listCommand } = await import('./interfaces/human/commands/list');
-  const { initCommand } = await import('./interfaces/human/commands/init');
-  const { recoverCommand } = await import('./interfaces/human/commands/recover');
-  const { searchCommand } = await import('./interfaces/human/commands/search');
-  const { heartbeatCommand } = await import('./interfaces/human/commands/heartbeat');
-  
-  return { listCommand, initCommand, recoverCommand, searchCommand, heartbeatCommand };
-}
 
 // Main CLI setup
 async function main() {
   ensureDirectories();
-  
-  const commands = await importCommands();
   
   const cli = yargs(hideBin(process.argv))
     .scriptName('pnpm cli')
@@ -67,11 +62,11 @@ async function main() {
     .strict();
 
   // Add commands
-  commands.listCommand(cli);
-  commands.initCommand(cli);
-  commands.recoverCommand(cli);
-  commands.searchCommand(cli);
-  commands.heartbeatCommand(cli);
+  listCommand(cli);
+  initCommand(cli);
+  recoverCommand(cli);
+  searchCommand(cli);
+  heartbeatCommand(cli);
 
   // Global middleware for error handling
   cli.middleware((argv) => {
