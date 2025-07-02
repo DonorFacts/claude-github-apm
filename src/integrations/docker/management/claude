@@ -6,13 +6,15 @@ set -e
 
 # Load shared modules
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LIB_DIR="$SCRIPT_DIR/../lib"
+# Utility directories
+SYSTEM_DIR="$SCRIPT_DIR/../../../utilities/system"
+GIT_DIR="$SCRIPT_DIR/../../../utilities/git"
 
-source "$LIB_DIR/env-loader.sh"
-source "$LIB_DIR/path-resolver.sh"
-source "$LIB_DIR/git-config.sh"
-source "$LIB_DIR/watch-processes.sh"
-source "$LIB_DIR/container-manager.sh"
+source "$SYSTEM_DIR/env-loader.sh"
+source "$SYSTEM_DIR/path-resolver.sh"
+source "$GIT_DIR/git-config.sh"
+source "$SYSTEM_DIR/watch-processes.sh"
+source "./container-manager.sh"
 
 # Load environment automatically
 load_project_env

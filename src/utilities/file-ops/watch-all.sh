@@ -41,9 +41,9 @@ trap cleanup EXIT INT TERM
 echo -e "${YELLOW}[WATCH-ALL]${NC} Starting concurrent watch processes..."
 
 # Start unified host-bridge daemon with prefixed output (if it exists)
-if [ -f "$PROJECT_ROOT/.local/bin/host-bridge-daemon.sh" ]; then
+if [ -f "$PROJECT_ROOT/src/integrations/docker/host-bridge/daemons/host-bridge-daemon.sh" ]; then
     echo -e "${YELLOW}[WATCH-ALL]${NC} Starting unified host-bridge daemon (VS Code, audio, speech)..."
-    "$PROJECT_ROOT/.local/bin/host-bridge-daemon.sh" 2>&1 | prefix_output "HOST-BRIDGE" "$MAGENTA" &
+    "$PROJECT_ROOT/src/integrations/docker/host-bridge/daemons/host-bridge-daemon.sh" 2>&1 | prefix_output "HOST-BRIDGE" "$MAGENTA" &
     BRIDGE_PID=$!
 else
     echo -e "${YELLOW}[WATCH-ALL]${NC} Host-bridge daemon not found (Docker-only feature)"

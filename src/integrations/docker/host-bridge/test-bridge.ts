@@ -17,7 +17,7 @@ async function testHostBridge() {
 
   if (!isRunning) {
     console.log('   Please start the daemon first:');
-    console.log('   ./.local/bin/host-bridge-daemon.sh');
+    console.log('   ./src/integrations/docker/host-bridge/daemons/host-bridge-daemon.sh');
     return;
   }
 

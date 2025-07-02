@@ -93,10 +93,12 @@ This directory contains reusable bash modules for the APM framework.
 ```bash
 # Load shared modules
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LIB_DIR="$SCRIPT_DIR/../lib"
+SYSTEM_DIR="$SCRIPT_DIR/../utilities/system"
+GIT_DIR="$SCRIPT_DIR/../utilities/git"
+DOCKER_DIR="$SCRIPT_DIR/../integrations/docker/management"
 
-source "$LIB_DIR/git-config.sh"
-source "$LIB_DIR/container-manager.sh"
+source "$GIT_DIR/git-config.sh"
+source "$DOCKER_DIR/container-manager.sh"
 
 # Use module functions
 setup_host_git_config
@@ -106,11 +108,11 @@ start_container
 ### Testing Individual Modules
 ```bash
 # Test git configuration
-source .local/lib/git-config.sh
+source src/utilities/git/git-config.sh
 setup_host_git_config
 
 # Test path resolution
-source .local/lib/path-resolver.sh
+source src/utilities/system/path-resolver.sh
 resolve_paths
 echo "Project root: $PROJECT_ROOT"
 echo "Work dir: $WORK_DIR"

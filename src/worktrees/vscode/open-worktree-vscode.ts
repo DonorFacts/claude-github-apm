@@ -47,12 +47,12 @@ async function openWorktreeInVSCode(worktreePath: string): Promise<void> {
       console.log('💡 Host will install platform-specific binaries automatically');
     } else {
       console.log('💡 Please ensure host-bridge daemon is running');
-      console.log('💡 Run: ./.local/bin/host-bridge-daemon.sh');
+      console.log('💡 Run: ./src/integrations/docker/host-bridge/daemons/host-bridge-daemon.sh');
     }
   } catch (error) {
     console.error('❌ Failed to open VS Code:', (error as Error).message);
     console.log('💡 Please ensure host-bridge daemon is running');
-    console.log('💡 Run: ./.local/bin/host-bridge-daemon.sh');
+    console.log('💡 Run: ./src/integrations/docker/host-bridge/daemons/host-bridge-daemon.sh');
   }
 }
 

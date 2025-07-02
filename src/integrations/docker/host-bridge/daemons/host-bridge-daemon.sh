@@ -8,7 +8,7 @@ set -euo pipefail
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BRIDGE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)/host-bridge"
+BRIDGE_DIR="$(cd "$SCRIPT_DIR/../runtime" && pwd)/host-bridge"
 REQUESTS_DIR="$BRIDGE_DIR/requests"
 RESPONSES_DIR="$BRIDGE_DIR/responses"
 CONFIG_DIR="$BRIDGE_DIR/config"

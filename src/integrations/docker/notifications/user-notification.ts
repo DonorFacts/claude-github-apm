@@ -5,7 +5,7 @@
  * Updated to use unified host-bridge system
  */
 
-import { hostBridge } from '../../src/integrations/docker/host-bridge/index.js';
+import { hostBridge } from '../host-bridge/index.js';
 
 async function notifyJake() {
   try {
@@ -20,7 +20,7 @@ async function notifyJake() {
     }
   } catch (error) {
     console.log('🔔 Task completed by Claude Code!');
-    console.error('⚠️  Audio notification failed:', error.message);
+    console.error('⚠️  Audio notification failed:', (error as Error).message);
     console.log('💡 Ensure host-bridge daemon is running: npm start');
   }
 }

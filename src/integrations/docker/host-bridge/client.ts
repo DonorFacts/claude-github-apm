@@ -22,7 +22,7 @@ export class HostBridge {
   private configDir: string;
 
   constructor(projectRoot: string = process.cwd()) {
-    this.bridgeDir = path.join(projectRoot, '.local', 'host-bridge');
+    this.bridgeDir = path.join(projectRoot, 'src', 'integrations', 'docker', 'host-bridge', 'runtime', 'host-bridge');
     this.requestsDir = path.join(this.bridgeDir, 'requests');
     this.responsesDir = path.join(this.bridgeDir, 'responses');
     this.configDir = path.join(this.bridgeDir, 'config');
