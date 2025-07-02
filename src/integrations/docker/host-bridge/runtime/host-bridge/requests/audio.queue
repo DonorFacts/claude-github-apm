@@ -1,6 +1,0 @@
-{"id":"9172c30d-8473-4dd5-a686-7708ec9583b1","service":"audio","action":"play","timestamp":"2025-06-30T20:47:06.164Z","payload":{"sound":"Hero.aiff","volume":1},"timeout":5000,"priority":"normal"}
-{"id":"9db9a339-f4ca-4ebe-8469-df93097ab22a","service":"audio","action":"play","timestamp":"2025-07-01T20:05:38.465Z","payload":{"sound":"Hero.aiff","volume":1},"timeout":5000,"priority":"normal"}
-{"id":"0dbb858f-f3ed-4aff-886e-80150d8530cd","service":"audio","action":"play","timestamp":"2025-07-01T20:21:32.143Z","payload":{"sound":"Hero.aiff","volume":1},"timeout":5000,"priority":"normal"}
-{"id":"80cbcd96-58af-4214-8577-730a7b0cd417","service":"audio","action":"play","timestamp":"2025-07-01T21:32:15.047Z","payload":{"sound":"Hero.aiff","volume":1},"timeout":5000,"priority":"normal"}
-{"id":"90311c93-59c0-4ae6-8b63-70fff9c442e0","service":"audio","action":"play","timestamp":"2025-07-02T06:11:34.822Z","payload":{"sound":"Hero.aiff","volume":1},"timeout":5000,"priority":"normal"}
-{"id":"f4352b79-302f-4d48-8186-f5148eb5394c","service":"audio","action":"play","timestamp":"2025-07-02T06:21:32.158Z","payload":{"sound":"Hero.aiff","volume":1},"timeout":5000,"priority":"normal"}
