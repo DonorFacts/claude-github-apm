@@ -1,6 +1,6 @@
 # Long-Term Memory - Master Developer
 
-Last Updated: 2025-06-29T19:45:00Z
+Last Updated: 2025-07-02T03:52:14Z
 
 ## User Preferences & Patterns
 
@@ -30,6 +30,9 @@ Last Updated: 2025-06-29T19:45:00Z
 - Commands in .claude/commands/ (and now "-/" for autocomplete)
 - Handover files in apm/worktree-handovers/
 - Context saves in apm/agents/{role}/context/
+- Interface-First Architecture: src/interfaces/ for API contracts
+- Domain organization: src/services/git/worktrees/ for semantic grouping
+- TypeScript-only policy: no shell scripts, use tsx execution
 
 ## Role-Specific Learnings
 
@@ -50,6 +53,8 @@ Last Updated: 2025-06-29T19:45:00Z
 - Never modify .git file directly in worktrees (breaks VS Code)
 - Don't assume container paths match host paths
 - Avoid keeping dead code "just in case" - user prefers clean, maintainable code
+- In large refactors: Always complete git migration immediately - don't leave files pending deletion
+- When moving files: Use systematic approach to ensure 1:1 mapping and no data loss
 
 ### Process Improvements
 - Simplified command classification (underscore-only) is more predictable
@@ -165,3 +170,24 @@ Git worktrees require consistent paths between host and container. The standard 
 - Previous work on different branches can cause confusion (e.g., test-docker-setup work in feature-draft-git-worktree-docs directory)
 - Full merges preserve development history better than cherry-picks
 - Runtime files (queues, local settings) should always be gitignored
+
+## Architecture Refactoring Insights
+
+### Interface-First Architecture Success
+- Explicit API contracts via src/interfaces/ eliminate ambiguity about public vs internal APIs
+- Domain-driven services (git, session, project, integrations) improve discoverability
+- Semantic placement (worktrees under git) makes logical sense and is easier to find
+- Zero code duplication between human and agent interfaces when using shared services
+
+### Large-Scale File Migration Best Practices
+- Plan 3 architectural options before implementing - compare trade-offs systematically
+- Use git mv for cleaner history, or ensure complete migration in single commit
+- Never leave pending deletions uncommitted - creates confusing intermediate state
+- User instinct about deletion/addition imbalance was correct - always validate migration completeness
+- Test functionality immediately after restructure to catch import path issues early
+
+### CLI Design Patterns
+- yargs provides excellent command-specific help and argument validation
+- TypeScript CLI with tsx execution superior to bash scripts for maintainability
+- Clear separation of interface (CLI commands) from implementation (services) scales well
+- YAML registry more readable than JSON for configuration data
