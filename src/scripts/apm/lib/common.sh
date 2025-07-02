@@ -28,13 +28,15 @@ log_error() {
 # Session management
 get_session_registry() {
     local apm_sessions="${APM_SESSIONS:-../apm/sessions}"
-    echo "$apm_sessions/registry.json"
+    echo "$apm_sessions/registry.yaml"
 }
 
 ensure_session_registry() {
     local registry_file="$(get_session_registry)"
     if [[ ! -f "$registry_file" ]]; then
-        echo '{"sessions": []}' > "$registry_file"
+        cat > "$registry_file" << 'EOF'
+sessions: []
+EOF
         log_info "Created session registry at $registry_file"
     fi
 }

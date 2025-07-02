@@ -78,3 +78,4 @@ _x_*
 
 # pnpm store (should use global store, not local)
 .pnpm-store/
+.apm_session

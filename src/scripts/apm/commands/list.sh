@@ -44,8 +44,9 @@ done
 ensure_session_registry
 registry_file="$(get_session_registry)"
 
-# Read sessions from registry
-sessions=$(jq -r '.sessions[]' "$registry_file" 2>/dev/null || echo "")
+# Read sessions from registry using YAML helper
+yaml_helper="$(dirname "$0")/../lib/yaml-helper.ts"
+sessions=$(tsx "$yaml_helper" list-sessions "$registry_file" 2>/dev/null || echo "")
 
 if [[ -z "$sessions" ]]; then
     log_info "No sessions found"
@@ -60,7 +61,7 @@ echo "0" > /tmp/apm_active_count
 echo "0" > /tmp/apm_crashed_count
 
 # Process each session
-jq -r '.sessions[] | "\(.id)|\(.status)|\(.last_heartbeat)|\(.role)|\(.specialization)|\(.worktree)"' "$registry_file" | while IFS='|' read -r id status last_heartbeat role specialization worktree; do
+echo "$sessions" | while IFS='|' read -r id status last_heartbeat role specialization worktree; do
     # Determine current status
     current_status="$status"
     if [[ "$status" == "active" ]]; then

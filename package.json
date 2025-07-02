@@ -18,6 +18,7 @@
     "dev": "echo 'Framework ready for linking'",
     "start": "./src/scripts/watch-all.sh",
     "shell": "npm run container:shell",
+    "cli": "tsx src/cli.ts",
     "=== BUILD & COMMANDS ===": "",
     "build": "npm run build:prompts",
     "build:prompts": "tsx src/scripts/command-sync/index.ts",
@@ -80,11 +81,15 @@
   },
   "dependencies": {
     "@slack/web-api": "^7.9.3",
+    "@types/yargs": "^17.0.33",
+    "chalk": "^5.4.1",
     "chokidar": "^4.0.3",
+    "commander": "^14.0.0",
     "express": "^5.1.0",
     "fs-extra": "^11.2.0",
     "glob": "^10.3.10",
     "gray-matter": "^4.0.3",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "yargs": "^18.0.0"
   }
 }
