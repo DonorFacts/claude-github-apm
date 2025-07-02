@@ -1,4 +1,4 @@
-import { Repository, IssueTypes } from '../../github/api/types';
+import { Repository, IssueTypes } from '../../integrations/github/api/types';
 
 export interface MarkdownHeader {
   level: number;

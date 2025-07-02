@@ -1,6 +1,6 @@
 import { ImplementationPlan, PlanItem } from '../api/types';
 import { IGitHubClient } from '../api/interfaces';
-import { shouldUseMocks, TEST_REPOSITORY } from '../../test-setup';
+import { shouldUseMocks, TEST_REPOSITORY } from '../../../test-setup';
 import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as path from 'path';

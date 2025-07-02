@@ -6,9 +6,9 @@ import {
   PlanItem, 
   IssueTypes,
   Repository 
-} from '../../github/api/types';
+} from '../../integrations/github/api/types';
 import { MarkdownHeader, MarkdownListItem, ParseContext } from '../../utilities/common/types';
-import { IssueTypeConfigManager } from '../../github/issues/IssueTypeConfigManager';
+import { IssueTypeConfigManager } from '../../integrations/github/issues/IssueTypeConfigManager';
 
 export class MarkdownToYamlConverter {
   private issueTypes: IssueTypes;

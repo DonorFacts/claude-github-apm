@@ -1,17 +1,25 @@
-#!/usr/bin/env node
+#!/usr/bin/env tsx
 
 /**
- * Claude GitHub APM - Prompt Build System
- * 
- * Transforms APM prompts with GitHub integration at build time
+ * Modern TypeScript version of the prompt build system
+ * Migrated from create-command-files.js
  */
 
-const fs = require('fs-extra');
-const path = require('path');
-const glob = require('glob');
-const matter = require('gray-matter');
+import fs from 'fs-extra';
+import path from 'path';
+import { glob } from 'glob';
+import matter from 'gray-matter';
 
-class PromptBuilder {
+interface BuildConfig {
+  sourceDir: string;
+  postProcessDir: string;
+  outputDir: string;
+  githubTemplatesDir: string;
+}
+
+export class PromptBuilder {
+  private config: BuildConfig;
+
   constructor() {
     this.config = {
       sourceDir: '.apm/prompts',
@@ -21,7 +29,7 @@ class PromptBuilder {
     };
   }
 
-  async build() {
+  async build(): Promise<void> {
     console.log('🔨 Building GitHub-enhanced APM prompts...\n');
     
     // Clean output directory
@@ -36,9 +44,9 @@ class PromptBuilder {
     console.log('\n✅ Build complete! Prompts available in dist/prompts/');
   }
 
-  async processPromptDirectory(type) {
+  private async processPromptDirectory(type: string): Promise<void> {
     const sourcePattern = path.join(this.config.sourceDir, type, '**/*.md');
-    const files = glob.sync(sourcePattern);
+    const files = await glob(sourcePattern);
     
     console.log(`\n📁 Processing ${type} prompts (${files.length} files)...`);
     
@@ -47,7 +55,7 @@ class PromptBuilder {
     }
   }
 
-  async processPromptFile(filePath, type) {
+  private async processPromptFile(filePath: string, type: string): Promise<void> {
     // Read original prompt
     const content = await fs.readFile(filePath, 'utf8');
     const parsed = matter(content);
@@ -78,7 +86,7 @@ class PromptBuilder {
     console.log(`  ✓ ${relativePath}`);
   }
 
-  async applyPostProcessor(parsed, postProcessPath) {
+  private async applyPostProcessor(parsed: matter.GrayMatterFile<string>, postProcessPath: string): Promise<string> {
     const postProcess = await fs.readFile(postProcessPath, 'utf8');
     const postMatter = matter(postProcess);
     
@@ -92,8 +100,11 @@ class PromptBuilder {
     const injections = postMatter.content.match(/## INJECT:(\w+)\n([\s\S]*?)(?=## |$)/g);
     if (injections) {
       for (const injection of injections) {
-        const [, sectionName, sectionContent] = injection.match(/## INJECT:(\w+)\n([\s\S]*?)(?=## |$)/);
-        content = content.replace(`{{${sectionName}}}`, sectionContent.trim());
+        const match = injection.match(/## INJECT:(\w+)\n([\s\S]*?)(?=## |$)/);
+        if (match) {
+          const [, sectionName, sectionContent] = match;
+          content = content.replace(`{{${sectionName}}}`, sectionContent.trim());
+        }
       }
     }
     
@@ -108,9 +119,9 @@ class PromptBuilder {
     return matter.stringify(content, mergedData);
   }
 
-  async injectGitHubContext(content, metadata) {
+  private async injectGitHubContext(content: string, metadata: Record<string, any>): Promise<string> {
     // Add GitHub-specific context based on prompt metadata
-    const githubContext = [];
+    const githubContext: string[] = [];
     
     if (metadata.agent_type === 'manager') {
       githubContext.push(`
@@ -142,9 +153,9 @@ class PromptBuilder {
     return content;
   }
 
-  async addIssueTypeAwareness(content, filePath) {
+  private async addIssueTypeAwareness(content: string, filePath: string): Promise<string> {
     // Map prompt types to issue types
-    const issueTypeMap = {
+    const issueTypeMap: Record<string, string[]> = {
       'manager-plan': ['phase', 'project', 'epic'],
       'task-prompt': ['feature', 'task'],
       'implement-': ['task'],
@@ -170,8 +181,8 @@ Use the appropriate issue type when creating GitHub issues.
     return content;
   }
 
-  getIssueTypeDescription(type) {
-    const descriptions = {
+  private getIssueTypeDescription(type: string): string {
+    const descriptions: Record<string, string> = {
       phase: 'Strategic milestone (e.g., "Phase 1: MVP")',
       project: 'Major initiative within a phase',
       epic: 'Collection of related features',
@@ -183,10 +194,18 @@ Use the appropriate issue type when creating GitHub issues.
   }
 }
 
+/**
+ * Export for use by other modules
+ */
+export async function createCommandFiles(workingDir: string, packageRoot: string): Promise<void> {
+  const builder = new PromptBuilder();
+  // Set working directory context if needed
+  process.chdir(workingDir);
+  await builder.build();
+}
+
 // Run if called directly
 if (require.main === module) {
   const builder = new PromptBuilder();
   builder.build().catch(console.error);
 }
-
-module.exports = PromptBuilder;

@@ -3,7 +3,7 @@
 const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
-const { createCommandFiles } = require('../lib/create-command-files');
+const { createCommandFiles } = require('../src/utilities/command-processing/prompt-builder.ts');
 
 const command = process.argv[2];
 const args = process.argv.slice(3);

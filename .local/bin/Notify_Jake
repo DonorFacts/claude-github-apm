@@ -5,7 +5,7 @@
  * Updated to use unified host-bridge system
  */
 
-import { hostBridge } from '../../src/tools/host-bridge/index.js';
+import { hostBridge } from '../../src/integrations/docker/host-bridge/index.js';
 
 async function notifyJake() {
   try {

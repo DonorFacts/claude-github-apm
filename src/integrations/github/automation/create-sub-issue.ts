@@ -2,11 +2,11 @@
 
 /**
  * Create sub-issue relationship between two issues
- * Usage: tsx src/scripts/github/create-sub-issue.ts <child_node_id> <parent_node_id>
+ * Usage: tsx src/integrations/github/automation/create-sub-issue.ts <child_node_id> <parent_node_id>
  */
 
 import { execSync } from 'child_process';
-import { logError, logInfo } from '../../utilities/common/common';
+import { logError, logInfo } from '../../../utilities/common/common';
 
 function main() {
   const childId = process.argv[2];

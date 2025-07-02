@@ -2,7 +2,7 @@
 
 /**
  * Simple speech helper for command-line usage
- * Usage: tsx src/tools/host-bridge/speech-helper.ts "Your message here"
+ * Usage: tsx src/integrations/docker/host-bridge/speech-helper.ts "Your message here"
  */
 
 import { hostBridge } from './index.js';
