@@ -10,8 +10,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - DO NOT edit more code than you have to.
 - DO NOT WASTE TOKENS, be succinct and concise.
 - If the User provides you with just a .md file reference and no other information, then YOU MUST treat the .md contents as specific instructions from the User for you to immediately follow exactly.
-- ALWAYS use strict TypeScript rather than creating Bash `.sh` scripts. Execute `.ts` files via `tsx <file>`.
-- ALWAYS invoke local scripts using relative paths (e.g., `./src/scripts/foo.sh`) rather than absolute paths. This ensures portability across different environments and worktrees.
+- **CRITICAL**: NEVER create shell scripts (`.sh`, `.bash`) under ANY circumstances. Use TypeScript exclusively for all automation and scripting tasks.
+- ALWAYS invoke local scripts using relative paths (e.g., `./src/scripts/foo.ts`) rather than absolute paths. This ensures portability across different environments and worktrees.
 - YOU MUST follow TDD practices every time you implement new functionality, fix bugs, or otherwise modify application behavior:
   1.  List happy path and edge cases
   2.  Identify acceptance criteria for each case
@@ -71,6 +71,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
     3. Features are the enemy of shipping
     4. A working tool today beats a perfect tool tomorrow
 
+## Script Language Policy: TypeScript-Only Automation
+
+**PROHIBITED**: Never create shell scripts (`.sh`, `.bash`, `.zsh`) for any purpose.
+
+**REQUIRED**: Use TypeScript for all automation and scripting:
+- Execute with `tsx script.ts`
+- Include type annotations and error handling
+- Add Jest tests for all scripts
+- Use `@types/node`, `commander`, `chalk` as needed
+
 ## Guidelines on Using Claude Code Sub-Agents:
 
 - Use a sub-agent when:
@@ -105,4 +115,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 2. **User starts asking 2+ questions that seem unrelated to current work**:
    - **Instructions File Path**: `src/prompts/multiple-questions.md`
    - **Instructions Summary**: Ask the user whether they want to move this new subject to a separate Claude conversation in a new Terminal tab, and create a new issue for it, appending as context the latest messages relevant to the new subject. And include the end of the initial Claude prompt an instruction for carrying over this conversation (either answering the user's last question (if not answered), summarizing where you both left off, providing a link to the new issue, and asking the user to continue the conversation in the new Terminal tab, maybe even sharing the keyboard shortcut to switch to the new tab))
+
+---
+
+# Important Instruction Reminders
+
+**ABSOLUTE REQUIREMENTS:**
+
+1. **NO SHELL SCRIPTS**: Never create `.sh`, `.bash`, or `.zsh` files. Use TypeScript instead.
+2. **SUGGEST ALTERNATIVES**: If user requests shell script, offer TypeScript alternative.
+3. **MIGRATE WHEN FOUND**: Suggest migrating existing shell scripts to TypeScript.
+
+Do what has been asked; nothing more, nothing less.
 
