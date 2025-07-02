@@ -24,6 +24,7 @@
     "clean": "rm -rf dist",
     "watch:commands": "tsx src/scripts/command-sync/index.ts --watch",
     "sync:commands": "tsx src/scripts/command-sync/index.ts",
+    "rebuild-container": "./rebuild-container.sh",
     "=== TESTING ===": "",
     "ts-check": "tsc --noEmit",
     "test": "tsc --noEmit && jest --silent",
@@ -33,6 +34,7 @@
     "=== PACKAGE MANAGEMENT ===": "",
     "link": "pnpm link --global",
     "unlink": "pnpm unlink --global",
+    "rebuild:platform": "./src/scripts/rebuild-platform-packages.sh",
     "=== GIT & SYNC ===": "",
     "sync:main": "./src/scripts/git/sync-main.sh",
     "=== CONTAINER MANAGEMENT ===": "",
@@ -71,6 +73,7 @@
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.0.4",
+    "@types/ws": "^8.5.12",
     "jest": "^30.0.0",
     "ts-jest": "^29.4.0",
     "tsx": "^4.20.3",
@@ -78,9 +81,11 @@
   },
   "dependencies": {
     "chokidar": "^4.0.3",
+    "clipboardy": "^4.0.0",
     "fs-extra": "^11.2.0",
     "glob": "^10.3.10",
     "gray-matter": "^4.0.3",
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "ws": "^8.18.0"
   }
 }

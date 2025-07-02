@@ -19,7 +19,7 @@ async function speakMessage() {
     await hostBridge.speech_say(message);
     console.log('Speech delivered!');
   } catch (error) {
-    console.error('Speech failed:', error.message);
+    console.error('Speech failed:', error instanceof Error ? error.message : error);
     console.log('💡 Ensure host-bridge daemon is running: npm start');
   }
 }

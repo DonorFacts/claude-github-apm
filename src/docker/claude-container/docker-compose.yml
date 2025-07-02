@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  claude-code:
+    build:
+      context: ../../..
+      dockerfile: src/docker/claude-container/Dockerfile
+    image: apm-claude-container:latest
+    container_name: claude-${COMPOSE_PROJECT_NAME:-default}
+    stdin_open: true
+    tty: true
+    working_dir: ${PWD:-/workspace}
+    
+    # Network configuration
+    network_mode: ${NETWORK_MODE:-host}
+    
+    # Resource limits (configurable via environment)
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-8g}
+          cpus: ${CPU_LIMIT:-4.0}
+    
+    # Volume mounts - preserving exact host paths for git worktree compatibility
+    volumes:
+      # Current workspace (excluding node_modules to prevent platform conflicts)
+      - ${PWD}:${PWD}:rw
+      
+      # Container-specific node_modules volume (shadows host node_modules)
+      - claude_node_modules:${PWD}/node_modules
+      
+      # Claude configuration (if exists)
+      - ${HOME}/.claude:/home/claude/.claude:rw
+      
+      # Cross-platform clipboard support
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      
+      # X11 forwarding for Linux (if available)
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    
+    # Environment variables
+    environment:
+      - DISPLAY=${DISPLAY:-host.docker.internal:0}
+      - APM_CONTAINERIZED=true
+      - APM_SECURITY_LEVEL=${APM_SECURITY_LEVEL:-standard}
+      - APM_DEBUG=${APM_DEBUG:-false}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - APM_WORKTREE_NAME=${COMPOSE_PROJECT_NAME:-default}
+      - HOST_OS=${HOST_OS:-darwin}  # darwin, linux, windows
+      - TMPDIR=${TMPDIR:-/tmp}
+    
+    # macOS-specific configuration
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+    # Security options
+    security_opt:
+      - seccomp:unconfined  # Required for some clipboard operations
+    
+    # Keep container running
+    command: tail -f /dev/null
+
+# Named volumes for container-specific dependencies
+volumes:
+  claude_node_modules:
+    driver: local

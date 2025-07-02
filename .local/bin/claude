@@ -63,6 +63,49 @@ if [ -n "$PWD" ]; then
     fi
 fi
 
+# Detect host OS
+detect_host_os() {
+    case "$(uname -s)" in
+        Darwin*) echo "darwin" ;;
+        Linux*)  echo "linux" ;;
+        MINGW*|MSYS*|CYGWIN*) echo "windows" ;;
+        *)       echo "unknown" ;;
+    esac
+}
+
+# Setup X11 for clipboard support
+setup_x11_environment() {
+    local host_os=$(detect_host_os)
+    
+    case "$host_os" in
+        darwin)
+            # Check if XQuartz is installed
+            if [ -d "/Applications/Utilities/XQuartz.app" ] || [ -d "/Applications/XQuartz.app" ]; then
+                # Start XQuartz if not running
+                if ! pgrep -x "XQuartz" > /dev/null; then
+                    echo "🖥️  Starting XQuartz for clipboard support..."
+                    open -a XQuartz &
+                    sleep 2
+                fi
+                # Set DISPLAY if not already set
+                [ -z "$DISPLAY" ] && export DISPLAY=":0"
+                # Allow connections from Docker
+                xhost +localhost 2>/dev/null || true
+            else
+                echo "⚠️  XQuartz not found. Install it for clipboard support: brew install --cask xquartz"
+            fi
+            ;;
+        linux)
+            # Set DISPLAY if not already set
+            [ -z "$DISPLAY" ] && export DISPLAY=":0"
+            # Allow local connections
+            xhost +local:docker 2>/dev/null || true
+            ;;
+    esac
+    
+    export HOST_OS="$host_os"
+}
+
 # Function to start watch processes on host if not already running
 start_watch_processes() {
     if [ -f "$WATCH_PID_FILE" ]; then
@@ -84,8 +127,27 @@ start_watch_processes() {
     echo "✅ Watch processes started (PID: $WATCH_PID, logs: /tmp/apm-watch.log)"
 }
 
+# Setup X11 environment for clipboard support
+setup_x11_environment
+
 # Start watch processes before container
 start_watch_processes
+
+# Check clipboard service availability (non-blocking)
+check_clipboard_service() {
+    if [ "${APM_CLIPBOARD_BRIDGE:-true}" = "false" ]; then
+        return 0
+    fi
+    
+    # Quick check without waiting - if it's ready, great, if not, continue
+    if curl -s --connect-timeout 1 "http://localhost:41073/health" > /dev/null 2>&1; then
+        echo "✅ Clipboard service available"
+    else
+        echo "ℹ️  Clipboard service not available (will start with watch processes)"
+    fi
+}
+
+check_clipboard_service
 
 # Check if container exists and is running
 if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
@@ -93,6 +155,17 @@ if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     
     # Ensure container is stopped if it exists
     docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
+    
+    # Prepare X11 configuration for clipboard support
+    X11_CONFIG=""
+    if [ -n "$DISPLAY" ] && [ -S "/tmp/.X11-unix" ]; then
+        X11_CONFIG="-e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw"
+        if [ -f "$HOME/.Xauthority" ]; then
+            X11_CONFIG="$X11_CONFIG -v $HOME/.Xauthority:/home/user/.Xauthority:rw"
+        fi
+        # Add security options for clipboard access
+        X11_CONFIG="$X11_CONFIG --security-opt seccomp:unconfined"
+    fi
     
     # Start new container with restricted access
     docker run -d \
@@ -109,6 +182,8 @@ if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         -e "GH_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
         -e "GITHUB_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
         -e "PATH=/workspace/.local/bin:/workspace/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
+        -e "HOST_OS=${HOST_OS:-}" \
+        $X11_CONFIG \
         "$CONTAINER_IMAGE"
     
     # Wait for container to be ready

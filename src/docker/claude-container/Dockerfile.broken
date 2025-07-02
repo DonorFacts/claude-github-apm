@@ -1,0 +1,243 @@
+FROM node:20-slim
+
+# Install system dependencies including GitHub CLI, security tools, shell utilities, and X11/clipboard support
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    bash \
+    zsh \
+    ca-certificates \
+    wget \
+    gnupg \
+    iptables \
+    netbase \
+    dnsutils \
+    jq \
+    sox \
+    alsa-utils \
+    xclip \
+    xsel \
+    x11-apps \
+    x11-utils \
+    x11-xserver-utils \
+    dbus-x11 \
+    libx11-dev \
+    libxext-dev \
+    libxrender-dev \
+    libxtst-dev \
+    xvfb \
+    && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor > /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
+    && apt-get update \
+    && apt-get install -y gh \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Claude Code and development tools globally
+RUN npm install -g @anthropic-ai/claude-code pnpm tsx
+
+# Create workspace directory structure
+RUN mkdir -p /workspace
+
+# Copy package files for dependency installation
+COPY package.json pnpm-lock.yaml* /workspace/
+WORKDIR /workspace
+
+# Install project dependencies with Linux-specific binaries
+# This ensures we get @esbuild/linux-* instead of host platform binaries
+RUN pnpm install --frozen-lockfile --prefer-offline
+
+# Install direnv for automatic environment loading
+RUN curl -sfL https://direnv.net/install.sh | bash
+
+# Don't create a specific user - we'll run as the host user
+# Set up shell configuration that works for any user
+RUN echo 'export HISTSIZE=100000' >> /etc/bash.bashrc \
+    && echo 'export PATH="/workspace/.local/bin:/workspace/node_modules/.bin:$PATH"' >> /etc/bash.bashrc \
+    && echo 'alias python=python3' >> /etc/bash.bashrc \
+    && echo 'alias pip=pip3' >> /etc/bash.bashrc \
+    && echo 'alias e="pnpm tsx"' >> /etc/bash.bashrc \
+    && echo 'alias pn=pnpm' >> /etc/bash.bashrc \
+    && echo 'eval "$(direnv hook bash)"' >> /etc/bash.bashrc
+
+# Make workspace writable by any user
+RUN chmod -R 777 /workspace
+
+# Create a generic home directory for any user
+RUN mkdir -p /home/user && chmod 777 /home/user
+
+# No firewall configuration needed - container has full network access
+
+# Add pre-approve direnv for workspace (in a location any user can access)
+RUN mkdir -p /etc/direnv \
+    && echo '/workspace' > /etc/direnv/allowed \
+    && chmod -R 755 /etc/direnv
+
+# Simple clipboard bridge scripts for file-based approach
+RUN mkdir -p /usr/local/bin && \
+    echo '#!/bin/bash' > /usr/local/bin/pbpaste && \
+    echo 'cat /workspace/.clipboard/content.txt 2>/dev/null || echo ""' >> /usr/local/bin/pbpaste && \
+    echo '#!/bin/bash' > /usr/local/bin/pbcopy && \
+    echo 'mkdir -p /workspace/.clipboard && cat > /workspace/.clipboard/content.txt' >> /usr/local/bin/pbcopy && \
+    chmod +x /usr/local/bin/pbpaste /usr/local/bin/pbcopy
+#!/bin/bash
+# Enhanced clipboard bridge - paste from host clipboard
+
+# Function to check if X11 is available
+check_x11() {
+    if [ -n "$DISPLAY" ] && xset q &>/dev/null; then
+        return 0
+    fi
+    return 1
+}
+
+# Try multiple clipboard access methods in order of preference
+if check_x11; then
+    # X11 is available - use xclip/xsel
+    if command -v xclip >/dev/null 2>&1; then
+        xclip -selection clipboard -o 2>/dev/null
+    elif command -v xsel >/dev/null 2>&1; then
+        xsel --clipboard --output 2>/dev/null
+    else
+        echo "X11 available but no clipboard tool found" >&2
+        exit 1
+    fi
+elif [ "$HOST_OS" = "darwin" ]; then
+    # macOS without X11 - try native pbpaste through Docker socket
+    if [ -S /var/run/docker.sock ]; then
+        # This is a placeholder - in practice, we need a host-side service
+        echo "macOS clipboard access requires XQuartz or host-side service" >&2
+        exit 1
+    fi
+else
+    echo "No clipboard access method available" >&2
+    exit 1
+fi
+EOF
+cat > /usr/local/bin/pbcopy << 'EOF' &&
+#!/bin/bash
+# Enhanced clipboard bridge - copy to host clipboard
+
+# Function to check if X11 is available
+check_x11() {
+    if [ -n "$DISPLAY" ] && xset q &>/dev/null; then
+        return 0
+    fi
+    return 1
+}
+
+# Read input
+input=$(cat)
+
+# Try multiple clipboard access methods in order of preference
+if check_x11; then
+    # X11 is available - use xclip/xsel
+    if command -v xclip >/dev/null 2>&1; then
+        echo -n "$input" | xclip -selection clipboard 2>/dev/null
+    elif command -v xsel >/dev/null 2>&1; then
+        echo -n "$input" | xsel --clipboard --input 2>/dev/null
+    else
+        echo "X11 available but no clipboard tool found" >&2
+        exit 1
+    fi
+elif [ "$HOST_OS" = "darwin" ]; then
+    # macOS without X11 - try native pbpaste through Docker socket
+    if [ -S /var/run/docker.sock ]; then
+        # This is a placeholder - in practice, we need a host-side service
+        echo "macOS clipboard access requires XQuartz or host-side service" >&2
+        exit 1
+    fi
+else
+    echo "No clipboard access method available" >&2
+    exit 1
+fi
+EOF
+chmod +x /usr/local/bin/pbpaste /usr/local/bin/pbcopy
+
+# Set environment variables
+ENV APM_CONTAINERIZED=true \
+    APM_PROJECT_ROOT=/workspace \
+    PNPM_STORE_DIR=/home/user/.pnpm-store
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD test -f /workspace/package.json || exit 1
+
+WORKDIR /workspace
+
+# Copy clipboard initialization script
+COPY clipboard-init.sh /usr/local/bin/clipboard-init.sh
+RUN chmod +x /usr/local/bin/clipboard-init.sh
+
+# Create enhanced clipboard integration startup script
+RUN cat > /usr/local/bin/start-clipboard-integration.sh << 'EOF' && chmod +x /usr/local/bin/start-clipboard-integration.sh
+#!/bin/bash
+# Initialize enhanced clipboard integration for Claude Code
+
+# Run clipboard initialization
+/usr/local/bin/clipboard-init.sh 2>/dev/null || true
+
+# Set up clipboard bridge environment variables
+export CLIPBOARD_BRIDGE_URL="http://host.docker.internal:41073"
+export APM_CLIPBOARD_DEBUG="${APM_CLIPBOARD_DEBUG:-false}"
+
+# Initialize seamless clipboard integration
+if [ "$APM_CONTAINERIZED" = "true" ]; then
+    echo "📋 Initializing seamless clipboard integration..."
+    
+    # Create global paste function available in the shell
+    cat > /usr/local/bin/paste << 'PASTE_EOF'
+#!/bin/bash
+tsx /workspace/src/tools/clipboard-bridge/paste-command.ts
+PASTE_EOF
+    chmod +x /usr/local/bin/paste
+    
+    # Create aliases
+    ln -sf /usr/local/bin/paste /usr/local/bin/p
+    ln -sf /usr/local/bin/paste /usr/local/bin/clipboard
+    ln -sf /usr/local/bin/paste /usr/local/bin/cb
+    
+    echo "✅ Clipboard commands available: paste, p, clipboard, cb"
+fi
+EOF
+
+# Create container startup script that handles platform-specific dependencies
+RUN cat > /usr/local/bin/container-startup.sh << 'EOF' && chmod +x /usr/local/bin/container-startup.sh
+#!/bin/bash
+# Container startup script - handles platform-specific dependencies and clipboard integration
+
+echo "🐳 Starting Claude container..."
+
+# Change to workspace directory
+cd /workspace 2>/dev/null || true
+
+# Rebuild platform-specific dependencies if package.json exists
+if [ -f "/workspace/package.json" ]; then
+    echo "🔧 Rebuilding platform-specific packages for container environment..."
+    
+    # List of packages that need platform-specific rebuilds
+    REBUILD_PACKAGES="esbuild"
+    
+    # Check if packages exist and rebuild them
+    for pkg in $REBUILD_PACKAGES; do
+        if [ -d "/workspace/node_modules/$pkg" ] || [ -d "/workspace/node_modules/.pnpm/$pkg"* ]; then
+            echo "  Rebuilding $pkg for linux-arm64..."
+            pnpm rebuild "$pkg" 2>/dev/null || {
+                echo "  ⚠️ Failed to rebuild $pkg, continuing..."
+            }
+        fi
+    done
+    
+    echo "✅ Platform-specific packages rebuilt"
+fi
+
+# Initialize clipboard integration
+/usr/local/bin/start-clipboard-integration.sh
+
+echo "✅ Claude container ready"
+
+# Keep container running
+tail -f /dev/null
+EOF
+
+# Keep container running with platform fix and clipboard initialization
+ENTRYPOINT ["/bin/bash", "-c", "/usr/local/bin/container-startup.sh"]

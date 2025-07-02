@@ -1,6 +1,6 @@
 FROM node:20-slim
 
-# Install system dependencies including GitHub CLI, security tools, and shell utilities
+# Install system dependencies including GitHub CLI, security tools, shell utilities, and X11/clipboard support
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -15,6 +15,17 @@ RUN apt-get update && apt-get install -y \
     jq \
     sox \
     alsa-utils \
+    xclip \
+    xsel \
+    x11-apps \
+    x11-utils \
+    x11-xserver-utils \
+    dbus-x11 \
+    libx11-dev \
+    libxext-dev \
+    libxrender-dev \
+    libxtst-dev \
+    xvfb \
     && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor > /usr/share/keyrings/githubcli-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
     && apt-get update \
@@ -26,6 +37,14 @@ RUN npm install -g @anthropic-ai/claude-code pnpm tsx
 
 # Create workspace directory structure
 RUN mkdir -p /workspace
+
+# Copy package files for dependency installation
+COPY package.json pnpm-lock.yaml* /workspace/
+WORKDIR /workspace
+
+# Install project dependencies with Linux-specific binaries
+# This ensures we get @esbuild/linux-* instead of host platform binaries
+RUN pnpm install --frozen-lockfile --prefer-offline
 
 # Install direnv for automatic environment loading
 RUN curl -sfL https://direnv.net/install.sh | bash
@@ -46,23 +65,19 @@ RUN chmod -R 777 /workspace
 # Create a generic home directory for any user
 RUN mkdir -p /home/user && chmod 777 /home/user
 
-# No firewall configuration needed - container has full network access
-
 # Add pre-approve direnv for workspace (in a location any user can access)
 RUN mkdir -p /etc/direnv \
     && echo '/workspace' > /etc/direnv/allowed \
     && chmod -R 755 /etc/direnv
+
+# Clipboard bridge functionality removed
 
 # Set environment variables
 ENV APM_CONTAINERIZED=true \
     APM_PROJECT_ROOT=/workspace \
     PNPM_STORE_DIR=/home/user/.pnpm-store
 
-# Add health check
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD test -f /workspace/package.json || exit 1
-
 WORKDIR /workspace
 
-# Keep container running
-ENTRYPOINT ["/bin/bash", "-c", "tail -f /dev/null"]
+# Default command
+CMD ["bash"]

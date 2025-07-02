@@ -1,0 +1,18 @@
+[
+  {
+    "key": "shift+alt+cmd+v",
+    "command": "workbench.action.terminal.sendSequence",
+    "args": {
+      "text": "echo 'VS Code keybinding triggered!' && tsx src/scripts/vscode-paste-clipboard.ts\n"
+    },
+    "when": "terminalFocus"
+  },
+  {
+    "key": "ctrl+shift+alt+v",
+    "command": "workbench.action.terminal.sendSequence", 
+    "args": {
+      "text": "echo 'Alternative keybinding triggered!' && tsx src/scripts/vscode-paste-clipboard.ts\n"
+    },
+    "when": "terminalFocus"
+  }
+]
