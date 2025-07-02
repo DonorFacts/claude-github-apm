@@ -1,68 +1,71 @@
 # Agent Context Snapshot
 
-Generated: 2025-06-29T16:39:41Z
+Generated: 2025-07-01T22:14:30Z
 Agent Role: developer
-Agent Instance: APM Master Developer Agent
+Agent Instance: APM Collective Intelligence Implementation
 
 ## Current State
 
 ### Role & Responsibilities
 
-- **Primary Role**: APM Master Developer Agent - Framework development and maintenance
-- **Current Focus**: Worktree workflow improvements and container integration
+- **Primary Role**: Developer implementing APM Collective Intelligence architecture
+- **Current Focus**: Crash recovery system foundation - session tracking and CLI
 - **Key Responsibilities**: 
-  - Implement and fix worktree creation and handover systems
-  - Maintain development tool organization patterns
-  - Ensure consistent container-based workflows
-  - Debug and resolve path handling issues
+  - Build session registry and heartbeat tracking
+  - Implement APM CLI for session management
+  - Create crash detection and recovery mechanisms
+  - Follow TDD practices and maintain existing repo structure
 
 ### Active Work
 
 #### Current Task
 
-- **Task ID**: Worktree workflow container requirement implementation
+- **Task ID**: APM Multi-Agent Memory Architecture - Hour 1 Implementation
 - **Status**: completed
-- **Started**: Earlier in session
-- **Work Completed**: 
-  - Fixed worktree handover system for container environments
-  - Updated handover file location to agent-specific directories
-  - Implemented container requirement validation
-  - Simplified path handling by requiring container mode
-  - Created multiple test worktrees to validate fixes
-- **Work Remaining**: None from current session
-- **Related Issues**: GitHub issues #395, #396
+- **Started**: 2025-07-01T22:00:00Z
+- **Work Completed**:
+  - Built complete APM CLI foundation (`src/scripts/apm/apm`)
+  - Implemented session registry system with JSON storage
+  - Created heartbeat tracking and staleness detection
+  - Built list command with active/crashed session filtering
+  - Created comprehensive demo plan and supporting scripts
+  - Moved scripts to proper `src/scripts/` location per repo conventions
+- **Work Remaining**: Recovery commands, VS Code integration, conversation search
+- **Related Issues**: APM Multi-Agent Memory Architecture
 
 #### Work in Progress
 
-No active code development in this session - was system improvement and testing work.
+Session registry working with external storage:
+- Sessions tracked in `../apm/sessions/registry.json`
+- Automatic staleness detection (>2 minutes = crashed)
+- Rich metadata: role, specialization, worktree, branch, timestamps
 
 ### Recent Context
 
 #### Recent Git Commits
 
-Recent commits relevant to current work:
-- c9dab16: feat: require container environment for worktree workflows
-- e1e7b43: refactor: update worktree handover system to use agent-specific directories
+- 4c9a6da: feat: complete APM Collective Intelligence architecture design
+- 356ac14: docs: consolidate architecture docs and preserve insights
 
 #### Decisions Made
 
-1. **Decision**: Require container environment for all worktree workflows
-   - **Rationale**: Eliminates host/container path translation complexity
-   - **Impact**: Simplifies all handover scripts and ensures predictable behavior
-   - **Time**: Current session
-   - **Approved By**: User (Jake)
+1. **Decision**: Use external storage (`../apm/`) for large conversations, repo storage (`./apm/`) for committed knowledge
+   - **Rationale**: Conversations too large for repo, but memories/summaries should be committed
+   - **Impact**: Clean separation of transient vs persistent data
+   - **Time**: During architecture review
+   - **Approved By**: Jake (user feedback)
 
-2. **Decision**: Move handover files to agent-specific directories
-   - **Rationale**: Better organization and single source of truth
-   - **Impact**: Handover files now only in `apm/agents/<role>/not-started/`
-   - **Time**: Current session
-   - **Approved By**: User (Jake)
+2. **Decision**: Move scripts from `apm/scripts/` to `src/scripts/apm/`
+   - **Rationale**: Follow existing repo conventions, keep source code in src/
+   - **Impact**: Maintains clean project structure
+   - **Time**: During demo creation
+   - **Approved By**: Jake (explicit instruction)
 
-3. **Decision**: Remove dual handover file creation
-   - **Rationale**: User requested single location instead of main + worktree
-   - **Impact**: Cleaner system, less duplication
-   - **Time**: Current session
-   - **Approved By**: User (Jake)
+3. **Decision**: Use JSON for session registry with jq processing
+   - **Rationale**: Human-readable, shell-friendly, simple to implement
+   - **Impact**: Easy debugging and manual inspection
+   - **Time**: During CLI implementation
+   - **Based On**: Technical simplicity for Day 1 implementation
 
 #### Problems Encountered
 
