@@ -1,0 +1,344 @@
+# Claude GitHub APM Implementation Plan
+version: "1.0"
+generated: "2025-06-18"
+
+project:
+  name: "Claude GitHub APM"
+  description: "Transform the original APM framework into a GitHub-native, enterprise-ready system with CLI capabilities, full TypeScript implementation, and seamless scaling from solo developers to enterprise teams."
+  repository:
+    owner: "DonorFacts"
+    name: "claude-github-apm"
+
+# Issue type IDs from DonorFacts organization
+issue_types:
+  phase: "IT_kwDODIcSxM4BoTQQ"
+  project: "IT_kwDODIcSxM4BoTQm"
+  epic: "IT_kwDODIcSxM4BoSKl"
+  feature: "IT_kwDODIcSxM4Bl1xX"
+  story: ""  # Add when Story type is created
+  task: "IT_kwDODIcSxM4Bl1xV"
+  bug: "IT_kwDODIcSxM4Bl1xW"
+
+items:
+  # Phase 1
+  - id: "phase-1"
+    type: "phase"
+    title: "TypeScript Foundation & Core Infrastructure"
+    description: |
+      **Agent Group Alpha** (Agent_TypeScript_Lead, Agent_Test_Engineer)
+      
+      ## Phase Overview
+      
+      Transform the existing JavaScript codebase into a robust TypeScript foundation with comprehensive testing infrastructure and npm publishing capabilities.
+      
+      ## Key Deliverables
+      
+      1. **TypeScript Migration Setup** (Epic 1.1)
+      2. **Testing Infrastructure Setup** (Epic 1.2)  
+      3. **Build System for NPM Publishing** (Epic 1.3)
+      4. **CLAUDE.md Integration System** (Feature 1.4)
+      
+      ## Success Criteria
+      
+      - ✅ Complete TypeScript migration with strict mode
+      - ✅ Test coverage > 80%
+      - ✅ Publishable npm package
+      - ✅ Automated CLAUDE.md updates in consuming repos
+      
+      ## Timeline
+      
+      Estimated Duration: 2-3 weeks
+    parent_id: null
+    children_ids: ["epic-1-1", "epic-1-2", "epic-1-3", "feature-1-4"]
+    issue_number: 2  # Already created
+
+  # Epic 1.1
+  - id: "epic-1-1"
+    type: "epic"
+    title: "TypeScript Migration Setup"
+    description: |
+      **Owner:** Agent_TypeScript_Lead
+      
+      ## Objective
+      
+      Convert the existing JavaScript codebase to strict TypeScript with proper typing and structure.
+      
+      ## Acceptance Criteria
+      
+      - ✅ TypeScript configured with strict mode
+      - ✅ All JavaScript files migrated to TypeScript
+      - ✅ Type coverage > 95%
+      - ✅ ESLint and Prettier configured with pre-commit hooks
+      - ✅ Build system produces clean JavaScript output
+      
+      ## Technical Notes
+      
+      - Use path aliases for clean imports
+      - Maintain backward compatibility
+      - Ensure proper error handling throughout
+      - Add progress indicators for long operations
+    parent_id: "phase-1"
+    children_ids: ["task-1-1-1", "task-1-1-2", "story-1-1-3", "task-1-1-4"]
+    metadata:
+      agent: "Agent_TypeScript_Lead"
+    issue_number: 3  # Already created
+
+  # Tasks under Epic 1.1
+  - id: "task-1-1-1"
+    type: "task"
+    title: "Set up TypeScript configuration and build system"
+    description: |
+      Configure TypeScript for the project with proper strictness and build tooling.
+      
+      ## Requirements
+      
+      - [ ] Create `tsconfig.json` with strict mode enabled
+      - [ ] Configure path aliases for clean imports
+      - [ ] Set up build scripts for development and production
+      - [ ] Configure source maps for debugging
+      
+      ## Technical Details
+      
+      Use latest TypeScript version with strictest possible settings while maintaining practical development experience.
+    parent_id: "epic-1-1"
+    metadata:
+      agent: "Agent_TypeScript_Lead"
+      priority: "high"
+    issue_number: 7  # Already created
+
+  - id: "task-1-1-2"
+    type: "task"
+    title: "Migrate lib/create-command-files.js to TypeScript"
+    description: |
+      Convert the core PromptBuilder functionality to TypeScript with full type safety.
+      
+      ## Requirements
+      
+      - [ ] Define interfaces for PromptBuilder configuration
+      - [ ] Type all methods and parameters strictly
+      - [ ] Handle fs-extra types (install @types/fs-extra)
+      - [ ] Ensure backward compatibility with existing functionality
+      
+      ## Acceptance Criteria
+      
+      - All public APIs maintain compatibility
+      - Type definitions exported for consumers
+      - No use of `any` type without justification
+    parent_id: "epic-1-1"
+    metadata:
+      agent: "Agent_TypeScript_Lead"
+      priority: "high"
+    issue_number: 4  # Already created
+
+  - id: "story-1-1-3"
+    type: "story"
+    title: "Migrate all shell scripts to TypeScript"
+    description: |
+      As a developer, I want all shell scripts converted to TypeScript so that we have consistent tooling and better error handling.
+      
+      ## Requirements
+      
+      - [ ] Create TypeScript equivalents using child_process or execa
+      - [ ] Implement proper error handling and typing
+      - [ ] Add progress indicators for long-running operations
+      - [ ] Maintain script functionality while improving maintainability
+      
+      ## Scripts to Migrate
+      
+      - create-sub-issue.sh
+      - add-issues-to-project.sh
+      - Any other shell scripts in the project
+    parent_id: "epic-1-1"
+    metadata:
+      agent: "Agent_TypeScript_Lead"
+      priority: "medium"
+    issue_number: 5  # Already created
+
+  - id: "task-1-1-4"
+    type: "task"
+    title: "Set up ESLint and Prettier for code quality"
+    description: |
+      Configure code quality tools to maintain consistent code style across the project.
+      
+      ## Requirements
+      
+      - [ ] Configure ESLint with TypeScript plugin
+      - [ ] Set up Prettier with team-standard formatting
+      - [ ] Add pre-commit hooks using husky
+      - [ ] Configure VS Code settings for consistency
+      
+      ## Configuration Guidelines
+      
+      - Use Anthropic's style guide if available
+      - Otherwise use reasonable defaults for TypeScript projects
+      - Ensure compatibility with existing code patterns
+    parent_id: "epic-1-1"
+    metadata:
+      agent: "Agent_TypeScript_Lead"
+      priority: "medium"
+    issue_number: 6  # Already created
+
+  # Epic 1.2
+  - id: "epic-1-2"
+    type: "epic"
+    title: "Testing Infrastructure Setup"
+    description: |
+      **Owner:** Agent_Test_Engineer
+      
+      ## Objective
+      
+      Establish comprehensive testing framework following TDD principles.
+      
+      ## Acceptance Criteria
+      
+      - ✅ Jest configured for TypeScript
+      - ✅ Test coverage > 80%
+      - ✅ CI/CD pipeline includes automated testing
+      - ✅ Testing best practices documented
+      
+      ## Technical Approach
+      
+      - Use Jest as primary testing framework
+      - Include unit, integration, and e2e tests
+      - Set up coverage reporting and thresholds
+    parent_id: "phase-1"
+    children_ids: ["task-1-2-1", "task-1-2-2", "task-1-2-3", "task-1-2-4"]
+    metadata:
+      agent: "Agent_Test_Engineer"
+
+  # Tasks under Epic 1.2
+  - id: "task-1-2-1"
+    type: "task"
+    title: "Set up Jest with TypeScript support"
+    description: |
+      Configure Jest testing framework to work with TypeScript.
+      
+      ## Requirements
+      
+      - [ ] Configure Jest for TypeScript transpilation
+      - [ ] Set up coverage reporting thresholds (aim for 80%+)
+      - [ ] Configure test environments for Node.js
+      - [ ] Add test scripts to package.json
+    parent_id: "epic-1-2"
+    metadata:
+      agent: "Agent_Test_Engineer"
+      priority: "high"
+
+  - id: "task-1-2-2"
+    type: "task"
+    title: "Create test structure and conventions"
+    description: |
+      Establish testing patterns and directory structure.
+      
+      ## Requirements
+      
+      - [ ] Establish __tests__ directories alongside source files
+      - [ ] Define naming conventions (*.test.ts, *.spec.ts)
+      - [ ] Create test utilities and helpers
+      - [ ] Document testing best practices in CONTRIBUTING.md
+    parent_id: "epic-1-2"
+    metadata:
+      agent: "Agent_Test_Engineer"
+      priority: "high"
+
+  - id: "task-1-2-3"
+    type: "task"
+    title: "Write initial test suite for create-command-files"
+    description: |
+      Create comprehensive tests for the core PromptBuilder functionality.
+      
+      ## Requirements
+      
+      - [ ] Test PromptBuilder class initialization
+      - [ ] Test file transformation logic
+      - [ ] Test error handling scenarios
+      - [ ] Test GitHub context injection
+    parent_id: "epic-1-2"
+    metadata:
+      agent: "Agent_Test_Engineer"
+      priority: "medium"
+
+  - id: "task-1-2-4"
+    type: "task"
+    title: "Set up continuous integration testing"
+    description: |
+      Configure GitHub Actions for automated test execution.
+      
+      ## Requirements
+      
+      - [ ] Configure GitHub Actions for test runs
+      - [ ] Add test status badges to README
+      - [ ] Set up automated test reports in PRs
+      - [ ] Configure test caching for faster runs
+    parent_id: "epic-1-2"
+    metadata:
+      agent: "Agent_Test_Engineer"
+      priority: "medium"
+
+  # Epic 1.3
+  - id: "epic-1-3"
+    type: "epic"
+    title: "Build System for NPM Publishing"
+    description: |
+      **Owner:** Agent_TypeScript_Lead
+      
+      ## Objective
+      
+      Create robust build system for npm/pnpm package distribution.
+      
+      ## Acceptance Criteria
+      
+      - ✅ Package publishable to npm
+      - ✅ Post-install scripts work correctly
+      - ✅ Supports both CommonJS and ESM
+      - ✅ Local development workflow documented
+    parent_id: "phase-1"
+    children_ids: ["task-1-3-1", "task-1-3-2", "task-1-3-3", "task-1-3-4"]
+    metadata:
+      agent: "Agent_TypeScript_Lead"
+
+  # Feature 1.4
+  - id: "feature-1-4"
+    type: "feature"
+    title: "CLAUDE.md Integration System"
+    description: |
+      **Owner:** Agent_TypeScript_Lead
+      
+      ## Objective
+      
+      Automatically update consuming repository's CLAUDE.md with APM framework usage information.
+      
+      ## User Story
+      
+      As a developer using claude-github-apm, I want my CLAUDE.md file automatically updated with APM documentation so Claude understands the available commands and workflows.
+    parent_id: "phase-1"
+    children_ids: ["task-1-4-1", "task-1-4-2", "task-1-4-3", "task-1-4-4"]
+    metadata:
+      agent: "Agent_TypeScript_Lead"
+
+  # Phase 2 (partial, to show pattern)
+  - id: "phase-2"
+    type: "phase"
+    title: "Prompt Transformation System Enhancement"
+    description: |
+      **Agent Group Beta** (Agent_Prompt_Engineer, Agent_GitHub_Integration, Agent_Build_Optimizer)
+      
+      ## Phase Overview
+      
+      Enhance the prompt transformation system to fully integrate GitHub context and optimize build performance.
+    parent_id: null
+    children_ids: ["epic-2-1", "epic-2-2", "epic-2-3", "feature-2-4"]
+
+# Execution plan for optimal API usage
+execution:
+  # Create issues level by level to ensure parents exist
+  create_order:
+    - level: 1  # Phases
+      items: ["phase-1", "phase-2"]
+    - level: 2  # Epics and Features under Phases
+      items: ["epic-1-1", "epic-1-2", "epic-1-3", "feature-1-4", "epic-2-1", "epic-2-2", "epic-2-3", "feature-2-4"]
+    - level: 3  # Tasks and Stories under Epics
+      items: ["task-1-1-1", "task-1-1-2", "story-1-1-3", "task-1-1-4", "task-1-2-1", "task-1-2-2", "task-1-2-3", "task-1-2-4"]
+    
+  # Relationship creation can be batched by parent
+  # This will be populated after issue creation

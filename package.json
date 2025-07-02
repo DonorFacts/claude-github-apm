@@ -41,15 +41,15 @@
     "claude:logs": "./.local/bin/claude-logs",
     "claude:stop": "./.local/bin/claude-stop-watch",
     "container:shell": "./.local/bin/claude-shell",
-    "container:start": "tsx src/scripts/docker/apm-container.dev.ts start",
-    "container:stop": "tsx src/scripts/docker/apm-container.dev.ts stop",
-    "container:status": "tsx src/scripts/docker/apm-container.dev.ts status",
-    "container:logs": "tsx src/scripts/docker/apm-container.dev.ts logs",
-    "container:bash": "tsx src/scripts/docker/apm-container.dev.ts shell",
+    "container:start": "tsx src/services/integrations/docker/apm-container.dev.ts start",
+    "container:stop": "tsx src/services/integrations/docker/apm-container.dev.ts stop",
+    "container:status": "tsx src/services/integrations/docker/apm-container.dev.ts status",
+    "container:logs": "tsx src/services/integrations/docker/apm-container.dev.ts logs",
+    "container:bash": "tsx src/services/integrations/docker/apm-container.dev.ts shell",
     "=== HOST-BRIDGE SYSTEM ===": "",
-    "test:bridge": "tsx src/tools/host-bridge/test-bridge.ts",
+    "test:bridge": "tsx src/services/integrations/host-bridge/test-bridge.ts",
     "notify": "tsx .local/bin/Notify_Jake",
-    "speak": "tsx src/tools/host-bridge/speech-helper.ts"
+    "speak": "tsx src/services/integrations/host-bridge/speech-helper.ts"
   },
   "keywords": [
     "claude",

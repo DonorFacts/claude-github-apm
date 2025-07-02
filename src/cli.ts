@@ -34,11 +34,11 @@ function ensureDirectories() {
 
 // Import commands
 async function importCommands() {
-  const { listCommand } = await import('./tools/apm/commands/list');
-  const { initCommand } = await import('./tools/apm/commands/init');
-  const { recoverCommand } = await import('./tools/apm/commands/recover');
-  const { searchCommand } = await import('./tools/apm/commands/search');
-  const { heartbeatCommand } = await import('./tools/apm/commands/heartbeat');
+  const { listCommand } = await import('./interfaces/human/commands/list');
+  const { initCommand } = await import('./interfaces/human/commands/init');
+  const { recoverCommand } = await import('./interfaces/human/commands/recover');
+  const { searchCommand } = await import('./interfaces/human/commands/search');
+  const { heartbeatCommand } = await import('./interfaces/human/commands/heartbeat');
   
   return { listCommand, initCommand, recoverCommand, searchCommand, heartbeatCommand };
 }

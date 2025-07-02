@@ -389,7 +389,20 @@ pnpm link
 
 ### Project Structure
 
-TBD
+```
+src/
+├── cli.ts                    # Main CLI entry point
+├── interfaces/               # API contracts
+│   ├── human/commands/       # Human CLI interface (pnpm cli)
+│   └── agent/slash-commands/ # Agent interface (/register-session)
+├── services/                 # Business logic domains
+│   ├── session/              # Session management
+│   ├── git/worktrees/        # Git and worktree operations
+│   ├── project/issues/       # Project management
+│   └── integrations/         # External services (GitHub, Slack, etc.)
+├── lib/                      # Shared utilities
+└── prompts/                  # Agent initialization prompts
+```
 
 ### Container Audio & Speech Notifications
 
@@ -422,7 +435,7 @@ pnpm test:bridge
 
 #### Usage from Container
 ```typescript
-import { hostBridge } from 'src/tools/host-bridge';
+import { hostBridge } from 'src/services/integrations/host-bridge';
 
 // Open VS Code windows
 await hostBridge.vscode_open('/workspace/main/docs');
