@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { IssueTypes } from '../bulk-issue-creator/types';
+import { IssueTypes } from '../../integrations/github/types';
 
 export class IssueTypeConfigManager {
   constructor(private configPath: string) {}

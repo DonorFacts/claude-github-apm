@@ -1,6 +1,6 @@
-import { IGitHubClient } from '../bulk-issue-creator/interfaces';
+import { IGitHubClient } from '../../integrations/github/interfaces';
 import { IssueTypeConfigManager } from './IssueTypeConfigManager';
-import { GitHubIssue } from '../bulk-issue-creator/types';
+import { GitHubIssue } from '../../integrations/github/types';
 
 export interface SingleIssueData {
   title: string;

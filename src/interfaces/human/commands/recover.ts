@@ -29,7 +29,10 @@ export function recoverCommand(yargs: Argv) {
       const sessionsDir = process.env.APM_SESSIONS!;
       const manager = new SessionManager(sessionsDir);
 
-      if (argv.sessionId === 'all') {
+      const sessionId = argv['session-id'] as string;
+      const dryRun = argv['dry-run'] as boolean;
+      
+      if (sessionId === 'all') {
         const crashedSessions = manager.listSessions('crashed');
         
         if (crashedSessions.length === 0) {
@@ -39,28 +42,28 @@ export function recoverCommand(yargs: Argv) {
 
         console.log(chalk.yellow('⚠'), `Found ${crashedSessions.length} crashed session(s)`);
         
-        if (argv.dryRun) {
+        if (dryRun) {
           console.log(chalk.gray('Dry run mode - showing recovery plan:'));
           console.log();
         }
 
         for (const session of crashedSessions) {
-          await recoverSession(session, argv.dryRun);
+          await recoverSession(session, dryRun);
         }
       } else {
-        const session = manager.getSession(argv.sessionId);
+        const session = manager.getSession(sessionId);
         
         if (!session) {
-          console.error(chalk.red('✗'), `Session not found: ${argv.sessionId}`);
+          console.error(chalk.red('✗'), `Session not found: ${sessionId}`);
           process.exit(1);
         }
 
         if (session.status !== 'crashed') {
-          console.log(chalk.yellow('⚠'), `Session ${argv.sessionId} is not crashed (status: ${session.status})`);
+          console.log(chalk.yellow('⚠'), `Session ${sessionId} is not crashed (status: ${session.status})`);
           return;
         }
 
-        await recoverSession(session, argv.dryRun);
+        await recoverSession(session, dryRun);
       }
     }
   );

@@ -268,7 +268,7 @@ Happy coding! 🚀`;
    */
   async findUser(searchTerm: string): Promise<string | null> {
     try {
-      const usersResult = await this.slack.users.list();
+      const usersResult = await this.slack.users.list({});
       const user = usersResult.members?.find(u => 
         (u.real_name && u.real_name.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (u.profile?.display_name && u.profile.display_name.toLowerCase().includes(searchTerm.toLowerCase())) ||

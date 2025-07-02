@@ -1,9 +1,9 @@
 #!/usr/bin/env tsx
 
 import * as path from 'path';
-import { GitHubClient } from '../tools/bulk-issue-creator/GitHubClient';
-import { SingleIssueCreator } from '../tools/issue-type-config/SingleIssueCreator';
-import { IssueTypeConfigManager } from '../tools/issue-type-config/IssueTypeConfigManager';
+import { GitHubClient } from '../../integrations/github/GitHubClient';
+import { SingleIssueCreator } from './SingleIssueCreator';
+import { IssueTypeConfigManager } from './IssueTypeConfigManager';
 
 async function main() {
   const args = process.argv.slice(2);

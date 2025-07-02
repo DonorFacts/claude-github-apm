@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { BulkIssueCreator } from '../tools/bulk-issue-creator/BulkIssueCreator';
-import { GitHubClient } from '../tools/bulk-issue-creator/GitHubClient';
+import { BulkIssueCreator } from '../../integrations/github/BulkIssueCreator';
+import { GitHubClient } from '../../integrations/github/GitHubClient';
 import * as path from 'path';
 
 async function main() {

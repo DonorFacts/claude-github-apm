@@ -1,4 +1,4 @@
-import { Repository, IssueTypes } from '../bulk-issue-creator/types';
+import { Repository, IssueTypes } from '../services/integrations/github/types';
 
 export interface MarkdownHeader {
   level: number;

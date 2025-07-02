@@ -27,11 +27,12 @@ export function heartbeatCommand(yargs: Argv) {
       const sessionsDir = process.env.APM_SESSIONS!;
       const manager = new SessionManager(sessionsDir);
 
-      const success = manager.updateHeartbeat(argv.sessionId);
+      const sessionId = argv['session-id'] as string;
+      const success = manager.updateHeartbeat(sessionId);
       
       if (!argv.silent) {
         if (success) {
-          console.log(chalk.green('✓'), `Heartbeat updated for ${argv.sessionId}`);
+          console.log(chalk.green('✓'), `Heartbeat updated for ${sessionId}`);
         } else {
           console.error(chalk.red('✗'), `Failed to update heartbeat for ${argv.sessionId}`);
         }

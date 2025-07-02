@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { MarkdownToYamlConverter } from '../tools/markdown-to-yaml/MarkdownToYamlConverter';
+import { MarkdownToYamlConverter } from '../../lib/MarkdownToYamlConverter';
 import * as path from 'path';
 import * as fs from 'fs';
 

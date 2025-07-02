@@ -8,7 +8,7 @@ import {
 } from './types';
 import { GitHubClient } from './GitHubClient';
 import { IGitHubClient } from './interfaces';
-import { IssueTypeDiscoveryService } from '../issue-type-config/IssueTypeDiscoveryService';
+import { IssueTypeDiscoveryService } from '../../project/issues/IssueTypeDiscoveryService';
 
 export class BulkIssueCreator {
   private plan: ImplementationPlan;
@@ -118,7 +118,10 @@ export class BulkIssueCreator {
       const { owner, name } = this.plan.project.repository;
       this.discoveredIssueTypes = await discoveryService.discoverIssueTypes(owner, name);
       
-      console.log(`Discovered ${Object.keys(this.discoveredIssueTypes).length} issue types:`, Object.keys(this.discoveredIssueTypes));
+      if (this.discoveredIssueTypes) {
+        const typeCount = Object.keys(this.discoveredIssueTypes).length;
+        console.log(`Discovered ${typeCount} issue types:`, Object.keys(this.discoveredIssueTypes));
+      }
     } catch (error) {
       console.warn('Failed to discover issue types, falling back to plan defaults:', error);
       this.discoveredIssueTypes = null;

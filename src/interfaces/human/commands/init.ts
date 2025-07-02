@@ -47,7 +47,7 @@ export function initCommand(yargs: Argv) {
 
       // Get current context
       const worktree = argv.worktree || path.basename(process.cwd());
-      let branch = argv.branch;
+      let branch: string = argv.branch || '';
       
       if (!branch) {
         try {
@@ -62,8 +62,8 @@ export function initCommand(yargs: Argv) {
       console.log(chalk.blue('🔄'), `Initializing ${argv.role} agent...`);
       
       const sessionId = manager.registerSession({
-        role: argv.role,
-        specialization: argv.specialization,
+        role: argv.role as string,
+        specialization: argv.specialization as string | undefined,
         worktree,
         branch,
         environment: process.env.APM_CONTAINERIZED === 'true' ? 'container' : 'host'

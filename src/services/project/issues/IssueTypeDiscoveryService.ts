@@ -1,5 +1,5 @@
-import { IGitHubClient } from '../bulk-issue-creator/interfaces';
-import { IssueTypes } from '../bulk-issue-creator/types';
+import { IGitHubClient } from '../../integrations/github/interfaces';
+import { IssueTypes } from '../../integrations/github/types';
 
 export class IssueTypeDiscoveryService {
   constructor(private githubClient: IGitHubClient) {}

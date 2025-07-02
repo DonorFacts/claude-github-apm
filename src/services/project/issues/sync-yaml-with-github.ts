@@ -3,7 +3,7 @@
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import { execSync } from 'child_process';
-import { ImplementationPlan, PlanItem } from '../tools/bulk-issue-creator/types';
+import { ImplementationPlan, PlanItem } from '../../integrations/github/types';
 
 async function syncYamlWithGitHub(yamlPath: string) {
   console.log('🔄 Syncing YAML with GitHub issues...');

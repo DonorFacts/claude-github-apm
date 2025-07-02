@@ -22,7 +22,7 @@ async function registerSession(args: RegisterSessionArgs): Promise<string> {
 
   // Auto-detect current context if not provided
   const worktree = args.worktree || path.basename(process.cwd());
-  let branch = args.branch;
+  let branch: string = args.branch || '';
   
   if (!branch) {
     try {

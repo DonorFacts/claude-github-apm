@@ -2,7 +2,7 @@
 
 import { execSync } from 'child_process';
 import { existsSync } from 'fs';
-import { hostBridge } from '../host-bridge/index.js';
+import { hostBridge } from '../../integrations/host-bridge/index';
 
 /**
  * Opens VS Code in a worktree directory after minimal dependency setup.
