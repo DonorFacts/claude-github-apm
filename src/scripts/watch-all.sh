@@ -55,6 +55,7 @@ echo -e "${YELLOW}[WATCH-ALL]${NC} Starting command sync watcher..."
 cd "$PROJECT_ROOT" && pnpm run watch:commands 2>&1 | prefix_output "COMMANDS" "$BLUE" &
 COMMANDS_PID=$!
 
+<<<<<<< HEAD
 # Function to wait for a service to be ready
 wait_for_service() {
     local url=$1
@@ -75,6 +76,8 @@ wait_for_service() {
 echo -e "${YELLOW}[WATCH-ALL]${NC} Clipboard bridge service disabled (components removed)"
 CLIPBOARD_PID=""
 
+=======
+>>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 # Future: Add more processes here
 # Example:
 # echo -e "${YELLOW}[WATCH-ALL]${NC} Starting event processor..."
@@ -85,7 +88,10 @@ echo -e "${YELLOW}[WATCH-ALL]${NC} All processes started successfully."
 echo -e "${YELLOW}[WATCH-ALL]${NC} Process PIDs:"
 [ -n "$BRIDGE_PID" ] && echo -e "  ${MAGENTA}[HOST-BRIDGE]${NC} PID: $BRIDGE_PID"
 echo -e "  ${BLUE}[COMMANDS]${NC}    PID: $COMMANDS_PID"
+<<<<<<< HEAD
 echo -e "  ${CYAN}[CLIPBOARD]${NC}   Disabled (components removed)"
+=======
+>>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 echo -e "${YELLOW}[WATCH-ALL]${NC} Press Ctrl+C to stop all processes."
 
 # Wait for all background processes

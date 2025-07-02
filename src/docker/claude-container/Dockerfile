@@ -1,6 +1,10 @@
 FROM node:20-slim
 
+<<<<<<< HEAD
 # Install system dependencies including GitHub CLI, security tools, shell utilities, and X11/clipboard support
+=======
+# Install system dependencies including GitHub CLI, security tools, and shell utilities
+>>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -15,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     jq \
     sox \
     alsa-utils \
+<<<<<<< HEAD
     xclip \
     xsel \
     x11-apps \
@@ -26,6 +31,8 @@ RUN apt-get update && apt-get install -y \
     libxrender-dev \
     libxtst-dev \
     xvfb \
+=======
+>>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
     && wget -qO- https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor > /usr/share/keyrings/githubcli-archive-keyring.gpg \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
     && apt-get update \
@@ -38,6 +45,7 @@ RUN npm install -g @anthropic-ai/claude-code pnpm tsx
 # Create workspace directory structure
 RUN mkdir -p /workspace
 
+<<<<<<< HEAD
 # Copy package files for dependency installation
 COPY package.json pnpm-lock.yaml* /workspace/
 WORKDIR /workspace
@@ -46,6 +54,8 @@ WORKDIR /workspace
 # This ensures we get @esbuild/linux-* instead of host platform binaries
 RUN pnpm install --frozen-lockfile --prefer-offline
 
+=======
+>>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 # Install direnv for automatic environment loading
 RUN curl -sfL https://direnv.net/install.sh | bash
 
@@ -65,19 +75,38 @@ RUN chmod -R 777 /workspace
 # Create a generic home directory for any user
 RUN mkdir -p /home/user && chmod 777 /home/user
 
+<<<<<<< HEAD
+=======
+# No firewall configuration needed - container has full network access
+
+>>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 # Add pre-approve direnv for workspace (in a location any user can access)
 RUN mkdir -p /etc/direnv \
     && echo '/workspace' > /etc/direnv/allowed \
     && chmod -R 755 /etc/direnv
 
+<<<<<<< HEAD
 # Clipboard bridge functionality removed
 
+=======
+>>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 # Set environment variables
 ENV APM_CONTAINERIZED=true \
     APM_PROJECT_ROOT=/workspace \
     PNPM_STORE_DIR=/home/user/.pnpm-store
 
+<<<<<<< HEAD
 WORKDIR /workspace
 
 # Default command
 CMD ["bash"]
+=======
+# Add health check
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD test -f /workspace/package.json || exit 1
+
+WORKDIR /workspace
+
+# Keep container running
+ENTRYPOINT ["/bin/bash", "-c", "tail -f /dev/null"]
+>>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
