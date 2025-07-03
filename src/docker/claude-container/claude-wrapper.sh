@@ -195,21 +195,6 @@ esac
 
 log_debug "Running Claude in secure container with multi-agent collaboration..."
 
-<<<<<<< HEAD
-# X11 forwarding for GUI applications and clipboard access
-X11_CONFIG=""
-if [ -n "$DISPLAY" ] && [ -S "/tmp/.X11-unix" ]; then
-    X11_CONFIG="-e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw"
-    if [ -f "$HOME/.Xauthority" ]; then
-        X11_CONFIG="$X11_CONFIG -v $HOME/.Xauthority:/root/.Xauthority:rw"
-    fi
-    log_debug "Enabled X11 forwarding for clipboard and GUI support"
-else
-    log_debug "X11 forwarding not available (no DISPLAY or X11 socket)"
-fi
-
-=======
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 # Run Claude in container with full security stack
 exec docker run \
     --rm \
@@ -220,10 +205,6 @@ exec docker run \
     $NETWORK_CONFIG \
     $RESOURCE_LIMITS \
     $SECURITY_OPTS \
-<<<<<<< HEAD
-    $X11_CONFIG \
-=======
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
     -v "$WORKSPACE_MOUNT" \
     $MAIN_MOUNT \
     $PARENT_MOUNT \

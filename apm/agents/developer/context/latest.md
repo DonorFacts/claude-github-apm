@@ -1,38 +1,21 @@
 # Agent Context Snapshot
 
-<<<<<<< HEAD
 Generated: 2025-07-02T21:50:00Z
 Agent Role: developer
 Agent Instance: General Framework Developer
-=======
-Generated: 2025-06-29T16:39:41Z
-Agent Role: developer
-Agent Instance: APM Master Developer Agent
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ## Current State
 
 ### Role & Responsibilities
 
-<<<<<<< HEAD
 - **Primary Role**: General Framework Developer
 - **Current Focus**: Implementing clipboard bridge for host-container image sharing
 - **Key Responsibilities**: Research, design, and implement solutions for Claude Code container environments
-=======
-- **Primary Role**: APM Master Developer Agent - Framework development and maintenance
-- **Current Focus**: Worktree workflow improvements and container integration
-- **Key Responsibilities**: 
-  - Implement and fix worktree creation and handover systems
-  - Maintain development tool organization patterns
-  - Ensure consistent container-based workflows
-  - Debug and resolve path handling issues
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ### Active Work
 
 #### Current Task
 
-<<<<<<< HEAD
 - **Task ID**: Clipboard Bridge Image Integration
 - **Status**: Research and design phase completed, implementation partially done
 - **Started**: 2025-07-02T21:00:00Z
@@ -62,29 +45,11 @@ Agent Instance: APM Master Developer Agent
 // Located in: src/tools/clipboard-bridge/integration.test.ts
 // Comprehensive TDD test suite for full workflow
 ```
-=======
-- **Task ID**: Worktree workflow container requirement implementation
-- **Status**: completed
-- **Started**: Earlier in session
-- **Work Completed**: 
-  - Fixed worktree handover system for container environments
-  - Updated handover file location to agent-specific directories
-  - Implemented container requirement validation
-  - Simplified path handling by requiring container mode
-  - Created multiple test worktrees to validate fixes
-- **Work Remaining**: None from current session
-- **Related Issues**: GitHub issues #395, #396
-
-#### Work in Progress
-
-No active code development in this session - was system improvement and testing work.
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ### Recent Context
 
 #### Recent Git Commits
 
-<<<<<<< HEAD
 No commits made yet - work is in progress and uncommitted.
 
 #### Decisions Made
@@ -118,61 +83,21 @@ No commits made yet - work is in progress and uncommitted.
   - **Status**: Identified workarounds
   - **Approach**: Research revealed 3 potential solutions: terminal injection, direct API, MCP server
   - **GitHub Issue**: Multiple related issues found in anthropics/claude-code repo
-=======
-Recent commits relevant to current work:
-- c9dab16: feat: require container environment for worktree workflows
-- e1e7b43: refactor: update worktree handover system to use agent-specific directories
-
-#### Decisions Made
-
-1. **Decision**: Require container environment for all worktree workflows
-   - **Rationale**: Eliminates host/container path translation complexity
-   - **Impact**: Simplifies all handover scripts and ensures predictable behavior
-   - **Time**: Current session
-   - **Approved By**: User (Jake)
-
-2. **Decision**: Move handover files to agent-specific directories
-   - **Rationale**: Better organization and single source of truth
-   - **Impact**: Handover files now only in `apm/agents/<role>/not-started/`
-   - **Time**: Current session
-   - **Approved By**: User (Jake)
-
-3. **Decision**: Remove dual handover file creation
-   - **Rationale**: User requested single location instead of main + worktree
-   - **Impact**: Cleaner system, less duplication
-   - **Time**: Current session
-   - **Approved By**: User (Jake)
-
-#### Problems Encountered
-
-- **Issue**: Original handover system had path detection issues in containers
-  - **Status**: Resolved
-  - **Approach**: Required container mode and simplified path logic
-  - **GitHub Issue**: Issues #395, #396 for testing
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 #### User Communications
 
 Recent important exchanges:
-<<<<<<< HEAD
 
 - 2025-07-02T21:00:00Z: Jake requested investigation of clipboard bridge for container environments
 - 2025-07-02T21:15:00Z: Clarified workflow should be container → host, not host-only
 - 2025-07-02T21:30:00Z: Jake pointed out fundamental issue with programmatic image input to Claude Code
 - 2025-07-02T21:45:00Z: Jake requested research into Claude Code's actual implementation approach
 - 2025-07-02T21:50:00Z: Jake suggested investigating snap-happy app for next session
-=======
-- User identified path mismatch between container and host environments
-- User suggested requiring container mode from start to simplify architecture
-- User requested handover files only in worktree directories, not duplicated
-- User confirmed the simplified approach worked correctly
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ### Understanding & Insights
 
 #### Project Patterns
 
-<<<<<<< HEAD
 - **TDD Methodology**: Jake insists on comprehensive TDD approach - write tests first, implement second
 - **Environment Awareness**: Solutions must work across host and container environments seamlessly
 - **Research-Driven Development**: Thorough investigation of existing solutions before implementing custom ones
@@ -183,25 +108,11 @@ Recent important exchanges:
 - **Constraints**: Claude Code CLI has limited programmatic APIs, especially for image input
 - **Dependencies**: macOS AppleScript for clipboard, Docker for containerization, Claude Code for AI interaction
 - **Core Problem**: Need to bridge gap between container environment and host clipboard, then inject into Claude Code programmatically
-=======
-- **Container-first architecture**: Requiring container mode eliminates architectural complexity
-- **Agent-specific directories**: Using `apm/agents/<role>/` improves organization
-- **Single source of truth**: Handover files should exist in one location only
-- **Test-driven validation**: Created multiple test worktrees to validate fixes
-
-#### Technical Context
-
-- **Architecture**: APM framework with multi-agent coordination via handover files
-- **Constraints**: Claude Code cannot cd outside main directory, container paths differ from host
-- **Dependencies**: Docker, VS Code integration, git worktree functionality
-- **GitHub Integration**: Issue tracking for worktree testing
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ### Pending Items
 
 #### Immediate Next Steps
 
-<<<<<<< HEAD
 1. Research snap-happy app (https://github.com/badlogic/lemmy/blob/main/apps/snap-happy/README.md) for cross-platform screenshot solutions
 2. Prototype xdotool terminal injection approach for Claude Code image input
 3. Test complete workflow: screenshot → clipboard → service → container → Claude Code
@@ -229,32 +140,10 @@ Recent important exchanges:
   - src/scripts/watch-all.sh (HTTP service integration)
   - package.json (new test:clipboard command)
 - **Next Commit Plans**: Commit clipboard bridge implementation and research findings
-=======
-1. No immediate development tasks pending
-2. Worktree system is now stable and container-validated
-3. Ready for new feature development or maintenance tasks
-
-#### Waiting For
-
-- No pending dependencies
-- System ready for production use
-
-#### Questions/Concerns
-
-- None from current session
-- Worktree workflow appears robust with container requirement
-
-### Git-Based Memory Status
-
-- **Last Commit**: c9dab16 feat: require container environment for worktree workflows
-- **Uncommitted Changes**: None (all changes committed)
-- **Next Commit Plans**: None pending for current work
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ### Environment State
 
 - **Current Directory**: /Users/jakedetels/www/claude-github-apm/main
-<<<<<<< HEAD
 - **Active Branch**: main
 - **Modified Files**: Multiple clipboard-bridge related files with significant enhancements
 
@@ -290,16 +179,10 @@ Recent important exchanges:
 - Create MCP server that receives images and calls Anthropic API
 - Pros: Integrates with Claude Code ecosystem
 - Cons: Complex, unclear if image input is supported in MCP protocol
-=======
-- **Open Files**: None requiring attention
-- **Modified Files**: None uncommitted
-- **Active Branch**: main
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ### Handover Notes
 
 **Critical Information**: 
-<<<<<<< HEAD
 - Clipboard bridge service is implemented and working for text
 - Image capture from macOS clipboard is fixed with new AppleScript approach
 - Container → host connectivity is working via host.docker.internal:41073
@@ -329,40 +212,12 @@ These files will only be read if/when the user chooses to resume this work:
 ```
 
 **Next Research Priority**: https://github.com/badlogic/lemmy/blob/main/apps/snap-happy/README.md
-=======
-- Worktree workflow now requires container environment from start
-- Handover files moved to agent-specific directories only
-- Path handling simplified by container requirement
-- Multiple test worktrees created and validated
-
-**Watch Out For**: 
-- Users attempting worktree workflows from host environment (will fail with clear error)
-- Need to start Claude Code in container mode for worktree functionality
-
-**Recommended Approach**: 
-- Continue using container-required workflow for all worktree operations
-- Follow updated create.md for consistent worktree creation
-- Agent-specific handover directories are now the standard
-
-**Key Files Modified**: 
-- src/prompts/git/worktrees/create.md (updated with container requirements)
-- src/scripts/git-worktree/create-handover.sh (simplified for container-only)
-- src/scripts/git-worktree/check-handover.sh (container validation and agent paths)
-
-**Test Worktrees Created**:
-- feature-395-test-worktree-creation
-- feature-396-test-worktree-validation  
-- test-worktree-final-validation
-
-**Work Completed**: Worktree system improvements are complete and tested
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ## Recovery Instructions
 
 To restore this context:
 
 1. During initialization, read ONLY:
-<<<<<<< HEAD
    - Your init files (generic + role-specific)
    - Your MEMORY.md
    - This context file
@@ -372,16 +227,3 @@ To restore this context:
    - Run `git status` to check for uncommitted changes
    - Review snap-happy app research as priority
 4. Continue with terminal injection prototyping or alternative approaches as directed
-=======
-   - APM Master Developer Agent init files
-   - MEMORY.md for developer role
-   - This context file
-2. Present work options to user and wait for direction
-3. Framework is in excellent state - ready for new feature development
-4. If user wants to review worktree changes, they're all committed in git history
-5. Continue with new work as directed
-
-## Context Save Purpose
-
-This save represents completion of major worktree workflow improvements. The system now requires container environment for predictable operation and uses agent-specific directories for better organization. Framework is stable and ready for production use.
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f

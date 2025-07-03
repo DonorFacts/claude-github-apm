@@ -1,10 +1,6 @@
 # Long-Term Memory - Master Developer
 
-<<<<<<< HEAD
 Last Updated: 2025-07-02T21:50:00Z
-=======
-Last Updated: 2025-06-29T19:45:00Z
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ## User Preferences & Patterns
 
@@ -27,13 +23,10 @@ Last Updated: 2025-06-29T19:45:00Z
 - Prefers concise prompts over verbose instructions
 - Prefers script-based configuration over prompt-embedded setup
 - Values fallback systems that improve UX while maintaining security awareness
-<<<<<<< HEAD
 - Strongly prefers zero-configuration solutions that "just work"
 - Dislikes manual setup steps - everything should be automated
 - Values cross-platform compatibility without OS-specific dependencies
 - Prefers simple commands over complex ones (paste vs pnpm paste)
-=======
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ### Project-Specific Patterns
 - Git worktrees for feature branches
@@ -52,7 +45,6 @@ Last Updated: 2025-06-29T19:45:00Z
 - Use Notify_Jake at end of completed responses
 - Use say-from-container.sh for important updates and explanations
 - Create host-side daemons for container limitations
-<<<<<<< HEAD
 - HTTP/WebSocket architecture provides better cross-platform support than OS-specific solutions
 - Service managers with auto-restart and health monitoring improve reliability
 - Integration with existing watch processes creates seamless UX
@@ -61,8 +53,6 @@ Last Updated: 2025-06-29T19:45:00Z
 - Docker named volumes prevent host/container platform conflicts for node_modules
 - Research established patterns (like isomorphic_copy) before custom implementations
 - Use .dockerignore to prevent platform-specific files from affecting container builds
-=======
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ### Common Pitfalls
 - Don't over-engineer when simple solutions work
@@ -72,7 +62,6 @@ Last Updated: 2025-06-29T19:45:00Z
 - Never modify .git file directly in worktrees (breaks VS Code)
 - Don't assume container paths match host paths
 - Avoid keeping dead code "just in case" - user prefers clean, maintainable code
-<<<<<<< HEAD
 - Avoid OS-specific solutions when cross-platform alternatives exist
 - Don't implement features that require manual setup steps
 - Avoid repeating error messages - implement proper error handling with silent failures
@@ -81,8 +70,6 @@ Last Updated: 2025-06-29T19:45:00Z
 - Always research established solutions before building custom implementations
 - Don't assume partial solutions solve the complete problem - Jake will identify missing pieces
 - Avoid proposing clipboard access without considering final delivery to the target application
-=======
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 
 ### Process Improvements
 - Simplified command classification (underscore-only) is more predictable
@@ -197,7 +184,6 @@ Git worktrees require consistent paths between host and container. The standard 
 - Branch names should match worktree directory names for clarity
 - Previous work on different branches can cause confusion (e.g., test-docker-setup work in feature-draft-git-worktree-docs directory)
 - Full merges preserve development history better than cherry-picks
-<<<<<<< HEAD
 - Runtime files (queues, local settings) should always be gitignored
 
 ## Clipboard Bridge Research Insights
@@ -223,6 +209,4 @@ Three primary approaches identified for programmatic image injection:
 
 ### Cross-Platform Screenshot Solutions
 Future research priority: snap-happy app for inspiration on cross-platform screenshot handling and container-host image sharing patterns.
-=======
 - Runtime files (queues, local settings) should always be gitignored
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
