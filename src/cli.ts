@@ -15,9 +15,7 @@ import { spawn } from 'child_process';
 import { listCommand } from './cli/user/list';
 import { sessionsCommand } from './cli/user/sessions';
 import { initCommand } from './cli/user/init';
-import { initSDKCommand } from './cli/user/init-sdk';
 import { restoreCommand } from './cli/user/restore';
-import { restoreSDKCommand } from './cli/user/restore-sdk';
 import { searchCommand } from './cli/user/search';
 import { completeCommand } from './cli/user/manage';
 import { speakCommand } from './cli/agent/speak';
@@ -71,9 +69,7 @@ async function main() {
   listCommand(cli);
   sessionsCommand(cli);  // Enhanced session management
   initCommand(cli);
-  initSDKCommand(cli);   // SDK-based initialization with hybrid CLI handoff
   restoreCommand(cli);   // Comprehensive session restoration using Claude Code --resume
-  restoreSDKCommand(cli); // SDK-based restoration with hybrid CLI handoff
   searchCommand(cli);
   completeCommand(cli);
   
