@@ -88,11 +88,15 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo '  echo "⚠️  Bot git config not set - missing BOT_GIT_NAME, BOT_GIT_EMAIL, or BOT_GIT_USERNAME"' >> /entrypoint.sh && \
     echo 'fi' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
+    echo '# Sanitize GitHub tokens (remove hidden characters, whitespace)' >> /entrypoint.sh && \
+    echo 'export GITHUB_BOT_TOKEN=$(echo "$GITHUB_BOT_TOKEN" | tr -d "[:space:]" | tr -d "\0" | tr -d "\r\n")' >> /entrypoint.sh && \
+    echo 'export GITHUB_TOKEN=$(echo "$GITHUB_TOKEN" | tr -d "[:space:]" | tr -d "\0" | tr -d "\r\n")' >> /entrypoint.sh && \
+    echo '' >> /entrypoint.sh && \
     echo '# Setup GitHub authentication if token is provided' >> /entrypoint.sh && \
     echo 'if [ -n "$GITHUB_BOT_TOKEN" ] && [ -n "$BOT_GIT_USERNAME" ]; then' >> /entrypoint.sh && \
     echo '  echo "https://$BOT_GIT_USERNAME:$GITHUB_BOT_TOKEN@github.com" > ~/.git-credentials' >> /entrypoint.sh && \
     echo '  chmod 600 ~/.git-credentials' >> /entrypoint.sh && \
-    echo '  echo "✅ Bot GitHub authentication configured"' >> /entrypoint.sh && \
+    echo '  echo "✅ Bot GitHub authentication configured (token sanitized)"' >> /entrypoint.sh && \
     echo 'fi' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
     echo '# Keep container running' >> /entrypoint.sh && \

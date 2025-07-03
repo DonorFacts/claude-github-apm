@@ -31,6 +31,17 @@ load_bot_config() {
     # Extract username from credential section
     export BOT_GIT_USERNAME=$(grep -A 5 '\[credential "https://github.com"\]' "$bot_config_file" | grep "username" | sed 's/.*= *//' | tr -d ' ')
     
+    # Sanitize GitHub tokens if they exist (remove hidden characters, whitespace)
+    if [ -n "$GITHUB_BOT_TOKEN" ]; then
+        export GITHUB_BOT_TOKEN=$(echo "$GITHUB_BOT_TOKEN" | tr -d '[:space:]' | tr -d '\0' | tr -d '\r\n')
+        echo "🧹 GITHUB_BOT_TOKEN sanitized"
+    fi
+    
+    if [ -n "$GITHUB_TOKEN" ]; then
+        export GITHUB_TOKEN=$(echo "$GITHUB_TOKEN" | tr -d '[:space:]' | tr -d '\0' | tr -d '\r\n')
+        echo "🧹 GITHUB_TOKEN sanitized"
+    fi
+    
     if [ -n "$BOT_GIT_NAME" ] && [ -n "$BOT_GIT_EMAIL" ] && [ -n "$BOT_GIT_USERNAME" ]; then
         echo "✅ Bot configuration loaded:"
         echo "   Name: $BOT_GIT_NAME"

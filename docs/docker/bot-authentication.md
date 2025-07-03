@@ -90,6 +90,47 @@ To verify your setup:
 ```
 **Solution**: Set `GITHUB_BOT_TOKEN` environment variable on host
 
+### Token Authentication Failures
+```
+remote: Invalid username or password.
+fatal: Authentication failed for 'https://github.com/...'
+```
+
+**Common Causes & Solutions**:
+
+1. **Hidden Characters in Token** (MOST COMMON)
+   - **Problem**: Copy/paste from browsers/emails can include invisible Unicode characters
+   - **Solution**: The system now automatically sanitizes tokens, but you can also:
+     ```bash
+     # Clean token manually if needed
+     export GITHUB_BOT_TOKEN=$(echo "your_token_here" | tr -d '[:space:]')
+     ```
+
+2. **Expired or Invalid Token**
+   - **Problem**: Token was revoked or expired
+   - **Solution**: Generate a new token on GitHub with `repo` scope
+
+3. **Wrong Username**
+   - **Problem**: Token belongs to different account than `BOT_GIT_USERNAME`
+   - **Solution**: Ensure token and username match the same GitHub account
+
+4. **Repository Permissions**
+   - **Problem**: Bot account doesn't have write access to repository
+   - **Solution**: Add bot account as collaborator with write permissions
+
+### Automatic Token Sanitization
+The system automatically removes these problematic characters:
+- Whitespace (spaces, tabs, newlines)
+- Null characters (`\0`)
+- Carriage returns (`\r`)
+- Line feeds (`\n`)
+
+You'll see this message if sanitization occurs:
+```
+🧹 GITHUB_BOT_TOKEN sanitized
+✅ Bot GitHub authentication configured (token sanitized)
+```
+
 ## Example Complete Setup
 
 ```bash
