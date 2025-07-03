@@ -63,7 +63,6 @@ if [ -n "$PWD" ]; then
     fi
 fi
 
-<<<<<<< HEAD
 # Detect host OS
 detect_host_os() {
     case "$(uname -s)" in
@@ -107,8 +106,6 @@ setup_x11_environment() {
     export HOST_OS="$host_os"
 }
 
-=======
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 # Function to start watch processes on host if not already running
 start_watch_processes() {
     if [ -f "$WATCH_PID_FILE" ]; then
@@ -130,34 +127,8 @@ start_watch_processes() {
     echo "✅ Watch processes started (PID: $WATCH_PID, logs: /tmp/apm-watch.log)"
 }
 
-<<<<<<< HEAD
-# Setup X11 environment for clipboard support
-setup_x11_environment
-
 # Start watch processes before container
 start_watch_processes
-
-# Check clipboard service availability (non-blocking)
-check_clipboard_service() {
-    if [ "${APM_CLIPBOARD_BRIDGE:-true}" = "false" ]; then
-        return 0
-    fi
-    
-    # Quick check without waiting - if it's ready, great, if not, continue
-    if curl -s --connect-timeout 1 "http://localhost:41073/health" > /dev/null 2>&1; then
-        echo "✅ Clipboard service available"
-    else
-        echo "ℹ️  Clipboard service not available (will start with watch processes)"
-    fi
-}
-
-check_clipboard_service
-
-=======
-# Start watch processes before container
-start_watch_processes
-
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
 # Check if container exists and is running
 if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo "Starting APM container..."
@@ -165,20 +136,6 @@ if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     # Ensure container is stopped if it exists
     docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
     
-<<<<<<< HEAD
-    # Prepare X11 configuration for clipboard support
-    X11_CONFIG=""
-    if [ -n "$DISPLAY" ] && [ -S "/tmp/.X11-unix" ]; then
-        X11_CONFIG="-e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix:rw"
-        if [ -f "$HOME/.Xauthority" ]; then
-            X11_CONFIG="$X11_CONFIG -v $HOME/.Xauthority:/home/user/.Xauthority:rw"
-        fi
-        # Add security options for clipboard access
-        X11_CONFIG="$X11_CONFIG --security-opt seccomp:unconfined"
-    fi
-    
-=======
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
     # Start new container with restricted access
     docker run -d \
         --name "$CONTAINER_NAME" \
@@ -194,11 +151,6 @@ if ! docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         -e "GH_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
         -e "GITHUB_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
         -e "PATH=/workspace/.local/bin:/workspace/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
-<<<<<<< HEAD
-        -e "HOST_OS=${HOST_OS:-}" \
-        $X11_CONFIG \
-=======
->>>>>>> 5d3291809a761e16acb51670a9738c3d2d31485f
         "$CONTAINER_IMAGE"
     
     # Wait for container to be ready
