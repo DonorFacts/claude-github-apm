@@ -89,20 +89,20 @@
 - **Key Decisions**: Require container mode for worktrees, single handover location, remove host detection
 - **Handover**: No - system improvements complete
 
-### 20250629_194500_context.md
-- **Saved**: 2025-06-29T19:45:00Z
-- **Agent State**: Documentation completion verification
-- **Primary Focus**: Verified debugging-tools.md, README updates, package.json organization from previous session
-- **Key Decisions**: Framework documentation patterns established, `.dev.ext` convention documented
-- **Handover**: No - session continuation/verification
+### 20250702_215000_context.md
 
-### 20250629_195100_context.md
-- **Saved**: 2025-06-29T19:51:00Z
-- **Agent State**: GitHub bot integration completed
-- **Primary Focus**: Bot account setup with fallback system, container token handling, worktree security
-- **Key Decisions**: Recommended vs required bot setup, script-based config, warning messages
-- **Handover**: No - session checkpoint
+- **Saved**: 2025-07-02T21:50:00Z
+- **Agent State**: Research and design phase completed
+- **Primary Focus**: Clipboard bridge for host-container image sharing in Claude Code environments
+- **Key Decisions**: 
+  - HTTP service approach chosen over file-based
+  - Terminal injection identified as most promising solution
+  - snap-happy app research planned for next session
+- **Handover**: No - checkpoint save for future continuation
 
+### Previous Entries
+
+<<<<<<< HEAD
 ### 20250629_114356_context.md
 - **Saved**: 2025-06-29T18:43:56Z
 - **Agent State**: Container security improvements and cleanup completed

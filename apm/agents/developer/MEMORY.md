@@ -34,6 +34,10 @@ Last Updated: 2025-07-03T02:24:00Z
 - **Automatic integration over manual commands**: Features must integrate into required workflows, not rely on manual usage
 - **UX quality as hard requirement**: Technical improvements cannot compromise user experience quality
 - **Hybrid solutions over pure approaches**: Often better to combine best aspects of different technologies
+- Strongly prefers zero-configuration solutions that "just work"
+- Dislikes manual setup steps - everything should be automated
+- Values cross-platform compatibility without OS-specific dependencies
+- Prefers simple commands over complex ones (paste vs pnpm paste)
 
 ### Project-Specific Patterns
 - Git worktrees for feature branches
@@ -59,8 +63,19 @@ Last Updated: 2025-07-03T02:24:00Z
 - Integrate automation into existing required workflows rather than creating new manual commands
 - Use CLI structure under `src/cli/agent/` and `src/cli/user/` for organized command management
 - Create host-side daemons for container limitations
+<<<<<<< HEAD
 - **Investigate container architecture first**: Check for mounted filesystems before building complex bridging solutions
 - **Analyze existing systems before adding new ones**: Prevent creating conflicting or redundant components
+=======
+- HTTP/WebSocket architecture provides better cross-platform support than OS-specific solutions
+- Service managers with auto-restart and health monitoring improve reliability
+- Integration with existing watch processes creates seamless UX
+- Graceful error handling and silent failures prevent spam in logs
+- File-based IPC often more reliable than HTTP services for Docker containers
+- Docker named volumes prevent host/container platform conflicts for node_modules
+- Research established patterns (like isomorphic_copy) before custom implementations
+- Use .dockerignore to prevent platform-specific files from affecting container builds
+>>>>>>> origin/main
 
 ### Common Pitfalls
 - Don't over-engineer when simple solutions work
@@ -70,10 +85,21 @@ Last Updated: 2025-07-03T02:24:00Z
 - Never modify .git file directly in worktrees (breaks VS Code)
 - Don't assume container paths match host paths
 - Avoid keeping dead code "just in case" - user prefers clean, maintainable code
+<<<<<<< HEAD
 - In large refactors: Always complete git migration immediately - don't leave files pending deletion
 - When moving files: Use systematic approach to ensure 1:1 mapping and no data loss
 - **Check for existing session management**: Don't build new session systems without analyzing existing ones (CLI commands may depend on them)
 - **Container/host architecture assumptions**: Always verify filesystem mounts before assuming complex bridging is needed
+=======
+- Avoid OS-specific solutions when cross-platform alternatives exist
+- Don't implement features that require manual setup steps
+- Avoid repeating error messages - implement proper error handling with silent failures
+- Docker node_modules sharing between platforms causes esbuild binary conflicts
+- Complex HTTP services often less reliable than simple file-based approaches in Docker
+- Always research established solutions before building custom implementations
+- Don't assume partial solutions solve the complete problem - Jake will identify missing pieces
+- Avoid proposing clipboard access without considering final delivery to the target application
+>>>>>>> origin/main
 
 ### Process Improvements
 - Simplified command classification (underscore-only) is more predictable
@@ -215,6 +241,7 @@ Git worktrees require consistent paths between host and container. The standard 
 - Full merges preserve development history better than cherry-picks
 - Runtime files (queues, local settings) should always be gitignored
 
+<<<<<<< HEAD
 ## Architecture Refactoring Insights
 
 ### Interface-First Architecture Success
@@ -255,3 +282,29 @@ Git worktrees require consistent paths between host and container. The standard 
 - Bridge mapping system enables session restoration across different tools
 - Environment validation critical for session restoration (branch/worktree matching)
 - Package installation constraints can block implementation - design around dependencies
+=======
+## Clipboard Bridge Research Insights
+
+### Claude Code API Limitations
+- Claude Code has no programmatic APIs for image input - only interactive Ctrl+V works
+- Official implementation is primitive: uses temporary files with 90% failure rate on macOS
+- No compression - "dumps everything into context window" causing context limits
+- Multiple GitHub issues document broken clipboard functionality across platforms
+
+### Research Methodology Appreciation
+Jake values deep technical investigation including:
+- Examining actual source code and GitHub issues, not just documentation
+- Understanding both capabilities and limitations of existing tools
+- Identifying multiple solution approaches with trade-off analysis
+- Recognizing when reference implementations are flawed and can be improved
+
+### Solution Architecture Patterns
+Three primary approaches identified for programmatic image injection:
+1. **Terminal injection** (xdotool) - maintains Claude Code context but platform-limited
+2. **Direct API bypass** - full control but loses agent capabilities  
+3. **MCP server** - ecosystem integration but unclear image support
+
+### Cross-Platform Screenshot Solutions
+Future research priority: snap-happy app for inspiration on cross-platform screenshot handling and container-host image sharing patterns.
+- Runtime files (queues, local settings) should always be gitignored
+>>>>>>> origin/main

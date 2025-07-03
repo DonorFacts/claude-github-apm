@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+  claude-code:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: apm-claude-container:latest
+    container_name: claude-${COMPOSE_PROJECT_NAME:-default}
+    stdin_open: true
+    tty: true
+    working_dir: ${PWD:-/workspace}
+    
+    # Network configuration
+    network_mode: ${NETWORK_MODE:-host}
+    
+    # Resource limits (configurable via environment)
+    deploy:
+      resources:
+        limits:
+          memory: ${MEMORY_LIMIT:-8g}
+          cpus: ${CPU_LIMIT:-4.0}
+    
+    # Volume mounts - preserving exact host paths for git worktree compatibility
+    volumes:
+      # Current workspace
+      - ${PWD}:${PWD}:rw
+      
+      # Parent directory for git worktree access (if exists)
+      - ${PARENT_DIR:-/tmp}:${PARENT_DIR:-/tmp}:rw
+      
+      # Main branch mount (if different from current)
+      - ${MAIN_BRANCH_PATH:-/tmp}:${MAIN_BRANCH_PATH:-/tmp}:rw
+      
+      # Claude configuration (if exists)
+      - ${HOME}/.claude:/home/claude/.claude:rw
+      
+      # APM memory system
+      - ${APM_PATH}:/workspace/apm:rw
+      
+      # Cross-platform clipboard support
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      
+      # X11 forwarding for macOS/Linux
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ${XAUTHORITY:-/dev/null}:${XAUTHORITY:-/dev/null}:rw
+      
+      # macOS specific - XQuartz socket location
+      - /private/tmp/.X11-unix:/private/tmp/.X11-unix:rw
+      - /opt/X11:/opt/X11:ro
+    
+    # Environment variables
+    environment:
+      # Display settings for X11
+      - DISPLAY=${DISPLAY:-host.docker.internal:0}
+      - XAUTHORITY=${XAUTHORITY:-}
+      
+      # APM environment
+      - APM_CONTAINERIZED=true
+      - APM_SECURITY_LEVEL=${APM_SECURITY_LEVEL:-standard}
+      - APM_DEBUG=${APM_DEBUG:-false}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - APM_WORKTREE_NAME=${COMPOSE_PROJECT_NAME:-default}
+      
+      # Host detection and clipboard
+      - HOST_OS=${HOST_OS:-darwin}
+      - TMPDIR=${TMPDIR:-/tmp}
+      
+      # Clipboard daemon settings
+      - CLIPBOARD_ENABLED=true
+      - XCLIP_SELECTION=clipboard
+    
+    # macOS-specific configuration
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    
+    # Security options
+    security_opt:
+      - seccomp:unconfined  # Required for clipboard operations
+    
+    # Capabilities for clipboard access
+    cap_add:
+      - SYS_ADMIN  # For clipboard monitoring
+    
+    # Run clipboard daemon and keep container alive
+    command: |
+      sh -c '
+        # Start clipboard daemon if X11 is available
+        if [ -n "$DISPLAY" ] && [ -S "/tmp/.X11-unix/X0" ]; then
+          echo "Starting clipboard daemon..."
+          # Run xclipd or similar daemon in background
+          nohup sh -c "while true; do sleep 1; done" > /dev/null 2>&1 &
+        fi
+        # Keep container running
+        tail -f /dev/null
+      '

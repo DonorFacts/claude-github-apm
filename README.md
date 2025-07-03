@@ -50,6 +50,7 @@ Claude GitHub APM is a **multi-agent project management framework** that coordin
 - Shared resources reduce overhead and complexity
 - Dynamic user mapping - runs as your host user (not root)
 - Health monitoring with auto-restart capabilities
+- **Platform Package Management**: Container automatically rebuilds platform-specific packages (like `esbuild`) on startup to handle macOS↔Linux differences. If you switch back to host commands after container usage, run `pnpm rebuild:platform` to rebuild packages for your host platform.
 
 **Multi-Agent Collaboration**: Agents can coordinate across worktrees with shared access to:
 - Main branch for architectural context

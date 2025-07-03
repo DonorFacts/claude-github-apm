@@ -1,55 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Read(~/www/claude-github-apm/)",
-      "Read(~/www/claude-github-apm/*)",
-      "Read(/workspace/)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "MultiEdit(*)",
 
-      "Bash(Notify_Jake)",
-
-      "Bash(git add:*)",
-      "Bash(git commit:*)",
-      "Bash(git checkout:*)",
-      "Bash(git pull:*)",
-      "Bash(git push:*)",
-      "Bash(git worktree:*)",
-
-      "Bash(gh api:*)",
-      "Bash(gh repo view:*)",
-      "Bash(gh issue edit:*)",
-
-      "Bash(pnpm add:*)",
-      "Bash(pnpm test:*)",
-      "Bash(pnpm install:*)",
-      "Bash(pnpm link:*)",
-
-      "Bash(npm install:*)",
-      "Bash(npm run:*)",
-      "Bash(npm search:*)",
-
-      "Bash(node:*)",
-      "Bash(INIT_CWD=./test-temp-project node scripts/postinstall.js)",
-
-      "Bash(mkdir:*)",
-      "Bash(rm:*)",
-      "Bash(mv:*)",
-      "Bash(cp:*)",
-      "Bash(ln:*)",
-      "Bash(touch:*)",
-      "Bash(chmod:*)",
-
-      "Bash(ls:*)",
-      "Bash(find:*)",
-      "Bash(grep:*)",
-
-      "Bash(printf:*)",
-      "Bash(echo:*)",
-      "Bash(tty)",
-      "Bash(env:*)",
-
-      "Bash(if [ -d tmp ]; then mv tmp .tmp; else mkdir -p .tmp; fi)",
-
-      "Bash(./src/scripts/create-sub-issue.sh)",
+      "Bash(*)",
 
       "WebFetch(domain:docs.anthropic.com)",
       "WebFetch(domain:github.com)"

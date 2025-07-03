@@ -1,0 +1,43 @@
+# Exclude host node_modules to prevent platform conflicts
+node_modules/
+.pnpm-store/
+
+# Exclude build artifacts  
+dist/
+build/
+out/
+
+# Exclude local development files
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Exclude OS-specific files
+.DS_Store
+Thumbs.db
+
+# Exclude git (we mount the workspace which includes .git)
+# .git
+
+# Exclude temporary files
+*.tmp
+*.temp
+.tmp/
+.temp/
+
+# Exclude logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Exclude coverage reports
+coverage/
+.nyc_output/
+
+# Exclude IDE files (but allow .vscode for container dev)
+.idea/
+*.swp
+*.swo
+*~

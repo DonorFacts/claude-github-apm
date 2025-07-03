@@ -27,6 +27,14 @@ RUN npm install -g @anthropic-ai/claude-code pnpm tsx
 # Create workspace directory structure
 RUN mkdir -p /workspace
 
+# Copy package files for dependency installation
+COPY package.json pnpm-lock.yaml* /workspace/
+WORKDIR /workspace
+
+# Install project dependencies with Linux-specific binaries
+# This ensures we get @esbuild/linux-* instead of host platform binaries
+RUN pnpm install --frozen-lockfile --prefer-offline
+
 # Install direnv for automatic environment loading
 RUN curl -sfL https://direnv.net/install.sh | bash
 
@@ -53,6 +61,8 @@ RUN mkdir -p /etc/direnv \
     && echo '/workspace' > /etc/direnv/allowed \
     && chmod -R 755 /etc/direnv
 
+# Clipboard bridge functionality removed
+
 # Set environment variables
 ENV APM_CONTAINERIZED=true \
     APM_PROJECT_ROOT=/workspace \
@@ -64,5 +74,5 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
 
 WORKDIR /workspace
 
-# Initialize git configuration and keep container running
-ENTRYPOINT ["/bin/bash", "-c", "[ -f /workspace/.local/bin/init-container-git.sh ] && /workspace/.local/bin/init-container-git.sh || true; tail -f /dev/null"]
+# Keep container running
+ENTRYPOINT ["/bin/bash", "-c", "tail -f /dev/null"]

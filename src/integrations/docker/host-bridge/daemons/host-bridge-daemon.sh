@@ -16,8 +16,37 @@ LOGS_DIR="$BRIDGE_DIR/logs"
 PID_FILE="$CONFIG_DIR/daemon.pid"
 LOG_FILE="$LOGS_DIR/bridge.log"
 
+# Speech queue filtering configuration
+SPEECH_MAX_AGE_SECONDS="${SPEECH_MAX_AGE_SECONDS:-120}"  # Default: 2 minutes, configurable via env var
+
 # Ensure directories exist
 mkdir -p "$REQUESTS_DIR" "$RESPONSES_DIR" "$CONFIG_DIR" "$LOGS_DIR"
+
+# Utility functions
+
+# Check if a request timestamp is too old for speech processing
+is_speech_request_stale() {
+    local request_timestamp="$1"
+    local current_timestamp=$(date -u +%s)
+    local request_timestamp_epoch
+    
+    # Convert ISO timestamp to epoch seconds
+    if command -v gdate &> /dev/null; then
+        # macOS with GNU date (via brew install coreutils)
+        request_timestamp_epoch=$(gdate -d "$request_timestamp" +%s 2>/dev/null || echo "0")
+    else
+        # Linux date
+        request_timestamp_epoch=$(date -d "$request_timestamp" +%s 2>/dev/null || echo "0")
+    fi
+    
+    # If timestamp parsing failed, consider it stale
+    if [ "$request_timestamp_epoch" = "0" ]; then
+        return 0  # stale
+    fi
+    
+    local age_seconds=$((current_timestamp - request_timestamp_epoch))
+    [ "$age_seconds" -gt "$SPEECH_MAX_AGE_SECONDS" ]
+}
 
 # Logging function
 log() {
@@ -54,6 +83,7 @@ trap cleanup SIGTERM SIGINT
 log "INFO" "Host-Bridge daemon started (PID: $$)"
 log "INFO" "Bridge directory: $BRIDGE_DIR"
 log "INFO" "Processing requests for: vscode, audio, speech"
+log "INFO" "Speech queue filtering: max age ${SPEECH_MAX_AGE_SECONDS}s (configurable via SPEECH_MAX_AGE_SECONDS)"
 
 # Path translation for container-to-host paths
 translate_container_path() {
@@ -178,6 +208,15 @@ handle_speech() {
     local voice=$(echo "$request" | jq -r '.payload.voice // "system"')
     local rate=$(echo "$request" | jq -r '.payload.rate // 200')
     local request_id=$(echo "$request" | jq -r '.id')
+    local request_timestamp=$(echo "$request" | jq -r '.timestamp')
+    
+    # Check if the speech request is too old
+    if is_speech_request_stale "$request_timestamp"; then
+        local age_info="older than ${SPEECH_MAX_AGE_SECONDS}s"
+        log "INFO" "Skipping stale speech request ($age_info): '$message'"
+        echo "{\"id\":\"$request_id\",\"status\":\"skipped\",\"message\":\"Request too old, skipped\",\"data\":{\"reason\":\"stale\",\"max_age_seconds\":$SPEECH_MAX_AGE_SECONDS},\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"}" >> "$RESPONSES_DIR/speech.response"
+        return 0
+    fi
     
     log "INFO" "Speech request: $action '$message' (voice: $voice, rate: $rate)"
     
@@ -216,7 +255,7 @@ process_queue() {
     local queue_file="$REQUESTS_DIR/$service.queue"
     
     if [ -f "$queue_file" ] && [ -s "$queue_file" ]; then
-        log "DEBUG" "Processing $service queue"
+        log "INFO" "Processing $service queue"
         
         while IFS= read -r request_line; do
             if [ -n "$request_line" ]; then
@@ -227,13 +266,13 @@ process_queue() {
                 
                 case "$service" in
                     "vscode")
-                        handle_vscode "$request_line"
+                        handle_vscode "$request_line" || true
                         ;;
                     "audio")
-                        handle_audio "$request_line"
+                        handle_audio "$request_line" || true
                         ;;
                     "speech")
-                        handle_speech "$request_line"
+                        handle_speech "$request_line" || true
                         ;;
                     *)
                         log "ERROR" "Unknown service: $service"
