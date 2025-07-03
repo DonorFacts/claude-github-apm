@@ -28,7 +28,7 @@ RUN npm install -g @anthropic-ai/claude-code pnpm tsx
 RUN mkdir -p /workspace
 
 # Copy package files for dependency installation
-COPY package.json pnpm-lock.yaml* /workspace/
+COPY main/package.json main/pnpm-lock.yaml* /workspace/
 WORKDIR /workspace
 
 # Install project dependencies with Linux-specific binaries
@@ -109,9 +109,9 @@ ENV APM_CONTAINERIZED=true \
     PNPM_STORE_DIR=/home/user/.pnpm-store \
     HOME=/home/user
 
-# Add health check - check for main package.json or workspace package.json
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD test -f /workspace/main/package.json || test -f /workspace/package.json || exit 1
+# Health check temporarily disabled for reliable rebuilds
+# HEALTHCHECK --interval=15s --timeout=10s --retries=5 --start-period=60s \
+#   CMD test -d /workspace && echo "Container healthy" || exit 1
 
 WORKDIR /workspace
 

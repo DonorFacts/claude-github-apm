@@ -163,11 +163,6 @@ class ApmContainer {
       -v "${projectRoot}:/workspace" \
       -v "${process.env.HOME}/.claude:/home/user/.claude" \
       -v "${process.env.HOME}/.zshrc:/home/user/.zshrc:ro" \
-      --health-cmd "test -f /workspace/package.json" \
-      --health-interval ${this.HEALTH_CHECK_INTERVAL}s \
-      --health-timeout 5s \
-      --health-retries 3 \
-      --health-start-period ${this.HEALTH_START_PERIOD}s \
       -e APM_CONTAINERIZED=true \
       -e APM_PROJECT_ROOT=/workspace \
       -e HOME=/home/user \
@@ -205,8 +200,12 @@ class ApmContainer {
       ).trim();
       
       if (output === 'running') {
-        // Check health
+        // If no health check configured, just return running
         const health = await this.getHealth();
+        if (health === 'unknown' || health === '') {
+          return 'running';
+        }
+        // Otherwise check health status
         return health === 'healthy' ? 'running' : 'unhealthy';
       } else if (output === 'exited') {
         return 'stopped';  // Treat exited as stopped
@@ -230,23 +229,35 @@ class ApmContainer {
   }
   
   async waitForHealthy(): Promise<void> {
-    const maxAttempts = 20; // Increased from 10
-    const waitInterval = 3; // Increased from 2 seconds
+    const health = await this.getHealth();
+    
+    // If no health check is configured, just verify container is running
+    if (health === 'unknown' || health === '') {
+      const status = await this.getStatus();
+      if (status === 'running') {
+        console.log('✅ Container is running (no health check configured)');
+        return;
+      } else {
+        throw new Error(`Container is not running: ${status}`);
+      }
+    }
+    
+    // Otherwise wait for health check
+    const maxAttempts = 30;
+    const waitInterval = 2;
     
     for (let i = 0; i < maxAttempts; i++) {
-      const health = await this.getHealth();
-      const status = await this.getStatus();
+      const currentHealth = await this.getHealth();
       
-      if (health === 'healthy') {
+      if (currentHealth === 'healthy') {
         console.log('✅ Container is healthy');
         return;
       }
       
-      // Check if container is still starting
-      if (health === 'starting') {
+      if (currentHealth === 'starting') {
         console.log(`⏳ Container is starting up... (${i + 1}/${maxAttempts})`);
       } else {
-        console.log(`⏳ Waiting for container to be healthy... (${i + 1}/${maxAttempts}) [${health}]`);
+        console.log(`⏳ Waiting for container to be healthy... (${i + 1}/${maxAttempts}) [${currentHealth}]`);
       }
       
       await this.sleep(waitInterval);

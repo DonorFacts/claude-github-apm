@@ -81,13 +81,39 @@ async function main(): Promise<void> {
     
     // Step 3: Rebuild Docker image
     const dockerfilePath = path.join(__dirname, 'Dockerfile');
-    const buildContext = process.cwd();
+    
+    // Find project root using same logic as apm-container
+    function findProjectRoot(): string {
+      let current = process.cwd();
+      while (current !== '/') {
+        // PRIORITY 1: Look for main/worktrees structure (this is the parent we want)
+        if (require('fs').existsSync(path.join(current, 'main')) && 
+            require('fs').existsSync(path.join(current, 'worktrees')) && 
+            require('fs').existsSync(path.join(current, 'main', 'package.json'))) {
+          return current;
+        }
+        current = path.dirname(current);
+      }
+      
+      // Fallback: if no main/worktrees structure found, look for direct project structure
+      current = process.cwd();
+      while (current !== '/') {
+        if (require('fs').existsSync(path.join(current, 'package.json'))) {
+          return current;
+        }
+        current = path.dirname(current);
+      }
+      
+      throw new Error('Could not find project root');
+    }
+    
+    const projectRoot = findProjectRoot();
     
     log(`Building image '${IMAGE_NAME}' from ${dockerfilePath}`);
-    log(`Build context: ${buildContext}`);
+    log(`Build context: ${projectRoot}`);
     
     runCommand(
-      `docker build -t ${IMAGE_NAME} -f "${dockerfilePath}" "${buildContext}"`,
+      `docker build -t ${IMAGE_NAME} -f "${dockerfilePath}" "${projectRoot}"`,
       'Building Docker image'
     );
     
