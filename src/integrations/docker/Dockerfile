@@ -57,6 +57,10 @@ RUN chmod +x /tmp/setup-direnv.sh && /tmp/setup-direnv.sh && rm /tmp/setup-diren
 
 # Clipboard bridge functionality removed
 
+# Copy git setup script and create entrypoint
+COPY src/integrations/docker/scripts/setup-git.sh /workspace/
+RUN chmod +x /workspace/setup-git.sh
+
 # Create simple entrypoint script that calls external setup
 RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'set -e' >> /entrypoint.sh && \
