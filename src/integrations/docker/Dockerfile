@@ -63,27 +63,41 @@ RUN mkdir -p /etc/direnv \
 
 # Clipboard bridge functionality removed
 
-# Create bot git config script (will be populated from environment at runtime)
-RUN mkdir -p /home/user && \
-    echo '#!/bin/bash' > /home/user/setup-git-config.sh && \
-    echo 'if [ -n "$BOT_GIT_NAME" ] && [ -n "$BOT_GIT_EMAIL" ] && [ -n "$BOT_GIT_USERNAME" ]; then' >> /home/user/setup-git-config.sh && \
-    echo '  echo "[user]" > ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  echo "    name = $BOT_GIT_NAME" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  echo "    email = $BOT_GIT_EMAIL" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  echo "[credential \"https://github.com\"]" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  echo "    username = $BOT_GIT_USERNAME" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  echo "[credential]" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  echo "    helper = store" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  echo "[init]" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  echo "    defaultBranch = main" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  echo "[pull]" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  echo "    rebase = false" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  chmod 644 ~/.gitconfig' >> /home/user/setup-git-config.sh && \
-    echo '  echo "✅ Bot git config created for $BOT_GIT_NAME ($BOT_GIT_EMAIL)"' >> /home/user/setup-git-config.sh && \
-    echo 'else' >> /home/user/setup-git-config.sh && \
-    echo '  echo "⚠️  Bot git config not set - missing BOT_GIT_NAME, BOT_GIT_EMAIL, or BOT_GIT_USERNAME"' >> /home/user/setup-git-config.sh && \
-    echo 'fi' >> /home/user/setup-git-config.sh && \
-    chmod +x /home/user/setup-git-config.sh
+# Create entrypoint script
+RUN echo '#!/bin/bash' > /entrypoint.sh && \
+    echo 'set -e' >> /entrypoint.sh && \
+    echo '' >> /entrypoint.sh && \
+    echo '# Setup bot git config if environment variables are provided' >> /entrypoint.sh && \
+    echo 'if [ -n "$BOT_GIT_NAME" ] && [ -n "$BOT_GIT_EMAIL" ] && [ -n "$BOT_GIT_USERNAME" ]; then' >> /entrypoint.sh && \
+    echo '  cat > ~/.gitconfig << EOF' >> /entrypoint.sh && \
+    echo '[user]' >> /entrypoint.sh && \
+    echo '    name = $BOT_GIT_NAME' >> /entrypoint.sh && \
+    echo '    email = $BOT_GIT_EMAIL' >> /entrypoint.sh && \
+    echo '[credential "https://github.com"]' >> /entrypoint.sh && \
+    echo '    username = $BOT_GIT_USERNAME' >> /entrypoint.sh && \
+    echo '[credential]' >> /entrypoint.sh && \
+    echo '    helper = store' >> /entrypoint.sh && \
+    echo '[init]' >> /entrypoint.sh && \
+    echo '    defaultBranch = main' >> /entrypoint.sh && \
+    echo '[pull]' >> /entrypoint.sh && \
+    echo '    rebase = false' >> /entrypoint.sh && \
+    echo 'EOF' >> /entrypoint.sh && \
+    echo '  chmod 644 ~/.gitconfig' >> /entrypoint.sh && \
+    echo '  echo "✅ Bot git config created for $BOT_GIT_NAME ($BOT_GIT_EMAIL)"' >> /entrypoint.sh && \
+    echo 'else' >> /entrypoint.sh && \
+    echo '  echo "⚠️  Bot git config not set - missing BOT_GIT_NAME, BOT_GIT_EMAIL, or BOT_GIT_USERNAME"' >> /entrypoint.sh && \
+    echo 'fi' >> /entrypoint.sh && \
+    echo '' >> /entrypoint.sh && \
+    echo '# Setup GitHub authentication if token is provided' >> /entrypoint.sh && \
+    echo 'if [ -n "$GITHUB_BOT_TOKEN" ] && [ -n "$BOT_GIT_USERNAME" ]; then' >> /entrypoint.sh && \
+    echo '  echo "https://$BOT_GIT_USERNAME:$GITHUB_BOT_TOKEN@github.com" > ~/.git-credentials' >> /entrypoint.sh && \
+    echo '  chmod 600 ~/.git-credentials' >> /entrypoint.sh && \
+    echo '  echo "✅ Bot GitHub authentication configured"' >> /entrypoint.sh && \
+    echo 'fi' >> /entrypoint.sh && \
+    echo '' >> /entrypoint.sh && \
+    echo '# Keep container running' >> /entrypoint.sh && \
+    echo 'exec "$@"' >> /entrypoint.sh && \
+    chmod +x /entrypoint.sh
 
 # Set environment variables
 ENV APM_CONTAINERIZED=true \
@@ -97,5 +111,5 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
 
 WORKDIR /workspace
 
-# Initialize bot configuration and authentication, then keep container running
-ENTRYPOINT ["/bin/bash", "-c", "/home/user/setup-git-config.sh && if [ -n \"$GITHUB_BOT_TOKEN\" ] && [ -n \"$BOT_GIT_USERNAME\" ]; then echo \"https://$BOT_GIT_USERNAME:$GITHUB_BOT_TOKEN@github.com\" > /home/user/.git-credentials && chmod 600 /home/user/.git-credentials && echo \"✅ Bot GitHub authentication configured\"; fi; tail -f /dev/null"]
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["tail", "-f", "/dev/null"]
