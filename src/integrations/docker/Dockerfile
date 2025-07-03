@@ -63,10 +63,33 @@ RUN mkdir -p /etc/direnv \
 
 # Clipboard bridge functionality removed
 
+# Create bot git config script (will be populated from environment at runtime)
+RUN mkdir -p /home/user && \
+    echo '#!/bin/bash' > /home/user/setup-git-config.sh && \
+    echo 'if [ -n "$BOT_GIT_NAME" ] && [ -n "$BOT_GIT_EMAIL" ] && [ -n "$BOT_GIT_USERNAME" ]; then' >> /home/user/setup-git-config.sh && \
+    echo '  echo "[user]" > ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  echo "    name = $BOT_GIT_NAME" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  echo "    email = $BOT_GIT_EMAIL" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  echo "[credential \"https://github.com\"]" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  echo "    username = $BOT_GIT_USERNAME" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  echo "[credential]" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  echo "    helper = store" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  echo "[init]" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  echo "    defaultBranch = main" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  echo "[pull]" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  echo "    rebase = false" >> ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  chmod 644 ~/.gitconfig' >> /home/user/setup-git-config.sh && \
+    echo '  echo "✅ Bot git config created for $BOT_GIT_NAME ($BOT_GIT_EMAIL)"' >> /home/user/setup-git-config.sh && \
+    echo 'else' >> /home/user/setup-git-config.sh && \
+    echo '  echo "⚠️  Bot git config not set - missing BOT_GIT_NAME, BOT_GIT_EMAIL, or BOT_GIT_USERNAME"' >> /home/user/setup-git-config.sh && \
+    echo 'fi' >> /home/user/setup-git-config.sh && \
+    chmod +x /home/user/setup-git-config.sh
+
 # Set environment variables
 ENV APM_CONTAINERIZED=true \
     APM_PROJECT_ROOT=/workspace \
-    PNPM_STORE_DIR=/home/user/.pnpm-store
+    PNPM_STORE_DIR=/home/user/.pnpm-store \
+    HOME=/home/user
 
 # Add health check
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
@@ -74,5 +97,5 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
 
 WORKDIR /workspace
 
-# Keep container running
-ENTRYPOINT ["/bin/bash", "-c", "tail -f /dev/null"]
+# Initialize bot configuration and authentication, then keep container running
+ENTRYPOINT ["/bin/bash", "-c", "/home/user/setup-git-config.sh && if [ -n \"$GITHUB_BOT_TOKEN\" ] && [ -n \"$BOT_GIT_USERNAME\" ]; then echo \"https://$BOT_GIT_USERNAME:$GITHUB_BOT_TOKEN@github.com\" > /home/user/.git-credentials && chmod 600 /home/user/.git-credentials && echo \"✅ Bot GitHub authentication configured\"; fi; tail -f /dev/null"]

@@ -14,7 +14,7 @@ start_container() {
         # Ensure container is stopped if it exists
         docker rm -f "$CONTAINER_NAME" 2>/dev/null || true
         
-        # Start new container with restricted access
+        # Start new container with bot-only access (no personal git configs)
         docker run -d \
             --name "$CONTAINER_NAME" \
             --restart unless-stopped \
@@ -22,8 +22,6 @@ start_container() {
             -v "$PROJECT_ROOT:/workspace" \
             -v "$HOME/.claude.json:/home/user/.claude.json" \
             -v "$HOME/.claude:/home/user/.claude" \
-            -v "$HOME/.gitconfig:/host/home/.gitconfig:ro" \
-            $([ -f "$HOME/.gitconfig-bot" ] && echo "-v $HOME/.gitconfig-bot:/host/home/.gitconfig-bot:ro") \
             -e "HOME=/home/user" \
             -e "APM_CONTAINERIZED=${APM_CONTAINERIZED:-true}" \
             -e "APM_SECURITY_LEVEL=${APM_SECURITY_LEVEL:-standard}" \
@@ -31,6 +29,9 @@ start_container() {
             -e "GH_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
             -e "GITHUB_TOKEN=${GITHUB_BOT_TOKEN:-$GITHUB_TOKEN}" \
             -e "GITHUB_BOT_TOKEN=${GITHUB_BOT_TOKEN}" \
+            -e "BOT_GIT_NAME=${BOT_GIT_NAME}" \
+            -e "BOT_GIT_EMAIL=${BOT_GIT_EMAIL}" \
+            -e "BOT_GIT_USERNAME=${BOT_GIT_USERNAME}" \
             -e "PATH=/workspace/.local/bin:/workspace/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
             "$CONTAINER_IMAGE"
         

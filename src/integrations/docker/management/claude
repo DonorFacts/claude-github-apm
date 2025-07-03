@@ -14,6 +14,7 @@ source "$SYSTEM_DIR/env-loader.sh"
 source "$SYSTEM_DIR/path-resolver.sh"
 source "$GIT_DIR/git-config.sh"
 source "$SYSTEM_DIR/watch-processes.sh"
+source "$SCRIPT_DIR/bot-config-loader.sh"
 source "$SCRIPT_DIR/container-manager.sh"
 
 # Load environment automatically
