@@ -13,7 +13,7 @@
 - **Saved**: 2025-07-03T02:23:00Z
 - **Agent State**: Session monitoring validation completed, integration architecture analysis completed
 - **Primary Focus**: Validated 6 session monitoring shell scripts for container/host compatibility, discovered major integration opportunity
-- **Key Decisions**: 
+- **Key Decisions**:
   - Simplified session monitoring using mounted ~/.claude architecture
   - Identified three separate session systems requiring unification
   - Created comprehensive test suite and validation process
@@ -25,7 +25,7 @@
 - **Saved**: 2025-07-03T02:45:00Z
 - **Agent State**: Session restoration system architecture design completed
 - **Primary Focus**: Claude Code SDK integration with hybrid SDK+CLI approach for session management
-- **Key Decisions**: 
+- **Key Decisions**:
   - Hybrid SDK+CLI approach chosen over pure solutions
   - SDK for session management and ID capture, CLI for interactive UX
   - Maintained UX quality requirement equal to baseline Claude Code CLI
@@ -37,7 +37,7 @@
 - **Saved**: 2025-07-02T22:09:00Z
 - **Agent State**: Session management CLI enhancements completed
 - **Primary Focus**: Enhanced CLI with automated activity tracking, eliminated paused state, clean package.json structure
-- **Key Decisions**: 
+- **Key Decisions**:
   - Eliminated paused state entirely for simplicity
   - Automated activity tracking via required `pnpm cli speak` command
   - Migrated speak from package.json to CLI structure
@@ -57,7 +57,7 @@
 - **Saved**: 2025-07-02T18:56:00Z
 - **Agent State**: Major architectural breakthrough completed
 - **Primary Focus**: Session management system complete redesign
-- **Key Decisions**: 
+- **Key Decisions**:
   - Eliminated heartbeat system as overengineering
   - Implemented file-per-session with directory-based status
   - Added rich metadata for collective intelligence
@@ -83,6 +83,7 @@
 - **Handover**: No - context save during active work session
 
 ### 20250629_163941_context.md
+
 - **Saved**: 2025-06-29T16:39:41Z
 - **Agent State**: Worktree system improvements completed
 - **Primary Focus**: Container-required workflows, agent-specific handover directories, simplified path handling
@@ -94,7 +95,7 @@
 - **Saved**: 2025-07-02T21:50:00Z
 - **Agent State**: Research and design phase completed
 - **Primary Focus**: Clipboard bridge for host-container image sharing in Claude Code environments
-- **Key Decisions**: 
+- **Key Decisions**:
   - HTTP service approach chosen over file-based
   - Terminal injection identified as most promising solution
   - snap-happy app research planned for next session
@@ -102,8 +103,8 @@
 
 ### Previous Entries
 
-<<<<<<< HEAD
 ### 20250629_114356_context.md
+
 - **Saved**: 2025-06-29T18:43:56Z
 - **Agent State**: Container security improvements and cleanup completed
 - **Primary Focus**: Fixed Notify_Jake container issues, removed dead code, validated security approach
@@ -111,6 +112,7 @@
 - **Handover**: No - session checkpoint
 
 ### 20250629_030000_context.md
+
 - **Saved**: 2025-06-29T03:00:00Z
 - **Agent State**: Docker merge completed, all features integrated
 - **Primary Focus**: Merged test-docker-setup branch, resolved conflicts, prepared for main PR
@@ -118,6 +120,7 @@
 - **Handover**: No - work complete
 
 ### 20250629_005100_context.md
+
 - **Saved**: 2025-06-29T00:51:00Z
 - **Agent State**: Docker audio/speech implementation complete
 - **Primary Focus**: Container notifications, git worktree fixes, cleanup
@@ -125,6 +128,7 @@
 - **Handover**: Yes - to continue Docker work
 
 ### 20250628_163246_context.md
+
 - **Saved**: 2025-06-28T16:32:46Z
 - **Agent State**: Working on Docker container audio/speech
 - **Primary Focus**: Implementing Notify_Jake and say-from-container.sh
@@ -132,6 +136,7 @@
 - **Handover**: Yes - mid-implementation
 
 ### 20250625_155453_context.md
+
 - **Saved**: 2025-06-25T15:54:53Z
 - **Agent State**: Initial developer setup
 - **Primary Focus**: Setting up development environment
