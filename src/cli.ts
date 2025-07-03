@@ -13,14 +13,20 @@ import { spawn } from 'child_process';
 
 // Import commands using modern ES modules
 import { listCommand } from './cli/user/list';
+import { sessionsCommand } from './cli/user/sessions';
 import { initCommand } from './cli/user/init';
-import { recoverCommand } from './cli/user/recover';
+import { initSDKCommand } from './cli/user/init-sdk';
+import { restoreCommand } from './cli/user/restore';
+import { restoreSDKCommand } from './cli/user/restore-sdk';
 import { searchCommand } from './cli/user/search';
-import { heartbeatCommand } from './cli/user/heartbeat';
+import { completeCommand } from './cli/user/manage';
+import { speakCommand } from './cli/agent/speak';
+import { trackAgentCommand, trackUserCommand, taskDoneCommand } from './cli/agent/track-activity';
 
 // Environment setup
 const APM_ROOT = path.resolve(__dirname, '..');
-const APM_EXTERNAL = path.resolve(APM_ROOT, '..', 'apm');
+// APM storage is in the current worktree's apm directory
+const APM_EXTERNAL = path.resolve(process.cwd(), 'apm');
 const APM_SESSIONS = path.join(APM_EXTERNAL, 'sessions');
 const APM_CONVERSATIONS = path.join(APM_EXTERNAL, 'conversations');
 
@@ -52,7 +58,7 @@ async function main() {
     .example('$0 list', 'Show all active agent sessions')
     .example('$0 list --crashed', 'Show crashed sessions that need recovery')
     .example('$0 init developer', 'Initialize a new developer agent session')
-    .example('$0 recover auth-dev-001-20250701', 'Recover a specific crashed session')
+    .example('$0 restore auth-dev-001-20250701', 'Restore a specific session')
     .example('$0 search "OAuth implementation"', 'Search across active conversations')
     .help('h')
     .alias('h', 'help')
@@ -63,10 +69,19 @@ async function main() {
 
   // Add commands
   listCommand(cli);
+  sessionsCommand(cli);  // Enhanced session management
   initCommand(cli);
-  recoverCommand(cli);
+  initSDKCommand(cli);   // SDK-based initialization with hybrid CLI handoff
+  restoreCommand(cli);   // Comprehensive session restoration using Claude Code --resume
+  restoreSDKCommand(cli); // SDK-based restoration with hybrid CLI handoff
   searchCommand(cli);
-  heartbeatCommand(cli);
+  completeCommand(cli);
+  
+  // Agent commands
+  speakCommand(cli);
+  trackAgentCommand(cli);
+  trackUserCommand(cli);
+  taskDoneCommand(cli);
 
   // Global middleware for error handling
   cli.middleware((argv) => {
