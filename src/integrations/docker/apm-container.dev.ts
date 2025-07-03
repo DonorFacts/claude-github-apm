@@ -124,7 +124,7 @@ class ApmContainer {
   private findProjectRoot(): string {
     let current = process.cwd();
     while (current !== '/') {
-      // First pass: look for main/worktrees structure
+      // PRIORITY 1: Look for main/worktrees structure (this is the parent we want)
       if (fs.existsSync(path.join(current, 'main')) && 
           fs.existsSync(path.join(current, 'worktrees')) && 
           fs.existsSync(path.join(current, 'main', 'package.json')) && 
@@ -132,19 +132,19 @@ class ApmContainer {
         return current;
       }
       
-      // Second pass: look for other valid structures
-      if (fs.existsSync(path.join(current, 'main', 'package.json')) &&
-          fs.existsSync(path.join(current, 'main', 'apm'))) {
-        return current;
-      }
-      
+      current = path.dirname(current);
+    }
+    
+    // Fallback: if no main/worktrees structure found, look for direct project structure
+    current = process.cwd();
+    while (current !== '/') {
       if (fs.existsSync(path.join(current, 'package.json')) &&
           fs.existsSync(path.join(current, 'apm'))) {
         return current;
       }
-      
       current = path.dirname(current);
     }
+    
     throw new Error('Could not find APM project root');
   }
   

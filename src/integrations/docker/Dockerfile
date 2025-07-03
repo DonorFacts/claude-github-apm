@@ -109,9 +109,9 @@ ENV APM_CONTAINERIZED=true \
     PNPM_STORE_DIR=/home/user/.pnpm-store \
     HOME=/home/user
 
-# Add health check
+# Add health check - check for main package.json or workspace package.json
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD test -f /workspace/package.json || exit 1
+  CMD test -f /workspace/main/package.json || test -f /workspace/package.json || exit 1
 
 WORKDIR /workspace
 
