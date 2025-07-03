@@ -27,11 +27,9 @@ CC_LOG=$(echo "$MANIFEST_ENTRY" | jq -r '.cc_log_path')
 START_TIME=$(echo "$MANIFEST_ENTRY" | jq -r '.started')
 END_TIME=$(echo "$MANIFEST_ENTRY" | jq -r '.ended // empty')
 
-# Expand the home directory path
-CC_LOG_EXPANDED=$(eval echo "$CC_LOG")
-
-if [ ! -f "$CC_LOG_EXPANDED" ]; then
-    echo "Claude Code log not found: $CC_LOG_EXPANDED"
+# Since ~/.claude is mounted, use direct path access
+if [ ! -f "$CC_LOG" ]; then
+    echo "Claude Code log not found: $CC_LOG"
     exit 1
 fi
 
@@ -43,12 +41,8 @@ echo "---"
 # Extract relevant timeframe from CC log
 if [ -z "$END_TIME" ]; then
     # Ongoing session - extract from start to now
-    jq -c --arg start "$START_TIME" \
-        'select(.timestamp >= $start)' \
-        "$CC_LOG_EXPANDED"
+    jq -c --arg start "$START_TIME" 'select(.timestamp >= $start)' "$CC_LOG"
 else
     # Completed session - extract specific timeframe
-    jq -c --arg start "$START_TIME" --arg end "$END_TIME" \
-        'select(.timestamp >= $start and .timestamp <= $end)' \
-        "$CC_LOG_EXPANDED"
+    jq -c --arg start "$START_TIME" --arg end "$END_TIME" 'select(.timestamp >= $start and .timestamp <= $end)' "$CC_LOG"
 fi
