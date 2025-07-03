@@ -63,40 +63,13 @@ RUN mkdir -p /etc/direnv \
 
 # Clipboard bridge functionality removed
 
-# Create entrypoint script
+# Create simple entrypoint script that calls external setup
 RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'set -e' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
-    echo '# Setup bot git config if environment variables are provided' >> /entrypoint.sh && \
-    echo 'if [ -n "$BOT_GIT_NAME" ] && [ -n "$BOT_GIT_EMAIL" ] && [ -n "$BOT_GIT_USERNAME" ]; then' >> /entrypoint.sh && \
-    echo '  cat > ~/.gitconfig << EOF' >> /entrypoint.sh && \
-    echo '[user]' >> /entrypoint.sh && \
-    echo '    name = $BOT_GIT_NAME' >> /entrypoint.sh && \
-    echo '    email = $BOT_GIT_EMAIL' >> /entrypoint.sh && \
-    echo '[credential "https://github.com"]' >> /entrypoint.sh && \
-    echo '    username = $BOT_GIT_USERNAME' >> /entrypoint.sh && \
-    echo '[credential]' >> /entrypoint.sh && \
-    echo '    helper = store' >> /entrypoint.sh && \
-    echo '[init]' >> /entrypoint.sh && \
-    echo '    defaultBranch = main' >> /entrypoint.sh && \
-    echo '[pull]' >> /entrypoint.sh && \
-    echo '    rebase = false' >> /entrypoint.sh && \
-    echo 'EOF' >> /entrypoint.sh && \
-    echo '  chmod 644 ~/.gitconfig' >> /entrypoint.sh && \
-    echo '  echo "✅ Bot git config created for $BOT_GIT_NAME ($BOT_GIT_EMAIL)"' >> /entrypoint.sh && \
-    echo 'else' >> /entrypoint.sh && \
-    echo '  echo "⚠️  Bot git config not set - missing BOT_GIT_NAME, BOT_GIT_EMAIL, or BOT_GIT_USERNAME"' >> /entrypoint.sh && \
-    echo 'fi' >> /entrypoint.sh && \
-    echo '' >> /entrypoint.sh && \
-    echo '# Sanitize GitHub tokens (remove hidden characters, whitespace)' >> /entrypoint.sh && \
-    echo 'export GITHUB_BOT_TOKEN=$(echo "$GITHUB_BOT_TOKEN" | tr -d "[:space:]" | tr -d "\0" | tr -d "\r\n")' >> /entrypoint.sh && \
-    echo 'export GITHUB_TOKEN=$(echo "$GITHUB_TOKEN" | tr -d "[:space:]" | tr -d "\0" | tr -d "\r\n")' >> /entrypoint.sh && \
-    echo '' >> /entrypoint.sh && \
-    echo '# Setup GitHub authentication if token is provided' >> /entrypoint.sh && \
-    echo 'if [ -n "$GITHUB_BOT_TOKEN" ] && [ -n "$BOT_GIT_USERNAME" ]; then' >> /entrypoint.sh && \
-    echo '  echo "https://$BOT_GIT_USERNAME:$GITHUB_BOT_TOKEN@github.com" > ~/.git-credentials' >> /entrypoint.sh && \
-    echo '  chmod 600 ~/.git-credentials' >> /entrypoint.sh && \
-    echo '  echo "✅ Bot GitHub authentication configured (token sanitized)"' >> /entrypoint.sh && \
+    echo '# Setup git configuration from .env file' >> /entrypoint.sh && \
+    echo 'if [ -f /workspace/setup-git.sh ]; then' >> /entrypoint.sh && \
+    echo '  /workspace/setup-git.sh' >> /entrypoint.sh && \
     echo 'fi' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
     echo '# Keep container running' >> /entrypoint.sh && \
