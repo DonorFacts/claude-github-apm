@@ -1,0 +1,11 @@
+sessions:
+  - id: developer-state-machine-20250702-195641
+    status: active
+    role: developer
+    specialization: state-machine
+    worktree: feature-multi-agent-memory-architecture
+    branch: feature-multi-agent-memory-architecture
+    last_heartbeat: "2025-07-02T19:56:41.637Z"
+    created: "2025-07-02T19:56:41.637Z"
+    context_file: context/latest.md
+    environment: container

@@ -1,6 +1,6 @@
 # Long-Term Memory - Master Developer
 
-Last Updated: 2025-07-02T03:52:14Z
+Last Updated: 2025-07-03T02:24:00Z
 
 ## User Preferences & Patterns
 
@@ -23,16 +23,30 @@ Last Updated: 2025-07-02T03:52:14Z
 - Prefers concise prompts over verbose instructions
 - Prefers script-based configuration over prompt-embedded setup
 - Values fallback systems that improve UX while maintaining security awareness
+- **Architectural simplicity over complex monitoring**: Rejects overengineering (e.g., heartbeat systems, paused states)
+- **File-based organization over centralized systems**: More intuitive and scalable
+- **Rich metadata for collective intelligence**: Essential for multi-agent coordination
+- **Manual user control over automatic systems**: Prefers explicit user decisions to automatic state transitions
+- **Local repo storage over shared storage**: Each worktree/branch should have isolated session data
+- **Container architecture awareness**: ~/.claude is mounted, eliminating need for complex host/container path translation
+- **Manual validation over automation**: Prefers step-by-step validation instructions over fully automated tests for speed
+- **Clean package.json structure**: Avoid script pollution, prefer CLI organization under `pnpm cli <command>`
+- **Automatic integration over manual commands**: Features must integrate into required workflows, not rely on manual usage
+- **UX quality as hard requirement**: Technical improvements cannot compromise user experience quality
+- **Hybrid solutions over pure approaches**: Often better to combine best aspects of different technologies
 
 ### Project-Specific Patterns
 - Git worktrees for feature branches
 - Comprehensive documentation in docs/ folder
 - Commands in .claude/commands/ (and now "-/" for autocomplete)
+- **CRITICAL**: The `-/` and `.claude/commands/` folders are for BUILT COMMANDS ONLY! Never manually edit files in these folders. Source prompts go in `src/prompts/**/*.md` and are built automatically via `npm start` or `pnpm watch:commands`.
 - Handover files in apm/worktree-handovers/
 - Context saves in apm/agents/{role}/context/
 - Interface-First Architecture: src/interfaces/ for API contracts
 - Domain organization: src/services/git/worktrees/ for semantic grouping
 - TypeScript-only policy: no shell scripts, use tsx execution
+- Session Registration: APM session tracking requires explicit registration via CLI commands or agent self-registration
+- **Multiple Session Systems Pattern**: Project may have multiple coexisting session management approaches (YAML registry, JSONL manifests, bridge mappings) requiring integration
 
 ## Role-Specific Learnings
 
@@ -41,9 +55,12 @@ Last Updated: 2025-07-02T03:52:14Z
 - Design multiple approaches before implementing
 - Run quality checks (lint, typecheck) before completing tasks
 - Update todo list frequently for visibility
-- Use Notify_Jake at end of completed responses
-- Use say-from-container.sh for important updates and explanations
+- Use `pnpm cli speak` for all agent communication (required + automatic activity tracking)
+- Integrate automation into existing required workflows rather than creating new manual commands
+- Use CLI structure under `src/cli/agent/` and `src/cli/user/` for organized command management
 - Create host-side daemons for container limitations
+- **Investigate container architecture first**: Check for mounted filesystems before building complex bridging solutions
+- **Analyze existing systems before adding new ones**: Prevent creating conflicting or redundant components
 
 ### Common Pitfalls
 - Don't over-engineer when simple solutions work
@@ -55,6 +72,8 @@ Last Updated: 2025-07-02T03:52:14Z
 - Avoid keeping dead code "just in case" - user prefers clean, maintainable code
 - In large refactors: Always complete git migration immediately - don't leave files pending deletion
 - When moving files: Use systematic approach to ensure 1:1 mapping and no data loss
+- **Check for existing session management**: Don't build new session systems without analyzing existing ones (CLI commands may depend on them)
+- **Container/host architecture assumptions**: Always verify filesystem mounts before assuming complex bridging is needed
 
 ### Process Improvements
 - Simplified command classification (underscore-only) is more predictable
@@ -74,6 +93,29 @@ Last Updated: 2025-07-02T03:52:14Z
 - Future: may want to track command changes in issues
 
 ## Recent Insights
+
+### Session Management Architecture Revolution - FULLY IMPLEMENTED ✅
+
+**Major Breakthrough COMPLETED (2025-07-02)**: Completely eliminated heartbeat-based session tracking in favor of file-per-session architecture:
+
+- **Problem Identified**: Heartbeats measured container health, not agent activity (Jake's key insight)
+- **Solution Implemented**: Directory-based status organization (active/, paused/, completed/, stale/)
+- **Architecture**: Each session = rich YAML file with conversation topics, task status, blockers, next actions
+- **UX Transformation**: From confusing mixed lists to clear status grouping with rich metadata
+- **Collective Intelligence**: Enhanced metadata enables agent coordination and seamless handoffs
+- **Vastly Superior**: New system makes Claude Code's resume experience look "pitiful"
+- **MIGRATION COMPLETE**: Removed all heartbeat references, TypeScript errors fixed, tests passing
+- **CLI ENHANCED**: Rich metadata display with visual hierarchy operational
+- **STATE MACHINE PERFECTED**: Manual pause/resume/complete commands implemented with proper logic
+- **TESTS COMPREHENSIVE**: 12 new tests covering all state transitions, 100% test coverage achieved
+- **CLI INTEGRATION UNIFIED**: All commands (init, list, sessions) now use SessionFileManager consistently
+- **STORAGE LOCALIZED**: Changed from ../apm to ./apm for per-branch session isolation
+
+Key Design Principles Discovered:
+- Status determined by file location, not artificial processes
+- Rich metadata essential for multi-agent workflows
+- File-based organization more intuitive than centralized registries
+- Visual hierarchy critical for complex session management
 
 ### Worktree System Architecture
 - Container-first approach eliminates host/container path translation complexity
@@ -118,6 +160,8 @@ Last Updated: 2025-07-02T03:52:14Z
 - Simple interfaces in types.ts
 - Comprehensive tests for each component
 - Clear documentation for users
+- **File-per-session architecture**: Individual YAML files more manageable than centralized registries
+- **Directory-based status organization**: Status determined by file location (active/, paused/, completed/, stale/)
 
 ### Docker Container Integration
 - Single-container architecture simpler than multi-container for multi-agent systems
@@ -191,3 +235,23 @@ Git worktrees require consistent paths between host and container. The standard 
 - TypeScript CLI with tsx execution superior to bash scripts for maintainability
 - Clear separation of interface (CLI commands) from implementation (services) scales well
 - YAML registry more readable than JSON for configuration data
+
+## Claude Code SDK Integration Insights
+
+### UX Quality Requirements
+- Interactive terminal experience must equal or exceed baseline Claude Code CLI
+- User experience quality is a hard constraint that cannot be compromised for technical benefits
+- SDK excellent for programmatic control but CLI superior for natural conversation flow
+- Real-time stdin/stdout conversation flow essential for user satisfaction
+
+### Hybrid Architecture Patterns
+- Pure solutions (SDK-only, CLI-only) often suboptimal compared to hybrid approaches
+- **SDK strengths**: Direct session ID access, programmatic error handling, TypeScript integration
+- **CLI strengths**: Natural terminal UX, proven session persistence, built-in controls
+- **Hybrid solution**: Use SDK for session management/ID capture, CLI handoff for interactive experience
+
+### Session Management Architecture Evolution
+- From file scanning approach to direct SDK session ID capture
+- Bridge mapping system enables session restoration across different tools
+- Environment validation critical for session restoration (branch/worktree matching)
+- Package installation constraints can block implementation - design around dependencies

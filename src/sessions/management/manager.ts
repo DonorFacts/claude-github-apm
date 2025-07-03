@@ -139,7 +139,7 @@ export class SessionManager {
   listSessions(filter?: 'active' | 'crashed' | 'completed'): Session[] {
     const registry = this.readRegistry();
     const now = new Date();
-    const staleThreshold = 2 * 60 * 1000; // 2 minutes
+    const staleThreshold = 15 * 60 * 1000; // 15 minutes - more reasonable for development sessions
 
     return registry.sessions
       .map(session => {

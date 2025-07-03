@@ -173,18 +173,53 @@ Do NOT read any other files mentioned in the context. After initialization, you 
 
 <!-- ### 7. Initialize Event System -->
 
-### 7. Confirm Initialization
+### 7. Session Registration & Heartbeat
+
+Register your session in the APM system for crash recovery and tracking:
+
+```bash
+# Check if session already exists (from pnpm cli init)
+if [ -n "$APM_SESSION_ID" ]; then
+    echo "✓ Using existing session: $APM_SESSION_ID"
+elif [ -f ".apm_session" ]; then
+    source .apm_session
+    echo "✓ Loaded session from file: $APM_SESSION_ID"
+else
+    # Self-register if no session exists (manual init)
+    echo "📝 Registering new session..."
+    ROLE_ID="[your-role-id]" # e.g., developer, prompt-engineer
+    SPECIALIZATION="" # Optional: e.g., ui-components, authentication
+    
+    # Register and capture session ID
+    APM_SESSION_ID=$(tsx src/cli/agent/register-session.ts "$ROLE_ID" "$SPECIALIZATION" 2>&1 | tail -1)
+    export APM_SESSION_ID
+    echo "✓ Registered as: $APM_SESSION_ID"
+fi
+
+# Start heartbeat in background (updates every 30 seconds)
+# Create heartbeat wrapper
+tsx src/sessions/monitoring/heartbeat-daemon.ts "$APM_SESSION_ID" &
+HEARTBEAT_PID=$!
+echo "♥️ Heartbeat started (PID: $HEARTBEAT_PID)"
+
+# Store for cleanup
+echo "HEARTBEAT_PID=$HEARTBEAT_PID" >> .apm_session
+```
+
+### 8. Confirm Initialization
 
 After completing these steps, confirm to the user:
 
 ```
 ✅ Agent initialized successfully
 - Role: [your role]
+- Session: $APM_SESSION_ID
 - Environment: [🐳 Container / 💻 Host]
 - Terminal: [confirm terminal title was set with container indicator]
 - Git workspace: [branch name]
 - Memory loaded: [Yes/No - if yes, last updated timestamp]
 - Context loaded: [Yes/No - if yes, current task]
+- Heartbeat: Active (PID: $HEARTBEAT_PID)
 - Speech system: [Test with `pnpm speak "Agent ready!"`]
 ```
 
@@ -293,12 +328,27 @@ When the user requests "save context":
 **On Session End** (context save or clear):
 
 ```bash
+# Stop heartbeat daemon
+if [ -f ".apm_session" ]; then
+    source .apm_session
+    if [ -n "$HEARTBEAT_PID" ]; then
+        kill $HEARTBEAT_PID 2>/dev/null
+        echo "💔 Heartbeat stopped"
+    fi
+fi
+
+# Mark session as completed in APM registry
+if [ -n "$APM_SESSION_ID" ]; then
+    tsx src/sessions/management/manager.ts end "$APM_SESSION_ID"
+    echo "◎ Session marked as completed: $APM_SESSION_ID"
+fi
+
 # Log session end
-echo '{"event": "session_end", "role": "'$ROLE_ID'", "session_id": "'$SESSION_ID'", "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' \
+echo '{"event": "session_end", "role": "'$ROLE_ID'", "session_id": "'$APM_SESSION_ID'", "timestamp": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' \
   >> apm/events/queue.jsonl
 
-# Update session manifest as ended
-jq '(.[-1].ended) = (now|todate)' manifest.jsonl > tmp && mv tmp manifest.jsonl
+# Clean up session file
+rm -f .apm_session
 
 # Return terminal to role name
 if [ "$APM_CONTAINERIZED" = "true" ]; then

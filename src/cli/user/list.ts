@@ -4,7 +4,7 @@
 
 import { Argv } from 'yargs';
 import chalk from 'chalk';
-import { SessionManager } from '../../sessions/management/manager';
+import { SessionFileManager } from '../../sessions/management/session-file-manager';
 
 export function listCommand(yargs: Argv) {
   return yargs.command(
@@ -34,18 +34,20 @@ export function listCommand(yargs: Argv) {
     },
     async (argv) => {
       const sessionsDir = process.env.APM_SESSIONS!;
-      const manager = new SessionManager(sessionsDir);
+      const manager = new SessionFileManager(sessionsDir);
 
       // Determine filter based on options
-      let filter: 'active' | 'crashed' | 'completed' | undefined;
+      let filter: 'active' | 'completed' | 'stale' | undefined;
       if (argv.crashed) {
-        filter = 'crashed';
+        filter = 'stale'; // Map crashed to stale in new system
       } else if (argv.all) {
         filter = undefined; // Show all
       } else if (argv.filter === 'all') {
         filter = undefined;
+      } else if (argv.filter === 'crashed') {
+        filter = 'stale'; // Map crashed to stale in new system
       } else {
-        filter = argv.filter as 'active' | 'crashed' | 'completed';
+        filter = argv.filter as 'active' | 'completed';
       }
 
       const sessions = manager.listSessions(filter);
@@ -55,68 +57,126 @@ export function listCommand(yargs: Argv) {
         return;
       }
 
+      // Group sessions by status for better UX  
+      const groupedSessions = {
+        active: sessions.filter(s => s.session.status === 'active'),
+        completed: sessions.filter(s => s.session.status === 'completed'),
+        stale: sessions.filter(s => s.session.status === 'stale')
+      };
+
+      const activeCnt = groupedSessions.active.length;
+      const completedCnt = groupedSessions.completed.length;
+      const staleCnt = groupedSessions.stale.length;
+
       console.log(chalk.bold(`Session Status Report - ${new Date().toLocaleString()}`));
       console.log('='.repeat(50));
       console.log();
 
-      let activeCnt = 0;
-      let crashedCnt = 0;
-      let completedCnt = 0;
-
-      for (const session of sessions) {
-        // Status icon and counting
-        let statusIcon: string;
-        switch (session.status) {
-          case 'active':
-            statusIcon = chalk.green('✓');
-            activeCnt++;
-            break;
-          case 'crashed':
-            statusIcon = chalk.red('✗');
-            crashedCnt++;
-            break;
-          case 'completed':
-            statusIcon = chalk.gray('◎');
-            completedCnt++;
-            break;
-        }
-
-        // Time since last activity
-        const lastHeartbeat = new Date(session.last_heartbeat);
+      // Helper functions to format time differences with colored indicators
+      const formatTimeDiff = (timestamp: string) => {
+        const time = new Date(timestamp);
         const now = new Date();
-        const diffMs = now.getTime() - lastHeartbeat.getTime();
+        const diffMs = now.getTime() - time.getTime();
         
-        let timeDiff: string;
-        if (diffMs < 60 * 1000) {
-          timeDiff = 'just now';
-        } else if (diffMs < 60 * 60 * 1000) {
-          timeDiff = `${Math.floor(diffMs / (60 * 1000))}m ago`;
-        } else if (diffMs < 24 * 60 * 60 * 1000) {
-          timeDiff = `${Math.floor(diffMs / (60 * 60 * 1000))}h ago`;
+        const minutes = Math.floor(diffMs / (60 * 1000));
+        const hours = Math.floor(diffMs / (60 * 60 * 1000));
+        const days = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+        
+        let color, indicator;
+        
+        if (minutes < 5) {
+          color = chalk.green;
+          indicator = '🟢';
+        } else if (minutes < 30) {
+          color = chalk.yellow;
+          indicator = '🟡';
+        } else if (hours < 2) {
+          color = (text: string) => chalk.hex('#FFA500')(text); // Orange color
+          indicator = '🟠';
         } else {
-          timeDiff = `${Math.floor(diffMs / (24 * 60 * 60 * 1000))}d ago`;
+          color = chalk.red;
+          indicator = '🔴';
         }
+        
+        let timeText;
+        if (minutes < 1) {
+          timeText = 'just now';
+        } else if (minutes < 60) {
+          timeText = `${minutes}m ago`;
+        } else if (hours < 24) {
+          const remainingMinutes = minutes % 60;
+          timeText = remainingMinutes > 0 ? `${hours}h ${remainingMinutes}m ago` : `${hours}h ago`;
+        } else {
+          const remainingHours = hours % 24;
+          timeText = remainingHours > 0 ? `${days}d ${remainingHours}h ago` : `${days}d ago`;
+        }
+        
+        return `${indicator} ${color(timeText)}`;
+      };
 
-        // Environment indicator
-        const envIcon = session.environment === 'container' ? '🐳 ' : '';
-
-        console.log(`${statusIcon} ${envIcon}${session.id}`);
-        console.log(`   Role: ${session.role}${session.specialization ? ` (${session.specialization})` : ''}`);
-        console.log(`   Worktree: ${session.worktree}`);
-        console.log(`   Branch: ${session.branch}`);
-        console.log(`   Last seen: ${timeDiff}`);
+      // Helper function to format session info with enhanced details
+      const formatSession = (session: any, statusIcon: string) => {
+        const envIcon = session.session.environment === 'container' ? '🐳 ' : '';
+        const role = session.session.specialization ? `${session.session.role} (${session.session.specialization})` : session.session.role;
+        
+        // Format timing with agent/user activity
+        const agentTime = session.session.agent_last_seen ? formatTimeDiff(session.session.agent_last_seen) : chalk.dim('unknown');
+        const userTime = session.session.user_last_seen ? formatTimeDiff(session.session.user_last_seen) : chalk.dim('unknown');
+        
+        console.log(`${statusIcon} ${envIcon}${chalk.bold(session.session.id)}`);
+        console.log(`   ${chalk.dim('Subject:')} ${session.session.conversation_topic || chalk.dim('No topic set')}`);
+        console.log(`   ${chalk.dim('Role:')} ${role}`);
+        console.log(`   ${chalk.dim('Worktree:')} ${session.session.worktree}`);
+        
+        // Show most recent completed task if available
+        if (session.session.most_recent_completed_task) {
+          console.log(`   ${chalk.dim('Last completed:')} ${session.session.most_recent_completed_task}`);
+        }
+        
+        console.log(`   ${chalk.dim('Last seen:')} Agent ${agentTime}, User ${userTime}`);
         console.log();
+      };
+
+      // Display Active Sessions
+      if (groupedSessions.active.length > 0) {
+        console.log(chalk.green.bold(`🟢 ACTIVE SESSIONS (${activeCnt})`));
+        console.log();
+        groupedSessions.active.forEach(session => {
+          formatSession(session, chalk.green('✓'));
+        });
       }
 
-      // Summary
+      // Display Stale Sessions  
+      if (groupedSessions.stale.length > 0) {
+        console.log(chalk.red.bold(`🔴 STALE SESSIONS (${staleCnt})`));
+        console.log(chalk.dim('   Sessions inactive >24 hours, need cleanup'));
+        console.log();
+        groupedSessions.stale.forEach(session => {
+          formatSession(session, chalk.red('✗'));
+        });
+      }
+
+      // Display Completed Sessions
+      if (groupedSessions.completed.length > 0) {
+        console.log(chalk.gray.bold(`⚪ COMPLETED SESSIONS (${completedCnt})`));
+        console.log();
+        groupedSessions.completed.forEach(session => {
+          formatSession(session, chalk.gray('◎'));
+        });
+      }
+
+      // Improved Summary
+      console.log(chalk.dim('─'.repeat(50)));
       if (!filter) {
-        console.log(chalk.bold(`Summary: ${activeCnt} active, ${crashedCnt} crashed, ${completedCnt} completed`));
-      } else if (filter === 'active') {
-        console.log(chalk.bold(`Active sessions: ${activeCnt}`));
-      } else if (filter === 'crashed') {
-        console.log(chalk.bold(`Crashed sessions: ${crashedCnt}`));
-      } else if (filter === 'completed') {
-        console.log(chalk.bold(`Completed sessions: ${completedCnt}`));
+        const summary = [];
+        if (activeCnt > 0) summary.push(chalk.green(`${activeCnt} active`));
+        if (staleCnt > 0) summary.push(chalk.red(`${staleCnt} stale`));
+        if (completedCnt > 0) summary.push(chalk.gray(`${completedCnt} completed`));
+        console.log(chalk.bold(`Total: ${summary.join(', ')}`));
+      } else {
+        const filterName = filter.charAt(0).toUpperCase() + filter.slice(1);
+        const count = sessions.length;
+        console.log(chalk.bold(`${filterName} sessions: ${count}`));
       }
     }
   );
