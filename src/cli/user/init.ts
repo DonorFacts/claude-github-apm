@@ -6,7 +6,7 @@ import { Argv } from 'yargs';
 import chalk from 'chalk';
 import { spawn } from 'child_process';
 import * as path from 'path';
-import { SessionManager } from '../../sessions/management/manager';
+import { SessionFileManager, SessionFile } from '../../sessions/management/session-file-manager';
 
 export function initCommand(yargs: Argv) {
   return yargs.command(
@@ -43,7 +43,7 @@ export function initCommand(yargs: Argv) {
     },
     async (argv) => {
       const sessionsDir = process.env.APM_SESSIONS!;
-      const manager = new SessionManager(sessionsDir);
+      const manager = new SessionFileManager(sessionsDir);
 
       // Get current context
       const worktree = argv.worktree || path.basename(process.cwd());
@@ -58,16 +58,55 @@ export function initCommand(yargs: Argv) {
         }
       }
 
-      // Register the session
+      // Generate session ID
+      const timestamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z/, '');
+      const sessionId = `${argv.role}${argv.specialization ? `-${argv.specialization}` : ''}-${timestamp.substring(0, 15)}`;
+
+      // Create session data
       console.log(chalk.blue('🔄'), `Initializing ${argv.role} agent...`);
       
-      const sessionId = manager.registerSession({
-        role: argv.role as string,
-        specialization: argv.specialization as string | undefined,
-        worktree,
-        branch,
-        environment: process.env.APM_CONTAINERIZED === 'true' ? 'container' : 'host'
-      });
+      const sessionData: SessionFile = {
+        session: {
+          id: sessionId,
+          status: 'active',
+          role: argv.role as string,
+          specialization: argv.specialization as string | undefined,
+          agent_prompt_version: 'v2.1.0',
+          conversation_topic: 'Agent initialization and task assignment',
+          current_task: 'Awaiting initial task assignment',
+          task_status: 'in_progress',
+          work_completed: [],
+          most_recent_completed_task: undefined,
+          work_in_progress: ['Session initialization'],
+          next_actions: ['Await user task assignment'],
+          blockers: [],
+          worktree,
+          branch,
+          context_file: 'context/latest.md',
+          context_remaining_percent: 100,
+          estimated_tokens_remaining: 200000,
+          created: new Date().toISOString(),
+          last_activity: new Date().toISOString(),
+          agent_last_seen: new Date().toISOString(),
+          user_last_seen: new Date().toISOString(),
+          last_context_save: new Date().toISOString(),
+          message_count: 0,
+          session_duration_minutes: 0,
+          github_issues: [],
+          related_sessions: [],
+          environment: process.env.APM_CONTAINERIZED === 'true' ? 'container' : 'host',
+          host_project_path: process.cwd(),
+          created_by: process.env.USER || 'unknown',
+          auto_archive_after: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
+        }
+      };
+
+      const success = manager.createSession(sessionData);
+
+      if (!success) {
+        console.error(chalk.red('✗'), 'Failed to create session');
+        process.exit(1);
+      }
 
       // Store session ID for agent to use
       const sessionEnvFile = path.join(process.cwd(), '.apm_session');
@@ -96,6 +135,7 @@ export function initCommand(yargs: Argv) {
 
       console.log(chalk.gray(`Starting: ${claudeCommand} with ${agentInitCommand}`));
       console.log(chalk.gray(`Session: ${sessionId}`));
+      console.log(chalk.dim('💡 Claude conversation UUID will be captured for future restoration'));
       
       // Spawn Claude process
       const child = spawn(claudeCommand, [], {
