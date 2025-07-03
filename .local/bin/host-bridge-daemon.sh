@@ -216,7 +216,7 @@ process_queue() {
     local queue_file="$REQUESTS_DIR/$service.queue"
     
     if [ -f "$queue_file" ] && [ -s "$queue_file" ]; then
-        log "DEBUG" "Processing $service queue"
+        log "INFO" "Processing $service queue"
         
         while IFS= read -r request_line; do
             if [ -n "$request_line" ]; then
@@ -227,13 +227,13 @@ process_queue() {
                 
                 case "$service" in
                     "vscode")
-                        handle_vscode "$request_line"
+                        handle_vscode "$request_line" || true
                         ;;
                     "audio")
-                        handle_audio "$request_line"
+                        handle_audio "$request_line" || true
                         ;;
                     "speech")
-                        handle_speech "$request_line"
+                        handle_speech "$request_line" || true
                         ;;
                     *)
                         log "ERROR" "Unknown service: $service"
