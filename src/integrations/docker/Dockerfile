@@ -40,13 +40,8 @@ RUN curl -sfL https://direnv.net/install.sh | bash
 
 # Don't create a specific user - we'll run as the host user
 # Set up shell configuration that works for any user
-RUN echo 'export HISTSIZE=100000' >> /etc/bash.bashrc \
-    && echo 'export PATH="/workspace/.local/bin:/workspace/node_modules/.bin:$PATH"' >> /etc/bash.bashrc \
-    && echo 'alias python=python3' >> /etc/bash.bashrc \
-    && echo 'alias pip=pip3' >> /etc/bash.bashrc \
-    && echo 'alias e="pnpm tsx"' >> /etc/bash.bashrc \
-    && echo 'alias pn=pnpm' >> /etc/bash.bashrc \
-    && echo 'eval "$(direnv hook bash)"' >> /etc/bash.bashrc
+COPY src/integrations/docker/scripts/setup-shell-config.sh /tmp/
+RUN chmod +x /tmp/setup-shell-config.sh && /tmp/setup-shell-config.sh && rm /tmp/setup-shell-config.sh
 
 # Make workspace writable by any user
 RUN chmod -R 777 /workspace
@@ -57,9 +52,8 @@ RUN mkdir -p /home/user && chmod 777 /home/user
 # No firewall configuration needed - container has full network access
 
 # Add pre-approve direnv for workspace (in a location any user can access)
-RUN mkdir -p /etc/direnv \
-    && echo '/workspace' > /etc/direnv/allowed \
-    && chmod -R 755 /etc/direnv
+COPY src/integrations/docker/scripts/setup-direnv.sh /tmp/
+RUN chmod +x /tmp/setup-direnv.sh && /tmp/setup-direnv.sh && rm /tmp/setup-direnv.sh
 
 # Clipboard bridge functionality removed
 
