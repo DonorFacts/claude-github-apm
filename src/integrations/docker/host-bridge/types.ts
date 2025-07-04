@@ -15,7 +15,7 @@ export interface BridgeRequest {
 
 export interface BridgeResponse {
   id: string;
-  status: 'success' | 'error' | 'timeout';
+  status: 'success' | 'error' | 'timeout' | 'skipped';
   message: string;
   timestamp: string;
   data?: Record<string, any>;
