@@ -1,13 +1,13 @@
-import { BulkIssueCreator } from '.../issues/BulkIssueCreator';
-import { GitHubClient } from '../GitHubClient';
-import { TestPlanBuilder, MockGitHubClient, expectIssueCreated, loadPlanFromFile } from '../utils/test-utils';
-import { shouldUseMocks, TEST_REPOSITORY } from '../../test-setup';
-import { IGitHubClient } from '.../api/interfaces';
+import { BulkIssueCreator } from '../issues/BulkIssueCreator';
+import { GitHubClient } from '../api/GitHubClient';
+import { TestPlanBuilder, MockGitHubClient, expectIssueCreated, loadPlanFromFile } from '../issues/test-utils';
+import { shouldUseMocks, TEST_REPOSITORY } from '../../../test-setup';
+import { IGitHubClient } from '../api/interfaces';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
 import { execSync } from 'child_process';
-import { IssueNumberTracker } from '../utils/issue-number-tracker';
+import { IssueNumberTracker } from '../issues/issue-number-tracker';
 
 describe('BulkIssueCreator - Happy Path', () => {
   let githubClient: IGitHubClient;
@@ -90,7 +90,7 @@ describe('BulkIssueCreator - Happy Path', () => {
       } else {
         // For production tests, verify issue number increased
         const updatedPlan = loadPlanFromFile(testPlanPath);
-        const createdItem = updatedPlan.items.find(i => i.id === 'task-1');
+        const createdItem = updatedPlan.items.find((i: any) => i.id === 'task-1');
         
         if (!createdItem?.issue_number) {
           throw new Error('Production test failed: No issue number found in plan. Issue was not created on GitHub.');

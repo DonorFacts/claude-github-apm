@@ -1,5 +1,5 @@
 import { IssueTypeDiscoveryService } from '../IssueTypeDiscoveryService';
-import { IGitHubClient } from '../../bulk-issue-creator/interfaces';
+import { IGitHubClient } from '../../api/interfaces';
 
 describe('IssueTypeDiscoveryService', () => {
   let mockGitHubClient: jest.Mocked<IGitHubClient>;

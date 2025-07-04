@@ -1,8 +1,8 @@
-import { BulkIssueCreator } from '.../issues/BulkIssueCreator';
-import { GitHubClient } from '../GitHubClient';
-import { TestPlanBuilder, MockGitHubClient } from '../utils/test-utils';
-import { shouldUseMocks } from '../../test-setup';
-import { IGitHubClient } from '.../api/interfaces';
+import { BulkIssueCreator } from '../issues/BulkIssueCreator';
+import { GitHubClient } from '../api/GitHubClient';
+import { TestPlanBuilder, MockGitHubClient } from '../issues/test-utils';
+import { shouldUseMocks } from '../../../test-setup';
+import { IGitHubClient } from '../api/interfaces';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';

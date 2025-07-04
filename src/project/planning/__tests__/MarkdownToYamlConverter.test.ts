@@ -1,5 +1,5 @@
-import { MarkdownToYamlConverter } from '.../project/planning/MarkdownToYamlConverter';
-import { ImplementationPlan, PlanItem } from '../../bulk-issue-creato../a../api/types';
+import { MarkdownToYamlConverter } from '../MarkdownToYamlConverter';
+import { ImplementationPlan, PlanItem } from '../../../integrations/github/api/types';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as yaml from 'js-yaml';
