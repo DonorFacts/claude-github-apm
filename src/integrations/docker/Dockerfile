@@ -34,9 +34,17 @@ WORKDIR /workspace
 RUN curl -sfL https://direnv.net/install.sh | bash
 
 # Don't create a specific user - we'll run as the host user
-# Set up shell configuration that works for any user
-COPY src/integrations/docker/scripts/setup-shell-config.sh /tmp/
-RUN chmod +x /tmp/setup-shell-config.sh && /tmp/setup-shell-config.sh && rm /tmp/setup-shell-config.sh
+# Copy and run build-time setup scripts
+COPY src/integrations/docker/scripts/setup-shell-config.sh \
+     src/integrations/docker/scripts/setup-direnv.sh \
+     /tmp/setup-scripts/
+
+RUN chmod +x /tmp/setup-scripts/*.sh && \
+    for script in /tmp/setup-scripts/*.sh; do \
+        echo "🔧 Running build-time script: $(basename "$script")..."; \
+        "$script"; \
+    done && \
+    rm -rf /tmp/setup-scripts
 
 # Make workspace writable by any user
 RUN chmod -R 777 /workspace
@@ -45,10 +53,6 @@ RUN chmod -R 777 /workspace
 RUN mkdir -p /home/user && chmod 777 /home/user
 
 # No firewall configuration needed - container has full network access
-
-# Add pre-approve direnv for workspace (in a location any user can access)
-COPY src/integrations/docker/scripts/setup-direnv.sh /tmp/
-RUN chmod +x /tmp/setup-direnv.sh && /tmp/setup-direnv.sh && rm /tmp/setup-direnv.sh
 
 # Clipboard bridge functionality removed
 
