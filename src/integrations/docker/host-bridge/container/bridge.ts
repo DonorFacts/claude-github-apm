@@ -13,7 +13,7 @@ import type {
   AudioPayload, 
   SpeechPayload,
   ServicesConfig 
-} from './types';
+} from '../shared/types';
 
 export class HostBridge {
   private bridgeDir: string;

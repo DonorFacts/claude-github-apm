@@ -1,0 +1,21 @@
+{
+  "vscode": {
+    "enabled": true,
+    "timeout": 10000,
+    "description": "VS Code integration",
+    "command": "code",
+    "path_translation": true
+  },
+  "audio": {
+    "enabled": true,
+    "timeout": 5000,
+    "description": "Audio notifications",
+    "sounds_dir": "/System/Library/Sounds"
+  },
+  "speech": {
+    "enabled": true,
+    "timeout": 30000,
+    "description": "Text-to-speech",
+    "voice": "system"
+  }
+}

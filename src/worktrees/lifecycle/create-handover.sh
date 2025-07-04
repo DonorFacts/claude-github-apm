@@ -155,5 +155,5 @@ echo "• Worktree directory: apm/agents/${AGENT_ROLE}/not-started/${HANDOVER_FI
 echo
 echo -e "${YELLOW}Next steps:${NC}"
 echo "1. Edit the handover file to add specific details"
-echo "2. Open VS Code with: tsx src/tools/worktree-manager/open-worktree-vscode.ts \"${WORKTREE_DIR}\""
+echo "2. Open VS Code with: tsx src/integrations/docker/host-bridge/container/cli/open-vscode.ts \"${WORKTREE_DIR}\""
 echo "3. The new agent will find the handover automatically"

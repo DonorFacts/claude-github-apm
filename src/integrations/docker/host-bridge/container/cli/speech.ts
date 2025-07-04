@@ -5,7 +5,7 @@
  * Usage: tsx src/integrations/docker/host-bridge/speech-helper.ts "Your message here"
  */
 
-import { hostBridge } from './index.js';
+import { hostBridge } from '../index.js';
 
 async function speakMessage() {
   const message = process.argv[2];

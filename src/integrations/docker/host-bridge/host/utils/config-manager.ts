@@ -5,7 +5,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import type { ServicesConfig } from '../../types';
+import type { ServicesConfig } from '../../shared/types';
 
 export class ConfigManager {
   private readonly configFile: string;

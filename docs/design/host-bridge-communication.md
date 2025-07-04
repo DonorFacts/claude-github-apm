@@ -17,15 +17,17 @@ Unified container-host communication system that enables Docker containers to in
 ### Implementation
 
 #### Container Side
-- TypeScript client library (`src/tools/host-bridge/`) with async/await API
-- Structured requests with timeout handling and retries
+- TypeScript bridge library (`src/integrations/docker/host-bridge/container/`) with async/await API
+- Structured requests with timeout handling
 - Type-safe interfaces for all service payloads
+- CLI tools for container-side utilities
 
 #### Host Side  
-- Single unified daemon (`host-bridge-daemon.ts`) handles all services
+- Single unified daemon (`src/integrations/docker/host-bridge/host/daemon.ts`) handles all services
 - JSON message processing with UUID tracking
 - Comprehensive logging and error handling
 - TypeScript implementation for better maintainability
+- Modular service handlers for each host service
 
 ### Technical Architecture
 
@@ -66,7 +68,7 @@ Unified container-host communication system that enables Docker containers to in
 
 #### Container Integration
 ```typescript
-import { hostBridge } from 'src/tools/host-bridge';
+import { hostBridge } from 'src/integrations/docker/host-bridge/container';
 
 // VS Code
 await hostBridge.vscode_open('/workspace/main/docs');
@@ -76,6 +78,11 @@ await hostBridge.audio_play('Hero.aiff');
 
 // Speech synthesis
 await hostBridge.speech_say('Task completed successfully!');
+
+// Non-blocking versions
+hostBridge.speech_say_nowait('Fire and forget message');
+hostBridge.audio_play_nowait('Hero.aiff');
+hostBridge.vscode_open_nowait('/workspace/main');
 ```
 
 ### Services
@@ -103,7 +110,7 @@ await hostBridge.speech_say('Task completed successfully!');
 npm start
 
 # Or manually:
-tsx src/integrations/docker/host-bridge/daemons/host-bridge-daemon.ts
+tsx src/integrations/docker/host-bridge/host/daemon.ts
 ```
 
 #### Testing

@@ -8,13 +8,13 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import type { BridgeRequest } from '../types';
+import type { BridgeRequest } from '../shared/types';
 
 // Import handlers
-import { ServiceHandler } from './handlers/base-handler';
-import { VSCodeHandler } from './handlers/vscode-handler';
-import { AudioHandler } from './handlers/audio-handler';
-import { SpeechHandler } from './handlers/speech-handler';
+import { ServiceHandler } from './handlers/base';
+import { VSCodeHandler } from './handlers/vscode';
+import { AudioHandler } from './handlers/audio';
+import { SpeechHandler } from './handlers/speech';
 
 // Import utilities
 import { PathTranslator } from './utils/path-translator';

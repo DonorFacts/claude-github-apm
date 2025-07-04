@@ -89,7 +89,7 @@ echo -e "${GREEN}✅ Handover created!${NC}"
 
 # Open VS Code using the existing TypeScript tool
 echo -e "${YELLOW}🚀 Opening VS Code and installing dependencies...${NC}"
-if ! tsx src/tools/worktree-manager/open-worktree-vscode.ts "$WORKTREE_PATH"; then
+if ! tsx src/integrations/docker/host-bridge/container/cli/open-vscode.ts "$WORKTREE_PATH"; then
     echo -e "${RED}❌ ERROR: Failed to open VS Code${NC}"
     echo "You can manually open VS Code with: code $WORKTREE_PATH"
 fi

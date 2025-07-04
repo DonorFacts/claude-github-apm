@@ -26,7 +26,7 @@ class WatchAllManager {
     this.processes = [];
 
     // Check if host-bridge daemon exists and add it FIRST (like the shell script)
-    const hostBridgePath = path.join(this.projectRoot, 'src/integrations/docker/host-bridge/daemons/host-bridge-daemon.ts');
+    const hostBridgePath = path.join(__dirname, 'daemon.ts');
     if (fs.existsSync(hostBridgePath)) {
       this.processes.push({
         name: 'HOST-BRIDGE',

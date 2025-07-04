@@ -6,12 +6,15 @@
 import * as fs from 'fs';
 import { promisify } from 'util';
 import { exec } from 'child_process';
-import { BaseHandler } from './base-handler';
-import type { BridgeRequest } from '../../types';
+import { BaseHandler } from './base';
+import type { BridgeRequest } from '../../shared/types';
 
 const execAsync = promisify(exec);
 
 export class AudioHandler extends BaseHandler {
+  private lastPlayTime: Map<string, number> = new Map();
+  private readonly minPlayInterval = 2000; // 2 seconds in milliseconds
+
   getServiceName(): string {
     return 'audio';
   }
@@ -36,6 +39,23 @@ export class AudioHandler extends BaseHandler {
   }
   
   private async handlePlay(requestId: string, sound: string, volume: number): Promise<void> {
+    // Check rate limiting
+    const now = Date.now();
+    const lastPlay = this.lastPlayTime.get(sound) || 0;
+    const timeSinceLastPlay = now - lastPlay;
+    
+    if (timeSinceLastPlay < this.minPlayInterval) {
+      const remainingTime = this.minPlayInterval - timeSinceLastPlay;
+      this.log('INFO', `Rate limiting: Skipping ${sound} (${remainingTime}ms until next allowed play)`);
+      this.writeResponse('audio', this.createResponse(
+        requestId,
+        'skipped',
+        `Rate limited - sound played too recently`,
+        { sound, remainingTime }
+      ));
+      return;
+    }
+    
     // Try different sound locations
     const soundPaths = [
       `/System/Library/Sounds/${sound}`,
@@ -66,6 +86,10 @@ export class AudioHandler extends BaseHandler {
     try {
       await execAsync(`afplay "${soundFile}"`);
       this.log('INFO', `Audio played successfully: ${soundFile}`);
+      
+      // Update last play time for rate limiting
+      this.lastPlayTime.set(sound, Date.now());
+      
       this.writeResponse('audio', this.createResponse(
         requestId,
         'success',

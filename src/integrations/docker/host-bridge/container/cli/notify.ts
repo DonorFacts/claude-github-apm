@@ -5,7 +5,7 @@
  * Updated to use unified host-bridge system
  */
 
-import { hostBridge } from '../host-bridge/index.js';
+import { hostBridge } from '../index.js';
 
 function notifyJake() {
   // Play notification sound via host-bridge (non-blocking)

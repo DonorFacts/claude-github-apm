@@ -3,7 +3,7 @@
  * Common interface for all service handlers
  */
 
-import type { BridgeRequest, BridgeResponse } from '../../types';
+import type { BridgeRequest, BridgeResponse } from '../../shared/types';
 
 export interface ServiceHandler {
   /**

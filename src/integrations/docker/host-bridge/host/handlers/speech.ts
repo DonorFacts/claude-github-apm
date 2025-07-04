@@ -5,8 +5,8 @@
 
 import { promisify } from 'util';
 import { exec } from 'child_process';
-import { BaseHandler } from './base-handler';
-import type { BridgeRequest } from '../../types';
+import { BaseHandler } from './base';
+import type { BridgeRequest } from '../../shared/types';
 
 const execAsync = promisify(exec);
 

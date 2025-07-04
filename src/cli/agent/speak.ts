@@ -31,7 +31,7 @@ export function speakCommand(yargs: Argv) {
       
       // Call the original speech helper
       const speakProcess = spawn('tsx', [
-        'src/integrations/docker/host-bridge/speech-helper.ts',
+        'src/integrations/docker/host-bridge/container/cli/speech.ts',
         message
       ], {
         stdio: 'inherit',
