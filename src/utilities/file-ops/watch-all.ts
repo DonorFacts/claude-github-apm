@@ -19,8 +19,8 @@ class WatchAllManager {
   private projectRoot: string;
 
   constructor() {
-    // Get project root (two levels up from this script - matching shell script logic)
-    this.projectRoot = path.resolve(__dirname, '../..');
+    // Get project root (use process.cwd() to get actual working directory)
+    this.projectRoot = process.cwd();
     
     // Define all watch processes based on the original shell script
     this.processes = [];

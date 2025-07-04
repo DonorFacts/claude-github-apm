@@ -34,6 +34,12 @@ is_speech_request_stale() {
     if command -v gdate &> /dev/null; then
         # macOS with GNU date (via brew install coreutils)
         request_timestamp_epoch=$(gdate -d "$request_timestamp" +%s 2>/dev/null || echo "0")
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS native date command
+        # Convert ISO 8601 format to a format macOS date can parse
+        # Remove milliseconds and timezone Z suffix
+        local clean_timestamp="${request_timestamp%.???Z}"
+        request_timestamp_epoch=$(date -u -j -f "%Y-%m-%dT%H:%M:%S" "$clean_timestamp" +%s 2>/dev/null || echo "0")
     else
         # Linux date
         request_timestamp_epoch=$(date -d "$request_timestamp" +%s 2>/dev/null || echo "0")
