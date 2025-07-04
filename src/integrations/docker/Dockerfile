@@ -27,13 +27,8 @@ RUN npm install -g @anthropic-ai/claude-code pnpm tsx
 # Create workspace directory structure
 RUN mkdir -p /workspace
 
-# Copy package files for dependency installation
-COPY main/package.json main/pnpm-lock.yaml* /workspace/
+# Set working directory (dependencies will be installed at runtime)
 WORKDIR /workspace
-
-# Install project dependencies with Linux-specific binaries
-# This ensures we get @esbuild/linux-* instead of host platform binaries
-RUN pnpm install --frozen-lockfile --prefer-offline
 
 # Install direnv for automatic environment loading
 RUN curl -sfL https://direnv.net/install.sh | bash
@@ -60,6 +55,11 @@ RUN chmod +x /tmp/setup-direnv.sh && /tmp/setup-direnv.sh && rm /tmp/setup-diren
 # Create simple entrypoint script that calls external setup
 RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'set -e' >> /entrypoint.sh && \
+    echo '' >> /entrypoint.sh && \
+    echo '# Install platform-specific dependencies after mount' >> /entrypoint.sh && \
+    echo 'if [ -f /workspace/main/src/integrations/docker/scripts/install-dependencies.sh ]; then' >> /entrypoint.sh && \
+    echo '  /workspace/main/src/integrations/docker/scripts/install-dependencies.sh' >> /entrypoint.sh && \
+    echo 'fi' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
     echo '# Setup git configuration from .env file' >> /entrypoint.sh && \
     echo 'if [ -f /workspace/main/src/integrations/docker/scripts/setup-git.sh ]; then' >> /entrypoint.sh && \
