@@ -22,9 +22,10 @@ Unified container-host communication system that enables Docker containers to in
 - Type-safe interfaces for all service payloads
 
 #### Host Side  
-- Single unified daemon (`host-bridge-daemon.sh`) handles all services
+- Single unified daemon (`host-bridge-daemon.ts`) handles all services
 - JSON message processing with UUID tracking
 - Comprehensive logging and error handling
+- TypeScript implementation for better maintainability
 
 ### Technical Architecture
 
@@ -102,7 +103,7 @@ await hostBridge.speech_say('Task completed successfully!');
 npm start
 
 # Or manually:
-./.local/bin/host-bridge-daemon.sh
+tsx src/integrations/docker/host-bridge/daemons/host-bridge-daemon.ts
 ```
 
 #### Testing
@@ -125,7 +126,7 @@ The host-bridge system replaces the previous scattered approach:
 - ❌ Individual `.local/*-queue` files
 
 **New**:
-- ✅ `host-bridge-daemon.sh` (unified)
+- ✅ `host-bridge-daemon.ts` (unified TypeScript daemon)
 - ✅ Structured `.local/host-bridge/` directory
 - ✅ Type-safe TypeScript client
 - ✅ Service configuration and discovery
