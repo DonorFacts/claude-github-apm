@@ -26,7 +26,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - ALWAYS run tests via `pnpm test` (or `pnpm test -- <jest options>`). This invokes the package.json script `tsc --noEmit && jest`.
 - ALWAYS use `pnpm` for package management, not `npm` or `yarn`.
 - Run the Bash command `tsx src/integrations/docker/notifications/user-notification.ts` at the end of every completed response to notify Jake (the User) of your completion.
-- **REQUIRED**: Use `pnpm cli speak "message"` to provide short status updates to Jake at the end of EVERY response. This is mandatory for all agents. Use this for:
+  <!-- - **REQUIRED**: Use `pnpm cli speak "message"` to provide short status updates to Jake at the end of EVERY response. This is mandatory for all agents. Use this for: -->
   - Brief summary of what was accomplished (always required)
   - Progress updates during long-running tasks within the same response
   - Important findings or decisions made
@@ -35,7 +35,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - Professional tone with occasional appropriate humor
   - **AUTOMATIC**: The CLI speak command automatically updates agent activity timestamps in session tracking
 - **SESSION ACTIVITY TRACKING**: Use standardized CLI commands for activity tracking:
-  - `pnpm cli speak "message"` - Speak with automatic agent activity tracking (required)
+  <!-- - `pnpm cli speak "message"` - Speak with automatic agent activity tracking (required) -->
   - `pnpm cli task-done "Completed feature X"` - Mark a specific task as completed
   - `pnpm cli track-agent` - Manual agent activity update (rarely needed)
   - `pnpm cli track-user` - Manual user activity update (when appropriate)
@@ -82,6 +82,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **PROHIBITED**: Never create shell scripts (`.sh`, `.bash`, `.zsh`) for any purpose.
 
 **REQUIRED**: Use TypeScript for all automation and scripting:
+
 - Execute with `tsx script.ts`
 - Include type annotations and error handling
 - Add Jest tests for all scripts
@@ -133,4 +134,3 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 3. **MIGRATE WHEN FOUND**: Suggest migrating existing shell scripts to TypeScript.
 
 Do what has been asked; nothing more, nothing less.
-
