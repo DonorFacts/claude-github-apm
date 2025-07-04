@@ -62,16 +62,7 @@ _x_*
 .cc-slack-config.json
 
 # Host-Bridge runtime files
-src/integrations/docker/host-bridge/runtime/host-bridge/requests/
-src/integrations/docker/host-bridge/runtime/host-bridge/responses/
-src/integrations/docker/host-bridge/runtime/host-bridge/logs/
-src/integrations/docker/host-bridge/runtime/host-bridge/config/daemon.pid
-
-# Legacy runtime files (to be removed)
-.local/sound-queue
-.local/speech-queue
-.local/vscode-queue
-.local/vscode-response
+src/integrations/docker/host-bridge/runtime/
 
 # Local settings
 .claude/settings.local.json
