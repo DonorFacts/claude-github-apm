@@ -1,0 +1,33 @@
+session:
+  id: developer-test-sdk-integration-20250703T005809
+  status: active
+  role: developer
+  specialization: test-sdk-integration
+  agent_prompt_version: v2.1.0
+  conversation_topic: Agent initialization and task assignment
+  current_task: Awaiting initial task assignment
+  task_status: in_progress
+  work_completed: []
+  work_in_progress:
+    - Session initialization
+  next_actions:
+    - Await user task assignment
+  blockers: []
+  worktree: feature-multi-agent-memory-architecture
+  branch: feature-multi-agent-memory-architecture
+  context_file: context/latest.md
+  context_remaining_percent: 100
+  estimated_tokens_remaining: 200000
+  created: '2025-07-03T00:58:09.228Z'
+  last_activity: '2025-07-03T00:58:09.228Z'
+  agent_last_seen: '2025-07-03T00:58:09.228Z'
+  user_last_seen: '2025-07-03T00:58:09.228Z'
+  last_context_save: '2025-07-03T00:58:09.228Z'
+  message_count: 0
+  session_duration_minutes: 0
+  github_issues: []
+  related_sessions: []
+  environment: container
+  host_project_path: /workspace/worktrees/feature-multi-agent-memory-architecture
+  created_by: unknown
+  auto_archive_after: '2025-07-10T00:58:09.228Z'

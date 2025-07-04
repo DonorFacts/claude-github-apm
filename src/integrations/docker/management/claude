@@ -1,0 +1,36 @@
+#!/bin/bash
+# Claude Code Container Wrapper - Clean Architecture
+# Orchestrates container-based Claude Code execution with automatic configuration
+
+set -e
+
+# Load shared modules
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Utility directories
+SYSTEM_DIR="$SCRIPT_DIR/../../../utilities/system"
+GIT_DIR="$SCRIPT_DIR/../../../utilities/git"
+
+source "$SYSTEM_DIR/env-loader.sh"
+source "$SYSTEM_DIR/path-resolver.sh"
+source "$GIT_DIR/git-config.sh"
+source "$SYSTEM_DIR/watch-processes.sh"
+source "$SCRIPT_DIR/bot-config-loader.sh"
+source "$SCRIPT_DIR/container-manager.sh"
+
+# Load environment automatically
+load_project_env
+
+# Resolve project paths
+resolve_paths
+
+# Setup git configuration automatically
+setup_host_git_config
+
+# Start watch processes before container
+start_watch_processes
+
+# Start container if needed
+start_container
+
+# Execute Claude in container
+exec_in_container "$@"

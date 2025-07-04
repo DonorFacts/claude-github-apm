@@ -10,8 +10,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - DO NOT edit more code than you have to.
 - DO NOT WASTE TOKENS, be succinct and concise.
 - If the User provides you with just a .md file reference and no other information, then YOU MUST treat the .md contents as specific instructions from the User for you to immediately follow exactly.
-- ALWAYS use strict TypeScript rather than creating Bash `.sh` scripts. Execute `.ts` files via `tsx <file>`.
-- ALWAYS invoke local scripts using relative paths (e.g., `./src/scripts/foo.sh`) rather than absolute paths. This ensures portability across different environments and worktrees.
+- **CRITICAL**: NEVER create shell scripts (`.sh`, `.bash`) under ANY circumstances. Use TypeScript exclusively for all automation and scripting tasks.
+- ALWAYS invoke local scripts using relative paths (e.g., `./src/scripts/foo.ts`) rather than absolute paths. This ensures portability across different environments and worktrees.
 - YOU MUST follow TDD practices every time you implement new functionality, fix bugs, or otherwise modify application behavior:
   1.  List happy path and edge cases
   2.  Identify acceptance criteria for each case
@@ -25,14 +25,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - YOU MUST output your design plan before implementing any code changes, considering at least 2 different approaches and their trade-offs.
 - ALWAYS run tests via `pnpm test` (or `pnpm test -- <jest options>`). This invokes the package.json script `tsc --noEmit && jest`.
 - ALWAYS use `pnpm` for package management, not `npm` or `yarn`.
-- Run the Bash command `./.local/bin/Notify_Jake` at the end of every completed response to notify Jake (the User) of your completion.
-- **REQUIRED**: Use `pnpm speak "message"` to provide short status updates to Jake at the end of EVERY response. This is mandatory for all agents. Use this for:
+- Run the Bash command `tsx src/integrations/docker/notifications/user-notification.ts` at the end of every completed response to notify Jake (the User) of your completion.
+  <!-- - **REQUIRED**: Use `pnpm cli speak "message"` to provide short status updates to Jake at the end of EVERY response. This is mandatory for all agents. Use this for: -->
   - Brief summary of what was accomplished (always required)
   - Progress updates during long-running tasks within the same response
   - Important findings or decisions made
   - Next steps or what to expect
   - Keep messages concise (1-2 sentences max)
   - Professional tone with occasional appropriate humor
+  - **AUTOMATIC**: The CLI speak command automatically updates agent activity timestamps in session tracking
+- **SESSION ACTIVITY TRACKING**: Use standardized CLI commands for activity tracking:
+  <!-- - `pnpm cli speak "message"` - Speak with automatic agent activity tracking (required) -->
+  - `pnpm cli task-done "Completed feature X"` - Mark a specific task as completed
+  - `pnpm cli track-agent` - Manual agent activity update (rarely needed)
+  - `pnpm cli track-user` - Manual user activity update (when appropriate)
 - NEVER use the phrase "You're absolutely right!", or variations thereof.
 - ALWAYS start your response with "Jake, ..."
 - **CONVERSATION CONTINUITY PROTOCOL**: At conversation start, create/update `.claude/conversations.yaml` entry with:
@@ -71,6 +77,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
     3. Features are the enemy of shipping
     4. A working tool today beats a perfect tool tomorrow
 
+## Script Language Policy: TypeScript-Only Automation
+
+**PROHIBITED**: Never create shell scripts (`.sh`, `.bash`, `.zsh`) for any purpose.
+
+**REQUIRED**: Use TypeScript for all automation and scripting:
+
+- Execute with `tsx script.ts`
+- Include type annotations and error handling
+- Add Jest tests for all scripts
+- Use `@types/node`, `commander`, `chalk` as needed
+
 ## Guidelines on Using Claude Code Sub-Agents:
 
 - Use a sub-agent when:
@@ -106,3 +123,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
    - **Instructions File Path**: `src/prompts/multiple-questions.md`
    - **Instructions Summary**: Ask the user whether they want to move this new subject to a separate Claude conversation in a new Terminal tab, and create a new issue for it, appending as context the latest messages relevant to the new subject. And include the end of the initial Claude prompt an instruction for carrying over this conversation (either answering the user's last question (if not answered), summarizing where you both left off, providing a link to the new issue, and asking the user to continue the conversation in the new Terminal tab, maybe even sharing the keyboard shortcut to switch to the new tab))
 
+---
+
+# Important Instruction Reminders
+
+**ABSOLUTE REQUIREMENTS:**
+
+1. **NO SHELL SCRIPTS**: Never create `.sh`, `.bash`, or `.zsh` files. Use TypeScript instead.
+2. **SUGGEST ALTERNATIVES**: If user requests shell script, offer TypeScript alternative.
+3. **MIGRATE WHEN FOUND**: Suggest migrating existing shell scripts to TypeScript.
+
+Do what has been asked; nothing more, nothing less.

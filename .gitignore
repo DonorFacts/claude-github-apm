@@ -57,12 +57,15 @@ _x_*
 
 # # Claude Commands
 # .claude/commands/
+# Slack configuration
+.slack-config.json
+.cc-slack-config.json
 
 # Host-Bridge runtime files
-.local/host-bridge/requests/
-.local/host-bridge/responses/
-.local/host-bridge/logs/
-.local/host-bridge/config/daemon.pid
+src/integrations/docker/host-bridge/runtime/host-bridge/requests/
+src/integrations/docker/host-bridge/runtime/host-bridge/responses/
+src/integrations/docker/host-bridge/runtime/host-bridge/logs/
+src/integrations/docker/host-bridge/runtime/host-bridge/config/daemon.pid
 
 # Legacy runtime files (to be removed)
 .local/sound-queue
@@ -75,3 +78,4 @@ _x_*
 
 # pnpm store (should use global store, not local)
 .pnpm-store/
+.apm_session
