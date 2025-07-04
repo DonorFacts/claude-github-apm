@@ -1,7 +1,10 @@
-FROM node:20-slim
+FROM node:22-bookworm-slim
+
+# Update and upgrade all packages to get latest security patches
+RUN apt-get update && apt-get upgrade -y
 
 # Install system dependencies including GitHub CLI, security tools, and shell utilities
-RUN apt-get update && apt-get install -y \
+RUN apt-get install -y \
     git \
     curl \
     bash \
@@ -19,7 +22,8 @@ RUN apt-get update && apt-get install -y \
     && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" > /etc/apt/sources.list.d/github-cli.list \
     && apt-get update \
     && apt-get install -y gh \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Install Claude Code and development tools globally
 RUN npm install -g @anthropic-ai/claude-code pnpm tsx
