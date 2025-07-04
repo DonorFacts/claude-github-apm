@@ -34,6 +34,31 @@ export class HostBridge {
   }
 
   /**
+   * Send a request without waiting for response (fire and forget)
+   */
+  sendRequestNoWait(
+    service: BridgeRequest['service'],
+    action: string,
+    payload: Record<string, any>,
+    options: { priority?: BridgeRequest['priority'] } = {}
+  ): void {
+    const request: BridgeRequest = {
+      id: randomUUID(),
+      service,
+      action,
+      timestamp: new Date().toISOString(),
+      payload,
+      timeout: 30000, // Default timeout
+      priority: options.priority ?? 'normal'
+    };
+
+    const requestFile = path.join(this.requestsDir, `${service}.queue`);
+    
+    // Just write the request and return immediately
+    writeFileSync(requestFile, JSON.stringify(request) + '\n', { flag: 'a' });
+  }
+  
+  /**
    * Send a request to the host daemon and wait for response
    */
   async request(
@@ -138,6 +163,13 @@ export class HostBridge {
   // Convenience methods for specific services
 
   /**
+   * Open a path in VS Code (no wait version)
+   */
+  vscode_open_nowait(path: string): void {
+    this.sendRequestNoWait('vscode', 'open', { path });
+  }
+
+  /**
    * Open a path in VS Code
    */
   async vscode_open(path: string): Promise<boolean> {
@@ -148,6 +180,13 @@ export class HostBridge {
       console.error('Failed to open VS Code:', (error as Error).message);
       return false;
     }
+  }
+
+  /**
+   * Play a notification sound (no wait version)
+   */
+  audio_play_nowait(sound: string, volume: number = 1.0): void {
+    this.sendRequestNoWait('audio', 'play', { sound, volume });
   }
 
   /**
@@ -164,6 +203,17 @@ export class HostBridge {
   }
 
   /**
+   * Speak text using text-to-speech (no wait version)
+   */
+  speech_say_nowait(message: string, voice?: string, rate?: number): void {
+    const payload: SpeechPayload = { message };
+    if (voice) payload.voice = voice;
+    if (rate) payload.rate = rate;
+    
+    this.sendRequestNoWait('speech', 'say', payload);
+  }
+  
+  /**
    * Speak text using text-to-speech
    */
   async speech_say(message: string, voice?: string, rate?: number): Promise<boolean> {
@@ -173,7 +223,7 @@ export class HostBridge {
       if (rate) payload.rate = rate;
       
       const response = await this.request('speech', 'say', payload);
-      return response.status === 'success';
+      return response.status === 'success' || response.status === 'skipped';
     } catch (error) {
       console.error('Failed to speak:', (error as Error).message);
       return false;

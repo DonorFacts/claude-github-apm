@@ -17,7 +17,8 @@ async function testHostBridge() {
 
   if (!isRunning) {
     console.log('   Please start the daemon first:');
-    console.log('   ./src/integrations/docker/host-bridge/daemons/host-bridge-daemon.sh');
+    console.log('   npm start');
+    console.log('   or manually: tsx src/integrations/docker/host-bridge/daemons/host-bridge-daemon.ts');
     return;
   }
 

@@ -7,22 +7,10 @@
 
 import { hostBridge } from '../host-bridge/index.js';
 
-async function notifyJake() {
-  try {
-    // Play notification sound via host-bridge
-    const success = await hostBridge.audio_play('Hero.aiff');
-    
-    if (success) {
-      console.log('🔔 Task completed by Claude Code!');
-    } else {
-      console.log('🔔 Task completed! (audio notification may have failed)');
-      console.log('💡 Ensure host-bridge daemon is running: npm start');
-    }
-  } catch (error) {
-    console.log('🔔 Task completed by Claude Code!');
-    console.error('⚠️  Audio notification failed:', (error as Error).message);
-    console.log('💡 Ensure host-bridge daemon is running: npm start');
-  }
+function notifyJake() {
+  // Play notification sound via host-bridge (non-blocking)
+  hostBridge.audio_play_nowait('Hero.aiff');
+  console.log('🔔 Task completed by Claude Code!');
 }
 
 notifyJake();
