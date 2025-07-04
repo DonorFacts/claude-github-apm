@@ -36,14 +36,6 @@ class WatchAllManager {
       });
     }
 
-    // Add command sync watcher (always present)
-    this.processes.push({
-      name: 'COMMANDS',
-      command: 'pnpm',
-      args: ['run', 'watch:commands'],
-      color: 'blue'
-    });
-
     // Handle graceful shutdown - matching shell script trap behavior
     process.on('SIGINT', () => this.shutdown());
     process.on('SIGTERM', () => this.shutdown());
@@ -57,8 +49,6 @@ class WatchAllManager {
     const startPromises = this.processes.map(async (watchProcess) => {
       if (watchProcess.name === 'HOST-BRIDGE') {
         console.log(chalk.yellow('[WATCH-ALL] Starting unified host-bridge daemon (VS Code, audio, speech)...'));
-      } else if (watchProcess.name === 'COMMANDS') {
-        console.log(chalk.yellow('[WATCH-ALL] Starting command sync watcher...'));
       }
       await this.startProcess(watchProcess);
     });

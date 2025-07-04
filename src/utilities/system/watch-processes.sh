@@ -10,7 +10,7 @@ start_watch_processes() {
     if [ -f "$WATCH_PID_FILE" ]; then
         WATCH_PID=$(cat "$WATCH_PID_FILE" 2>/dev/null || echo "")
         if [ -n "$WATCH_PID" ] && kill -0 "$WATCH_PID" 2>/dev/null; then
-            echo "📋 Watch processes already running (PID: $WATCH_PID)"
+            echo "📋 Host-bridge daemon already running (PID: $WATCH_PID)"
             return 0
         else
             echo "🔄 Cleaning up stale PID file..."
@@ -18,10 +18,10 @@ start_watch_processes() {
         fi
     fi
     
-    echo "🚀 Starting watch processes on host..."
+    echo "🚀 Starting host-bridge daemon on host..."
     cd "$PROJECT_ROOT"
-    nohup pnpm start > /tmp/apm-watch.log 2>&1 &
+    nohup pnpm start > /tmp/apm-host-bridge.log 2>&1 &
     WATCH_PID=$!
     echo "$WATCH_PID" > "$WATCH_PID_FILE"
-    echo "✅ Watch processes started (PID: $WATCH_PID, logs: /tmp/apm-watch.log)"
+    echo "✅ Host-bridge daemon started (PID: $WATCH_PID, logs: /tmp/apm-host-bridge.log)"
 }

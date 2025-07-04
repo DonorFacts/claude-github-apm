@@ -130,7 +130,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **ABSOLUTE REQUIREMENTS:**
 
 1. **NO SHELL SCRIPTS**: Never create `.sh`, `.bash`, or `.zsh` files. Use TypeScript instead.
-2. **SUGGEST ALTERNATIVES**: If user requests shell script, offer TypeScript alternative.
-3. **MIGRATE WHEN FOUND**: Suggest migrating existing shell scripts to TypeScript.
+2. **ALWAYS RUN TS CHECKS**: After you create/update a .ts/.tsx file, ALWAYS run `pnpm ts-check` to check for TS errors.
+3. **SUGGEST ALTERNATIVES**: If user requests shell script, offer TypeScript alternative.
+4. **MIGRATE WHEN FOUND**: Suggest migrating existing shell scripts to TypeScript.
 
 Do what has been asked; nothing more, nothing less.

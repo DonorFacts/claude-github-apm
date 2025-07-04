@@ -68,5 +68,5 @@ exec_in_container() {
         -e "APM_WORKTREE_NAME=$(basename "$PWD")" \
         -e "PATH=/workspace/.local/bin:/workspace/node_modules/.bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" \
         "$CONTAINER_NAME" \
-        /usr/local/bin/claude --dangerously-skip-permissions "$@"
+        tsx /workspace/main/src/integrations/docker/container/claude-with-watcher.ts "$@"
 }

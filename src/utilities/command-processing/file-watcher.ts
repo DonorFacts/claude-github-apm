@@ -1,4 +1,4 @@
-import * as chokidar from 'chokidar';
+import watch from 'node-watch';
 import * as fs from 'fs';
 import * as path from 'path';
 import { glob } from 'glob';
@@ -11,10 +11,11 @@ export interface FileWatcherOptions {
   sourcePath: string;
   targetPath: string;
   syncOnStart?: boolean;
+  shortcutPath?: string;  // Optional custom shortcut path, defaults to '-'
 }
 
 export class FileWatcher {
-  private watcher?: chokidar.FSWatcher;
+  private watcher?: any; // node-watch watcher instance
   private analyzer: PromptAnalyzer;
   private classifier: CommandClassifier;
   private transformer: CommandNameTransformer;
@@ -31,19 +32,57 @@ export class FileWatcher {
   }
   
   async start(): Promise<void> {
-    const pattern = path.join(this.options.sourcePath, '**/*.md');
+    const sourcePath = path.resolve(this.options.sourcePath);
+    console.log(`🔍 Setting up node-watch for: ${sourcePath}`);
+    console.log(`📂 Current working directory: ${process.cwd()}`);
     
-    this.watcher = chokidar.watch(pattern, {
-      ignored: (path: string) => path.includes('/_x_/'),
-      persistent: true,
-      ignoreInitial: true
+    // Set up watcher options
+    const watchOptions = {
+      recursive: true,
+      filter: (filePath: string) => {
+        // Return true to watch, false to ignore
+        if (filePath.includes('/_x_/')) return false;
+        if (filePath.endsWith('.md')) return true;
+        // Also watch directories to detect new files
+        if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) return true;
+        return false;
+      }
+    };
+    
+    // Create the watcher
+    this.watcher = watch(sourcePath, watchOptions, (eventType: string, filePath: string) => {
+      console.log(`\n📍 Event: ${eventType} - File: ${filePath}`);
+      console.log(`   Relative path: ${path.relative(sourcePath, filePath)}`);
+      
+      // Only process markdown files
+      if (!filePath.endsWith('.md')) {
+        console.log(`   ⏭️  Skipping non-markdown file`);
+        return;
+      }
+      
+      // Handle different event types
+      if (eventType === 'update') {
+        // Check if file exists to determine if it's add/change or delete
+        if (fs.existsSync(filePath)) {
+          console.log(`   📝 File ${fs.existsSync(filePath) ? 'changed' : 'added'}`);
+          // Add a small delay to ensure file write is complete
+          setTimeout(() => {
+            console.log(`   ⏱️  Processing after 500ms delay...`);
+            this.syncFile(filePath);
+          }, 500);
+        } else {
+          console.log(`   🗑️  File removed`);
+          this.removeCommand(filePath);
+        }
+      } else if (eventType === 'remove') {
+        console.log(`   🗑️  File removed`);
+        this.removeCommand(filePath);
+      }
     });
     
-    // Set up event handlers
-    this.watcher
-      .on('add', (path: string) => this.syncFile(path))
-      .on('change', (path: string) => this.syncFile(path))
-      .on('unlink', (path: string) => this.removeCommand(path));
+    console.log('✅ node-watch is now watching for changes');
+    console.log('👀 Watching for changes...');
+    console.log('Press Ctrl+C to stop');
     
     // Sync all files on start if requested
     if (this.options.syncOnStart) {
@@ -53,8 +92,9 @@ export class FileWatcher {
   
   async stop(): Promise<void> {
     if (this.watcher) {
-      await this.watcher.close();
+      this.watcher.close();
       this.watcher = undefined;
+      console.log('🛑 node-watch stopped');
     }
   }
   
@@ -64,14 +104,21 @@ export class FileWatcher {
       ignore: ['**/_x_/**']
     });
     
-    // Analyze all files first to build the dependency graph
+    // Build file map with fresh content
     const fileMap = new Map<string, PromptFile>();
     for (const file of files) {
       try {
-        const analyzed = await this.analyzer.analyzeFile(file);
-        fileMap.set(file, analyzed);
+        // Read fresh content directly
+        const content = fs.readFileSync(file, 'utf-8');
+        const promptFile: PromptFile = {
+          path: file,
+          content: content,
+          imports: [],
+          importedBy: []
+        };
+        fileMap.set(file, promptFile);
       } catch (error) {
-        console.error(`Error analyzing file ${file}:`, error);
+        console.error(`Error reading file ${file}:`, error);
       }
     }
     
@@ -89,21 +136,42 @@ export class FileWatcher {
   
   private async syncFile(filePath: string): Promise<void> {
     try {
-      // Analyze the file
-      const file = await this.analyzer.analyzeFile(filePath);
+      console.log(`\n🔄 Syncing file: ${filePath}`);
+      
+      // Convert to relative path if it's absolute
+      const relativePath = path.isAbsolute(filePath) 
+        ? path.relative(process.cwd(), filePath)
+        : filePath;
+      
+      console.log(`   📍 Relative path from cwd: ${relativePath}`);
+      
+      // Read fresh content directly - bypass analyzer cache for updates
+      const content = fs.readFileSync(relativePath, 'utf-8');
+      
+      // Create a simple PromptFile object with fresh content
+      const file: PromptFile = {
+        path: relativePath,
+        content: content,
+        imports: [],
+        importedBy: []
+      };
       
       // Create a map with just this file for classification
       // Note: This is a simplified approach - in a real implementation,
       // we might want to maintain a cache of all files for accurate classification
       const fileMap = new Map<string, PromptFile>();
-      fileMap.set(filePath, file);
+      fileMap.set(relativePath, file);
       
       // Classify
       const classification = this.classifier.classifyPrompts(fileMap);
       
       // Only sync if it's public
-      if (classification.public.includes(filePath)) {
+      if (classification.public.includes(relativePath)) {
+        console.log(`   ✅ File is public, syncing...`);
         await this.syncFileContent(file);
+        console.log(`   ✅ Sync complete`);
+      } else {
+        console.log(`   ⏭️  Skipping private file`);
       }
     } catch (error) {
       console.error(`Error syncing file ${filePath}:`, error);
@@ -111,38 +179,54 @@ export class FileWatcher {
   }
   
   private async syncFileContent(file: PromptFile): Promise<void> {
+    console.log(`   📄 Syncing content: ${file.content.length} bytes`);
+    
     // Transform the filename
     const transformedName = this.transformer.transform(file.path);
+    
+    // Log only if different from original
+    const originalName = path.basename(file.path);
+    if (transformedName !== originalName) {
+      console.log(`   📝 Transformed: ${originalName} → ${transformedName}`);
+    }
     
     // Sync to both target directories
     const targetPaths = [
       this.options.targetPath,  // .claude/commands
-      '-'  // Shortcut folder
+      this.options.shortcutPath || '-'  // Shortcut folder
     ];
     
     for (const targetPath of targetPaths) {
       const targetFile = path.join(targetPath, transformedName);
+      console.log(`   📝 Writing to: ${targetFile}`);
       
       // Ensure target directory exists
       const targetDir = path.dirname(targetFile);
       if (!fs.existsSync(targetDir)) {
+        console.log(`   📁 Creating directory: ${targetDir}`);
         fs.mkdirSync(targetDir, { recursive: true });
       }
       
       // Write the file
       fs.writeFileSync(targetFile, file.content);
+      console.log(`   ✅ Written ${file.content.length} bytes to ${targetFile}`);
     }
   }
   
   private async removeCommand(filePath: string): Promise<void> {
     try {
+      // Convert to relative path if it's absolute
+      const relativePath = path.isAbsolute(filePath) 
+        ? path.relative(process.cwd(), filePath)
+        : filePath;
+      
       // Transform the filename to get the target path
-      const transformedName = this.transformer.transform(filePath);
+      const transformedName = this.transformer.transform(relativePath);
       
       // Remove from both target directories
       const targetPaths = [
         this.options.targetPath,  // .claude/commands
-        '-'  // Shortcut folder
+        this.options.shortcutPath || '-'  // Shortcut folder
       ];
       
       for (const targetPath of targetPaths) {
@@ -150,7 +234,15 @@ export class FileWatcher {
         
         // Remove the file if it exists
         if (fs.existsSync(targetFile)) {
-          fs.unlinkSync(targetFile);
+          try {
+            fs.unlinkSync(targetFile);
+            console.log(`   🗑️  Removed: ${targetFile}`);
+          } catch (unlinkError) {
+            // Ignore if file doesn't exist
+            if ((unlinkError as any).code !== 'ENOENT') {
+              throw unlinkError;
+            }
+          }
         }
       }
     } catch (error) {
