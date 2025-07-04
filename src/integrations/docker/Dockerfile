@@ -56,15 +56,16 @@ RUN chmod +x /tmp/setup-direnv.sh && /tmp/setup-direnv.sh && rm /tmp/setup-diren
 RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'set -e' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
-    echo '# Install platform-specific dependencies after mount' >> /entrypoint.sh && \
-    echo 'if [ -f /workspace/main/src/integrations/docker/scripts/install-dependencies.sh ]; then' >> /entrypoint.sh && \
-    echo '  /workspace/main/src/integrations/docker/scripts/install-dependencies.sh' >> /entrypoint.sh && \
-    echo 'fi' >> /entrypoint.sh && \
+    echo '# Run setup scripts in order' >> /entrypoint.sh && \
+    echo 'SCRIPTS=(' >> /entrypoint.sh && \
+    echo '  "/workspace/main/src/integrations/docker/scripts/install-dependencies.sh"' >> /entrypoint.sh && \
+    echo '  "/workspace/main/src/integrations/docker/scripts/setup-git.sh"' >> /entrypoint.sh && \
+    echo ')' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
-    echo '# Setup git configuration from .env file' >> /entrypoint.sh && \
-    echo 'if [ -f /workspace/main/src/integrations/docker/scripts/setup-git.sh ]; then' >> /entrypoint.sh && \
-    echo '  /workspace/main/src/integrations/docker/scripts/setup-git.sh' >> /entrypoint.sh && \
-    echo 'fi' >> /entrypoint.sh && \
+    echo 'for script in "${SCRIPTS[@]}"; do' >> /entrypoint.sh && \
+    echo '  echo "🔧 Running $(basename "$script")..."' >> /entrypoint.sh && \
+    echo '  "$script"' >> /entrypoint.sh && \
+    echo 'done' >> /entrypoint.sh && \
     echo '' >> /entrypoint.sh && \
     echo '# Keep container running' >> /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
