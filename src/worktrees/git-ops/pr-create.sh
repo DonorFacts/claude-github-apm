@@ -27,7 +27,7 @@ ensure_github_issue() {
         
         # Use the first commit to create meaningful issue title
         ISSUE_TITLE=$(git log --format="%s" main..HEAD | head -1 | cut -d: -f2- | sed 's/^ *//')
-        ISSUE_BODY=$(./src/scripts/git/generate-issue-body.sh)
+        ISSUE_BODY=$(./src/worktrees/git-ops/generate-issue-body.sh)
         
         # Create issue and capture number
         if command -v gh >/dev/null 2>&1; then
