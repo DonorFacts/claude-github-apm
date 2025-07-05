@@ -18,6 +18,7 @@ import { initCommand } from './cli/user/init';
 import { restoreCommand } from './cli/user/restore';
 import { searchCommand } from './cli/user/search';
 import { completeCommand } from './cli/user/manage';
+import { sessionCommand } from './cli/user/session';
 import { speakCommand } from './cli/agent/speak';
 import { trackAgentCommand, trackUserCommand, taskDoneCommand } from './cli/agent/track-activity';
 
@@ -68,6 +69,7 @@ async function main() {
   // Add commands
   listCommand(cli);
   sessionsCommand(cli);  // Enhanced session management
+  sessionCommand(cli);   // Get current session info (jsonl, uuid)
   initCommand(cli);
   restoreCommand(cli);   // Comprehensive session restoration using Claude Code --resume
   searchCommand(cli);

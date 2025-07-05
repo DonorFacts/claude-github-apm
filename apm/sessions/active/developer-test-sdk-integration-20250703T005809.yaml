@@ -19,12 +19,12 @@ session:
   context_remaining_percent: 100
   estimated_tokens_remaining: 200000
   created: '2025-07-03T00:58:09.228Z'
-  last_activity: '2025-07-03T00:58:09.228Z'
+  last_activity: '2025-07-04T23:49:02.259Z'
   agent_last_seen: '2025-07-03T00:58:09.228Z'
   user_last_seen: '2025-07-03T00:58:09.228Z'
   last_context_save: '2025-07-03T00:58:09.228Z'
-  message_count: 0
-  session_duration_minutes: 0
+  message_count: 1
+  session_duration_minutes: 2810
   github_issues: []
   related_sessions: []
   environment: container

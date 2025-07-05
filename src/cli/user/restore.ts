@@ -273,7 +273,10 @@ async function performClaudeCodeRestore(manager: SessionFileManager, session: an
   console.log(chalk.blue('📋'), 'Launching Claude Code with conversation restoration...');
   
   // Use Claude Code's native --resume functionality
-  const claudeCommand = path.join('.local', 'bin', 'claude');
+  // In containers, claude is at /usr/local/bin/claude
+  const claudeCommand = process.env.APM_CONTAINERIZED === 'true' 
+    ? '/usr/local/bin/claude'
+    : path.join(require('os').homedir(), '.local', 'bin', 'claude');
   
   console.log(chalk.gray(`Command: ${claudeCommand} --resume ${claudeSessionUuid}`));
   console.log(chalk.gray(`APM Session: ${session.id}`));
