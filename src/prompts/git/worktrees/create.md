@@ -267,3 +267,26 @@ Example reasoning:
 | `handle-main-branch-changes.sh` | Path C workflow | Main + your changes only |
 | `handle-mixed-changes.sh` | Path D workflow | Main + mixed authorship |
 | `handle-others-changes.sh` | Path E workflow | Main + others' changes only |
+
+## Agent Instructions
+
+**REQUIRED**: Before beginning worktree creation, create a detailed todo list covering all workflow steps. Mark each todo as completed immediately after finishing the corresponding work.
+
+**REQUIRED**: After completing the workflow, validate your work against the acceptance criteria checklist below.
+
+## Acceptance Criteria Checklist
+
+**CRITICAL**: ALL criteria must pass before considering the work complete.
+
+- [ ] **Container Environment**: `echo $APM_CONTAINERIZED` returns "true"
+- [ ] **GitHub Issue**: `gh issue view <issue-number>` returns valid issue details
+- [ ] **Feature Branch**: `git branch --list feature-<issue-number>-<description>` shows new branch
+- [ ] **Worktree Directory**: `ls ../worktrees/<branch-name>/` shows project files
+- [ ] **Git Worktree**: `git worktree list` shows new worktree path
+- [ ] **Handover File**: `ls ../worktrees/<branch-name>/apm/worktree-handovers/not-started/<branch-name>.md` exists
+- [ ] **VS Code Integration**: `code ../worktrees/<branch-name>` opens correct directory
+- [ ] **Claude Access**: From worktree, `claude --version` succeeds
+- [ ] **Boundary Protocol**: Agent understands redirection rules from complete-handoff.md
+- [ ] **User Validation**: User confirms "verified" after checking new VS Code window
+
+**Fail-Fast Rule**: If any criteria fails, stop and resolve the issue before proceeding.

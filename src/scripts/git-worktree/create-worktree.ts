@@ -107,12 +107,15 @@ This is a new feature branch for mobile app development. The agent should:
     writeFileSync(join(agentDir, 'handover.md'), handoverContent);
   }
 
-  private openVSCode(worktreeDir: string): void {
+  private async openVSCode(worktreeDir: string): Promise<void> {
     try {
-      this.runCommand(`code ${worktreeDir}`);
+      console.log('📤 Opening VS Code via host-bridge...');
+      // Use the proper VS Code opening script
+      this.runCommand(`tsx src/integrations/docker/host-bridge/container/cli/open-vscode.ts ${worktreeDir}`);
     } catch (error) {
       console.log(`Could not open VS Code automatically: ${error}`);
       console.log(`Please manually open: ${worktreeDir}`);
+      console.log('💡 Make sure host-bridge daemon is running');
     }
   }
 
@@ -180,7 +183,7 @@ Created automatically by git worktree setup.
 
     // Open VS Code
     console.log('🚀 Opening VS Code...');
-    this.openVSCode(worktreeDir);
+    await this.openVSCode(worktreeDir);
 
     console.log(`
 ✅ Worktree setup complete!

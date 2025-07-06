@@ -6,14 +6,13 @@ This template guides the creation of handover files when creating new worktrees.
 
 ## Handover File Location
 
-Create at: `apm/worktree-handovers/not-started/YYYY_MM_DD-<branch-name>.md`
+Create at: `apm/worktree-handovers/not-started/<branch-name>.md`
 
-**CRITICAL**: Use TODAY'S date (the current date when creating the file)
-- Format: YYYY_MM_DD (year_month_day with underscores)
+**CRITICAL**: Use the exact branch name as the filename
+- Format: `<branch-name>.md` (e.g., `feature-123-user-auth.md`)
 - Directory: Always place in `not-started/` subdirectory
-- Example: If today is June 25, 2024, create: `apm/worktree-handovers/not-started/2024_06_25-feature-auth.md`
-- Example: If today is January 15, 2025, create: `apm/worktree-handovers/not-started/2025_01_15-feature-auth.md`
-- DO NOT use dates from examples - always use the CURRENT date
+- Example: For branch `feature-123-user-auth`, create: `apm/worktree-handovers/not-started/feature-123-user-auth.md`
+- Example: For branch `feature-456-api-endpoints`, create: `apm/worktree-handovers/not-started/feature-456-api-endpoints.md`
 
 **Note**: The agent will automatically move this file to `apm/worktree-handovers/completed/` after processing to ensure one-time use.
 
@@ -216,4 +215,4 @@ When creating a handover:
 - [ ] Specify clear next steps
 - [ ] Reference relevant issues/PRs/files
 - [ ] Consider if task needs special instructions
-- [ ] Ensure branch name in filename matches actual branch
+- [ ] Ensure branch name in filename matches actual branch (no date prefix required)
