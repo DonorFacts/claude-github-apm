@@ -70,3 +70,7 @@ src/integrations/docker/host-bridge/runtime/
 # pnpm store (should use global store, not local)
 .pnpm-store/
 .apm_session
+
+
+tmp/
+.claude/conversations/

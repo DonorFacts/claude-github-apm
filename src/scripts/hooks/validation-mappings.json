@@ -1,0 +1,6 @@
+{
+  "validationMappings": {
+    "git/worktrees/create": "src/scripts/git-worktree/validate-worktree.ts",
+    "joke": "src/scripts/jokes/validate-joke.ts"
+  }
+}

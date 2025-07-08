@@ -284,7 +284,7 @@ Example reasoning:
 - [ ] **Worktree Directory**: `ls ../worktrees/<branch-name>/` shows project files
 - [ ] **Git Worktree**: `git worktree list` shows new worktree path
 - [ ] **Handover File**: `ls ../worktrees/<branch-name>/apm/worktree-handovers/not-started/<branch-name>.md` exists
-- [ ] **VS Code Integration**: `code ../worktrees/<branch-name>` opens correct directory
+- [ ] **VS Code Integration**: `tsx src/integrations/docker/host-bridge/container/cli/open-vscode.ts ../worktrees/<branch-name>` opens VS Code
 - [ ] **Claude Access**: From worktree, `claude --version` succeeds
 - [ ] **Boundary Protocol**: Agent understands redirection rules from complete-handoff.md
 - [ ] **User Validation**: User confirms "verified" after checking new VS Code window

@@ -12,5 +12,40 @@
       "WebFetch(domain:github.com)"
     ],
     "deny": []
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /workspace/main && tsx src/scripts/hooks/session-capture-fixed.ts"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /workspace/main && tsx src/scripts/hooks/validate-from-transcript.ts '$CLAUDE_HOOK_INPUT'"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /workspace/main && tsx src/scripts/hooks/validate-from-transcript.ts '$CLAUDE_HOOK_INPUT'"
+          }
+        ]
+      }
+    ]
   }
 }

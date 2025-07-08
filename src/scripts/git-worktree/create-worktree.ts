@@ -193,6 +193,17 @@ Created automatically by git worktree setup.
 👤 Agent role: ${options.agentRole}
 ${options.issueNumber ? `🎫 Issue: #${options.issueNumber}` : ''}
 
+🔍 Running validation...`);
+
+    // Run validation
+    try {
+      this.runCommand(`tsx src/scripts/git-worktree/validate-worktree.ts ${options.branchName} ${options.issueNumber || ''}`);
+      console.log('✅ Validation completed successfully!');
+    } catch (error) {
+      console.log('⚠️  Validation found issues - please review above');
+    }
+
+    console.log(`
 Next steps:
 1. Switch to the new VS Code window
 2. Verify Claude is running in the terminal

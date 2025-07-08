@@ -4,7 +4,7 @@
     {
       "label": "Claude",
       "type": "shell",
-      "command": "${workspaceFolder}/.local/bin/claude '@src/prompts/git/worktrees/init-handover.md'",
+      "command": "pnpm claude '@src/prompts/git/worktrees/init-handover.md'",
       "presentation": {
         "reveal": "always",
         "panel": "new",
