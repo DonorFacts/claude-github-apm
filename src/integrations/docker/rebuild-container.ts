@@ -107,13 +107,13 @@ async function main(): Promise<void> {
       throw new Error('Could not find project root');
     }
     
-    const projectRoot = findProjectRoot();
+    const buildContext = process.cwd();
     
     log(`Building image '${IMAGE_NAME}' from ${dockerfilePath}`);
-    log(`Build context: ${projectRoot}`);
+    log(`Build context: ${buildContext}`);
     
     runCommand(
-      `docker build -t ${IMAGE_NAME} -f "${dockerfilePath}" "${projectRoot}"`,
+      `docker build -t ${IMAGE_NAME} -f "${dockerfilePath}" "${buildContext}"`,
       'Building Docker image'
     );
     
