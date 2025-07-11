@@ -2,7 +2,7 @@
 
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { join, relative } from 'path';
 
 interface WorktreeOptions {
   branchName: string;
@@ -110,8 +110,9 @@ This is a new feature branch for mobile app development. The agent should:
   private async openVSCode(worktreeDir: string): Promise<void> {
     try {
       console.log('📤 Opening VS Code via host-bridge...');
-      // Use the proper VS Code opening script
-      this.runCommand(`tsx src/integrations/docker/host-bridge/container/cli/open-vscode.ts ${worktreeDir}`);
+      // Convert absolute path to relative path for host-bridge compatibility
+      const relativePath = relative(this.mainDir, worktreeDir);
+      this.runCommand(`tsx src/integrations/docker/host-bridge/container/cli/open-vscode.ts ${relativePath}`);
     } catch (error) {
       console.log(`Could not open VS Code automatically: ${error}`);
       console.log(`Please manually open: ${worktreeDir}`);
