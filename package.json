@@ -42,6 +42,7 @@
     "sync:main": "./src/scripts/git/sync-main.sh",
     "=== CONTAINER MANAGEMENT ===": "",
     "claude": "./src/integrations/docker/management/claude",
+    "claude:local": "npx @anthropic-ai/claude-code",
     "claude:logs": "./src/integrations/docker/management/claude-logs",
     "claude:stop": "./src/integrations/docker/management/claude-stop-watch",
     "container:shell": "./src/integrations/docker/management/claude-shell",
@@ -76,6 +77,7 @@
     "url": "git+https://github.com/DonorFacts/claude-github-apm.git"
   },
   "devDependencies": {
+    "@anthropic-ai/claude-code": "^1.0.51",
     "@jest/globals": "^30.0.3",
     "@types/express": "^5.0.3",
     "@types/fs-extra": "^11.0.4",

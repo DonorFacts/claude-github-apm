@@ -12,8 +12,9 @@ class ClaudeWrapper {
     // Pass all arguments to Claude Code
     const args = process.argv.slice(2);
     
-    // Execute Claude Code directly
-    spawn('/usr/local/bin/claude', ['--dangerously-skip-permissions', ...args], {
+    // Execute Claude Code directly from node_modules/.bin
+    // Docker exec sets working directory, so relative path will work
+    spawn('./node_modules/.bin/claude', ['--dangerously-skip-permissions', ...args], {
       stdio: 'inherit',
       shell: false
     }).on('exit', (code) => {
