@@ -74,15 +74,16 @@ Are you on main/master/develop?
 When starting fresh with no uncommitted changes:
 
 ```bash
-./src/scripts/git-worktree/create-clean-worktree.sh "$ISSUE_NUMBER" "developer" "brief-description"
+tsx src/scripts/git-worktree/create-worktree.ts <agent-role> <description> [branch-type]
 ```
 
 This script handles:
-- Creating the feature branch
-- Setting up the worktree
-- Creating handover files
-- Opening VS Code
-- Completing the handoff process
+- Creating the GitHub issue automatically
+- Generating the branch name from issue number (e.g., feature-412-tts-mistral7b)
+- Setting up the worktree with proper paths
+- Creating handover files in both locations
+- Opening VS Code with host-bridge
+- Completing the validation
 
 ## Path B: Feature Branch with Related Changes
 
@@ -138,20 +139,20 @@ This script:
 
 ## Complete Workflow Example
 
-Here's a typical complete workflow:
+Here's the new automated workflow:
 
 ```bash
-# Step 1: Validate environment
-./src/scripts/git-worktree/validate-container.sh
+# Step 1: Validate environment (automatic in script)
+# Step 2: Create worktree with automated issue creation and branch naming
+tsx src/scripts/git-worktree/create-worktree.ts developer "text-to-speech mistral 7b integration"
 
-# Step 2: Get issue number
-ISSUE_NUMBER=$(./src/scripts/git-worktree/create-github-issue.sh)
-
-# Step 3: Assess situation
-./src/scripts/git-worktree/assess-situation.sh
-
-# Step 4: Follow recommended path (example for clean creation)
-./src/scripts/git-worktree/create-clean-worktree.sh "$ISSUE_NUMBER" "developer" "auth-system"
+# That's it! The script automatically:
+# - Creates GitHub issue
+# - Generates branch name: feature-412-text-to-speech-mistral-7b-integration
+# - Sets up worktree with relative paths
+# - Creates handover files
+# - Opens VS Code
+# - Validates everything
 ```
 
 ## Post-Handoff Protocol
@@ -213,16 +214,31 @@ git worktree prune                                   # Clean stale info
 
 ## Script Parameters
 
-All workflow scripts follow the same parameter pattern:
+The new automated worktree creation script follows this pattern:
 
 ```bash
-script-name.sh <issue-number> <agent-role> <brief-description>
+tsx src/scripts/git-worktree/create-worktree.ts <agent-role> <description> [branch-type]
 ```
 
 Where:
-- `issue-number`: GitHub issue number (e.g., "123")
-- `agent-role`: Target agent role (e.g., "developer", "scrum-master")
-- `brief-description`: Short kebab-case description (e.g., "user-auth-system")
+- `agent-role`: Target agent role (e.g., "developer", "scrum-master", "prompt-engineer")
+- `description`: Human-readable description (e.g., "text-to-speech mistral 7b integration")
+- `branch-type`: Optional branch type ("feature" (default), "fix", "hotfix", "bug")
+
+**Examples:**
+```bash
+# Feature branch (default)
+tsx src/scripts/git-worktree/create-worktree.ts developer "text-to-speech integration"
+# → Creates: feature-412-text-to-speech-integration
+
+# Bug fix branch
+tsx src/scripts/git-worktree/create-worktree.ts developer "fix memory leak in parser" fix
+# → Creates: fix-413-fix-memory-leak-in-parser
+
+# Hotfix branch
+tsx src/scripts/git-worktree/create-worktree.ts developer "critical auth bypass" hotfix
+# → Creates: hotfix-414-critical-auth-bypass
+```
 
 ## Troubleshooting
 
