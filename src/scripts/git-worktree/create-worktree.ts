@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
 import { execSync } from 'child_process';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync } from 'fs';
 import { join, relative } from 'path';
 
 interface WorktreeOptions {
@@ -70,6 +70,42 @@ class GitWorktreeManager {
 
     // Create new branch and worktree
     this.runCommand(`git worktree add -b ${branchName} ${targetDir}`);
+    
+    // Fix .git file to use relative paths for container/host compatibility
+    this.fixWorktreeGitFile(targetDir);
+  }
+
+  private fixWorktreeGitFile(worktreeDir: string): void {
+    const gitFilePath = join(worktreeDir, '.git');
+    
+    if (!existsSync(gitFilePath)) {
+      console.log('⚠️  .git file not found in worktree, skipping path fix');
+      return;
+    }
+    
+    try {
+      const gitFileContent = readFileSync(gitFilePath, 'utf8').trim();
+      
+      // Extract the gitdir path (format: "gitdir: /absolute/path")
+      const gitdirMatch = gitFileContent.match(/^gitdir:\s*(.+)$/);
+      if (!gitdirMatch) {
+        console.log('⚠️  Could not parse .git file format, skipping path fix');
+        return;
+      }
+      
+      const absolutePath = gitdirMatch[1];
+      
+      // Convert absolute path to relative path
+      const relativePath = relative(worktreeDir, absolutePath);
+      const newContent = `gitdir: ${relativePath}`;
+      
+      // Write back the fixed content
+      writeFileSync(gitFilePath, newContent + '\n');
+      console.log(`✅ Fixed .git file path: ${absolutePath} → ${relativePath}`);
+      
+    } catch (error) {
+      console.log(`⚠️  Failed to fix .git file paths: ${error}`);
+    }
   }
 
   private createHandoverFile(worktreeDir: string, options: WorktreeOptions): void {
