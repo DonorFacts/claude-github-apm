@@ -20,6 +20,7 @@ import { searchCommand } from './cli/user/search';
 import { completeCommand } from './cli/user/manage';
 import { speakCommand } from './cli/agent/speak';
 import { trackAgentCommand, trackUserCommand, taskDoneCommand } from './cli/agent/track-activity';
+import { speakMistralCommand } from './tts/cli/speak-mistral';
 
 // Environment setup
 const APM_ROOT = path.resolve(__dirname, '..');
@@ -75,6 +76,7 @@ async function main() {
   
   // Agent commands
   speakCommand(cli);
+  speakMistralCommand(cli);
   trackAgentCommand(cli);
   trackUserCommand(cli);
   taskDoneCommand(cli);

@@ -8,6 +8,8 @@
 import { Argv } from 'yargs';
 import { spawn } from 'child_process';
 import { SessionFileManager } from '../../sessions/management/session-file-manager';
+import { TTSService } from '../../tts/core/tts-service';
+import { SystemTTSProvider } from '../../tts/providers/system-tts';
 import chalk from 'chalk';
 
 export function speakCommand(yargs: Argv) {
@@ -29,26 +31,50 @@ export function speakCommand(yargs: Argv) {
       // Update agent activity automatically
       await updateAgentActivity();
       
-      // Call the original speech helper
-      const speakProcess = spawn('tsx', [
-        'src/integrations/docker/host-bridge/container/cli/speech.ts',
-        message
-      ], {
-        stdio: 'inherit',
-        cwd: process.cwd()
-      });
-      
-      speakProcess.on('close', (code) => {
-        if (code !== 0) {
-          console.error(chalk.red('✗'), `Speech command failed with code ${code}`);
+      try {
+        // Use new TTS service for better integration
+        const ttsService = new TTSService({
+          defaultProvider: 'system',
+          enableActivityTracking: false, // Already handled above
+          providers: {}
+        });
+
+        // Register system TTS provider
+        const systemProvider = new SystemTTSProvider();
+        ttsService.registerProvider(systemProvider);
+
+        // Perform TTS operation
+        const result = await ttsService.speak(message, 'system');
+
+        if (!result.success) {
+          console.error(chalk.red('✗'), `Speech failed: ${result.error || 'Unknown error'}`);
           process.exit(1);
         }
-      });
-      
-      speakProcess.on('error', (error) => {
-        console.error(chalk.red('✗'), `Speech command error: ${error.message}`);
-        process.exit(1);
-      });
+
+      } catch (error) {
+        // Fallback to original implementation if new service fails
+        console.warn(chalk.yellow('⚠️'), 'Using fallback speech implementation');
+        
+        const speakProcess = spawn('tsx', [
+          'src/integrations/docker/host-bridge/container/cli/speech.ts',
+          message
+        ], {
+          stdio: 'inherit',
+          cwd: process.cwd()
+        });
+        
+        speakProcess.on('close', (code) => {
+          if (code !== 0) {
+            console.error(chalk.red('✗'), `Speech command failed with code ${code}`);
+            process.exit(1);
+          }
+        });
+        
+        speakProcess.on('error', (error) => {
+          console.error(chalk.red('✗'), `Speech command error: ${error.message}`);
+          process.exit(1);
+        });
+      }
     }
   );
 }
