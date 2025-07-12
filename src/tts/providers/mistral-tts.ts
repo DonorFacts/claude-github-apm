@@ -6,6 +6,7 @@
 import { Ollama } from 'ollama';
 import { TTSProvider, TTSResult, TTSOptions, TTSError, OllamaConfig } from '../core/interfaces';
 import { hostBridge } from '../../integrations/docker/host-bridge/container/index';
+import { buildPrompt, PromptContext, getMaxTokens, validatePromptLength } from './prompt-templates';
 
 export class MistralTTSProvider implements TTSProvider {
   readonly name = 'mistral';
@@ -22,7 +23,11 @@ export class MistralTTSProvider implements TTSProvider {
   /**
    * AI-enhanced TTS: Generate enhanced text via Mistral, then synthesize with system TTS
    */
-  async speak(message: string, options?: TTSOptions): Promise<TTSResult> {
+  async speak(message: string, options?: TTSOptions & { 
+    contentType?: string;
+    context?: PromptContext;
+    hookMode?: boolean;
+  }): Promise<TTSResult> {
     if (!message || message.trim().length === 0) {
       throw new TTSError('INVALID_MESSAGE', 'Message cannot be empty', this.name);
     }
@@ -30,8 +35,12 @@ export class MistralTTSProvider implements TTSProvider {
     try {
       const startTime = Date.now();
       
-      // Step 1: Enhance text via Mistral 7B
-      const enhancedText = await this.generateEnhancedText(message);
+      // Step 1: Enhance text via Mistral 7B with contextual prompts
+      const enhancedText = await this.generateEnhancedText(
+        message, 
+        options?.contentType,
+        options?.context
+      );
       
       // Step 2: Synthesize enhanced text using system TTS
       const ttsSuccess = await hostBridge.speech_say(
@@ -54,7 +63,9 @@ export class MistralTTSProvider implements TTSProvider {
         audioData: Buffer.from(JSON.stringify({
           original: message,
           enhanced: enhancedText,
-          model: this.config.model
+          model: this.config.model,
+          contentType: options?.contentType,
+          context: options?.context
         }))
       };
 
@@ -140,11 +151,28 @@ export class MistralTTSProvider implements TTSProvider {
   }
 
   /**
-   * Generate enhanced text via Mistral 7B
+   * Generate enhanced text via Mistral 7B with contextual prompts
    */
-  private async generateEnhancedText(message: string): Promise<string> {
+  private async generateEnhancedText(
+    message: string, 
+    contentType?: string,
+    context?: PromptContext
+  ): Promise<string> {
     try {
-      const prompt = this.createEnhancementPrompt(message);
+      const prompt = this.createContextualPrompt(message, contentType, context);
+      
+      // Validate prompt length
+      const validation = validatePromptLength(prompt, contentType || 'info');
+      if (!validation.valid) {
+        // If prompt is too long, fallback to basic enhancement
+        return this.createBasicEnhancement(message);
+      }
+
+      // Determine max tokens for this request
+      const maxTokens = Math.min(
+        getMaxTokens(contentType || 'info'),
+        this.config.maxTokens || 200
+      );
       
       const response = await this.ollama.generate({
         model: this.config.model,
@@ -152,7 +180,7 @@ export class MistralTTSProvider implements TTSProvider {
         stream: false,
         options: {
           temperature: this.config.temperature,
-          ...(this.config.maxTokens && { num_predict: this.config.maxTokens })
+          num_predict: maxTokens
         }
       });
 
@@ -169,6 +197,34 @@ export class MistralTTSProvider implements TTSProvider {
       // If AI enhancement fails, fallback to original message
       return message;
     }
+  }
+
+  /**
+   * Create contextual prompt based on content type and context
+   */
+  createContextualPrompt(message: string, contentType?: string, context?: PromptContext): string {
+    // Use contextual prompt if content type is provided
+    if (contentType) {
+      try {
+        return buildPrompt(contentType, message, context);
+      } catch (error) {
+        // Fallback to basic prompt if template building fails
+        return this.createEnhancementPrompt(message);
+      }
+    }
+
+    // Fallback to basic enhancement prompt
+    return this.createEnhancementPrompt(message);
+  }
+
+  /**
+   * Create basic enhancement for cases where contextual prompts fail
+   */
+  private createBasicEnhancement(message: string): string {
+    // For simple cases, just clean up the message without AI enhancement
+    return message
+      .replace(/([.!?])\s*$/, '$1') // Ensure proper ending punctuation
+      .trim();
   }
 
   /**

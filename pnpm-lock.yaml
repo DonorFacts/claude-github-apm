@@ -47,10 +47,13 @@ importers:
       yargs:
         specifier: ^18.0.0
         version: 18.0.0
+      zod:
+        specifier: ^4.0.5
+        version: 4.0.5
     devDependencies:
       '@anthropic-ai/claude-code':
-        specifier: ^1.0.51
-        version: 1.0.51
+        specifier: ^1.0.44
+        version: 1.0.44
       '@jest/globals':
         specifier: ^30.0.3
         version: 30.0.4
@@ -97,8 +100,8 @@ packages:
     resolution: {integrity: sha512-30iZtAPgz+LTIYoeivqYo853f02jBYSd5uGnGpkFV0M3xOt9aN73erkgYAmZU43x4VfqcnLxW9Kpg3R5LC4YYw==}
     engines: {node: '>=6.0.0'}
 
-  '@anthropic-ai/claude-code@1.0.51':
-    resolution: {integrity: sha512-annBc4ez7nDPbp+di6bjIQGiAdmdVln4k3gAYioym2MxOEl3py5s7SsoR+dNSmfgfIHUdKBTbtXnXD5rkmO5aA==}
+  '@anthropic-ai/claude-code@1.0.44':
+    resolution: {integrity: sha512-GCX0KeMcyhLlfs/dLWlMiHShAMmjt8d7xcVUS53z7VnV6s3cIIrRPsKQ/xX/Q9rFm5dSVmRnzU88Ku28fb3QKQ==}
     engines: {node: '>=18.0.0'}
     hasBin: true
 
@@ -2132,6 +2135,9 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
+  zod@4.0.5:
+    resolution: {integrity: sha512-/5UuuRPStvHXu7RS+gmvRf4NXrNxpSllGwDnCBcJZtQsKrviYXm54yDGV2KYNLT5kq0lHGcl7lqWJLgSaG+tgA==}
+
 snapshots:
 
   '@ampproject/remapping@2.3.0':
@@ -2139,7 +2145,7 @@ snapshots:
       '@jridgewell/gen-mapping': 0.3.12
       '@jridgewell/trace-mapping': 0.3.29
 
-  '@anthropic-ai/claude-code@1.0.51':
+  '@anthropic-ai/claude-code@1.0.44':
     optionalDependencies:
       '@img/sharp-darwin-arm64': 0.33.5
       '@img/sharp-darwin-x64': 0.33.5
@@ -4414,3 +4420,5 @@ snapshots:
       yargs-parser: 22.0.0
 
   yocto-queue@0.1.0: {}
+
+  zod@4.0.5: {}

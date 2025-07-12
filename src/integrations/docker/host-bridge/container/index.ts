@@ -3,7 +3,7 @@
  * Unified container-host communication
  */
 
-export { HostBridge, hostBridge } from './bridge.js';
+export { HostBridge, hostBridge } from './bridge';
 export type {
   BridgeRequest,
   BridgeResponse,
